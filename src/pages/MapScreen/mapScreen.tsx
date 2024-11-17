@@ -1,58 +1,44 @@
-import React, { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
-import { Container } from "./styles";
-import Header from "../../components/header/header";
-import Footer from "../../components/footer/footer";
+import React, { useState, useEffect } from 'react';
+import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 
-const MapScreen: React.FC = () => {
-  const [position, setPosition] = useState<[number, number] | null>(null);
+const MapComponent: React.FC = () => {
+  const [location, setLocation] = useState<google.maps.LatLngLiteral | null>(null);
 
-  // Obtendo a localização atual
-  const getLocation = () => {
+  useEffect(() => {
+    // Função para obter a localização atual do usuário
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
-          setPosition([latitude, longitude]);
+          setLocation({ lat: latitude, lng: longitude });
         },
         (error) => {
-          console.error("Erro ao obter localização:", error);
+          console.error("Erro ao obter localização: ", error);
+          // Defina uma localização padrão caso haja erro
+          setLocation({ lat: -22.9068, lng: -43.1729 }); // Rio de Janeiro
         }
       );
     } else {
-      console.error("Geolocalização não é suportada neste navegador.");
+      console.error("Geolocalização não é suportada pelo navegador.");
     }
-  };
-
-  useEffect(() => {
-    getLocation();
   }, []);
 
-  const SetMapView = ({ position }: { position: [number, number] }) => {
-    const map = useMap();
-    map.setView(position, 13); // Define centro e zoom
-    return null;
-  };
-
-  if (!position) {
-    return <div>Carregando localização...</div>;
+  // Se a localização ainda não foi obtida, não renderiza o mapa
+  if (!location) {
+    return <div>Carregando mapa...</div>;
   }
 
   return (
-    <Container>
-      <Header />
-      <div className="map-container">
-        <MapContainer style={{ width: "100%", height: "400px" }}>
-          <SetMapView position={position} />
-          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          <Marker position={position}>
-            <Popup>Você está aqui!</Popup>
-          </Marker>
-        </MapContainer>
-      </div>
-      <Footer />
-    </Container>
+    <LoadScript googleMapsApiKey="AIzaSyDYVtKwXhjWQyyxOgp7qfUHf3sH9fNTins">
+      <GoogleMap
+        mapContainerStyle={{ width: '100%', height: '100%' }}
+        center={location}
+        zoom={14}
+      >
+        <Marker position={location} />
+      </GoogleMap>
+    </LoadScript>
   );
 };
 
-export default MapScreen;
+export default MapComponent;

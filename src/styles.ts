@@ -21,6 +21,25 @@ const GlobalStyles = createGlobalStyle`
     flex-direction: column;
     min-height: 100vh;
   }
+
+  /* Adicionando ajustes responsivos */
+  @media (max-width: 360px) {
+    body {
+      padding: 10px;  /* Ajuste de padding para telas menores */
+    }
+
+    #root {
+      max-width: 360px;  /* Limite de largura do container */
+      margin: 0 auto;  /* Centraliza na tela */
+      overflow: hidden;  /* Evita que o conteúdo ultrapasse */
+    }
+  }
+
+  @media (max-width: 740px) {
+    #root {
+      max-height: 740px;  /* Limite de altura do container */
+    }
+  }
 `;
 
 export default GlobalStyles;

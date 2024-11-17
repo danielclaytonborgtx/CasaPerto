@@ -1,12 +1,41 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
-export const FooterContainer = styled.footer`
-  background-color: #007bff;
-  color: white;
-  padding: 10px;
-  text-align: center;
+export const Container = styled.div`
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #FF7F50;
+  border-top: 1px solid #000000;
   position: fixed;
   bottom: 0;
-  width: 100%;
-  font-size: 0.9rem;
+  left: 0;
+  right: 0;
+`;
+
+export const Button = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 40px;
+  border-radius: 10px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: #FFA07A;
+  }
+`;
+
+export const ButtonContent = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+export const ButtonText = styled.span`
+  color: #000000;
+  margin-left: 8px;
+  font-size: 16px;
 `;

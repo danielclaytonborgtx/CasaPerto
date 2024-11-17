@@ -1,9 +1,11 @@
+import React from 'react';
 
-
-export function List() {
+const ListScrren: React.FC = () => {
   return (
     <div>
-      <h1>Lista de Imóveis</h1>
+      <h1>Bem-vindo à Lista de imóveis</h1>
     </div>
   );
-}
+};
+
+export default ListScrren;

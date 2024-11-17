@@ -1,11 +1,31 @@
-import React from "react";
-import { FooterContainer } from "./styles";
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Container, Button, ButtonContent, ButtonText } from './styles';
+import { FaMapMarkedAlt, FaListAlt } from 'react-icons/fa';
 
 const Footer: React.FC = () => {
+  const navigate = useNavigate();
+
+  const navigateTo = (path: string) => {
+    navigate(path); 
+  };
+
   return (
-    <FooterContainer>
-      <p>&copy; 2024 Your Company</p>
-    </FooterContainer>
+    <Container>
+      <Button onClick={() => navigateTo('/map')}>
+        <ButtonContent>
+          <FaMapMarkedAlt size={24} color="black" /> 
+          <ButtonText>Mapa</ButtonText>
+        </ButtonContent>
+      </Button>
+      <Button onClick={() => navigateTo('/list')}>
+        <ButtonContent>
+          <FaListAlt size={24} color="black" /> 
+          
+          <ButtonText>Lista</ButtonText>
+        </ButtonContent>
+      </Button>
+    </Container>
   );
 };
 
