@@ -2,7 +2,6 @@ import styled from 'styled-components';
 
 export const Container = styled.div`
   display: flex;
-  
   justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
@@ -13,29 +12,25 @@ export const Container = styled.div`
   left: 0;
   right: 0;
   z-index: 10;
-  height: 60px; 
+  height: 60px;
 `;
 
 export const MenuButton = styled.button`
-  font-size: 30px;
   background: none;
   border: none;
   cursor: pointer;
-  color: #fff;
   display: flex;
-  justify-content: center; 
-  align-items: center;       
-  padding: 0;                
-  margin: 0;                 
-  margin-right: 20px;
+  justify-content: center;
+  align-items: center;
+  height: 45px; 
+  width: 45px; 
+  margin-right: 15px;
 `;
-
 
 export const SearchInput = styled.input`
   flex: 1;
   height: 35px;
-  border-color: #000;
-  border-width: 1px;
+  border: 1px solid #000;
   border-radius: 5px;
   padding-left: 10px;
   background-color: #fff;
@@ -43,18 +38,18 @@ export const SearchInput = styled.input`
 `;
 
 export const AddButton = styled.button`
-  height: 40px;
-  width: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
   background-color: transparent;
   border: none;
   cursor: pointer;
-  margin-left: 10px;
+  height: 45px;
+  width: 45px; 
+  margin-left: 15px;
 `;
 
 export const Icon = styled.span`
-  font-size: 20px;
+  font-size: 25px; 
   color: black;
 `;
