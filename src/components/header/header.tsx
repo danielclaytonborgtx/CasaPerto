@@ -15,17 +15,17 @@ const Header: React.FC = () => {
     <Container>
       <MenuButton onClick={toggleSlideMenu}>
         <Icon>
-          <FaBars size={25}/>
+          <FaBars size={30} />
         </Icon>
       </MenuButton>
       <SearchInput type="text" placeholder="Buscar mais perto" />
       <AddButton>
         <Icon>
-          <FaPlus size={25}/>
+          <FaPlus size={30} />
         </Icon>
       </AddButton>
 
-      {isSlideMenuVisible && <SlideMenu onClose={toggleSlideMenu} />}
+      {isSlideMenuVisible && <SlideMenu onClose={toggleSlideMenu} isVisible={isSlideMenuVisible} />}
     </Container>
   );
 };

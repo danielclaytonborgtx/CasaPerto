@@ -32,7 +32,7 @@ export const SearchInput = styled.input`
   height: 35px;
   border: 1px solid #000;
   border-radius: 5px;
-  padding-left: 10px;
+  padding-left: 20px;
   background-color: #fff;
   margin-top: 5px;
 `;
@@ -45,11 +45,11 @@ export const AddButton = styled.button`
   border: none;
   cursor: pointer;
   height: 45px;
-  width: 45px; 
+  width: 45px;  
   margin-left: 15px;
 `;
 
 export const Icon = styled.span`
-  font-size: 25px; 
+  font-size: 25px;
   color: black;
 `;
