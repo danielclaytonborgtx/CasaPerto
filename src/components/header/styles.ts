@@ -25,6 +25,7 @@ export const MenuButton = styled.button`
   height: 45px; 
   width: 45px; 
   margin-right: 15px;
+  margin-top: 8px;
 `;
 
 export const SearchInput = styled.input`
@@ -32,9 +33,10 @@ export const SearchInput = styled.input`
   height: 35px;
   border: 1px solid #000;
   border-radius: 5px;
-  padding-left: 20px;
+  padding-left: 30px;  
+  padding-right: 30px; 
   background-color: #fff;
-  margin-top: 5px;
+  margin-top: 3px;
 `;
 
 export const AddButton = styled.button`
@@ -47,6 +49,7 @@ export const AddButton = styled.button`
   height: 45px;
   width: 45px;  
   margin-left: 15px;
+  margin-top: 8px;
 `;
 
 export const Icon = styled.span`
