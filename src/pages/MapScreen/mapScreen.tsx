@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+import { Container } from './styles';
 
 const MapComponent: React.FC = () => {
   const [location, setLocation] = useState<google.maps.LatLngLiteral | null>(null);
@@ -29,15 +30,20 @@ const MapComponent: React.FC = () => {
   }
 
   return (
-    <LoadScript googleMapsApiKey="AIzaSyDYVtKwXhjWQyyxOgp7qfUHf3sH9fNTins">
-      <GoogleMap
-        mapContainerStyle={{ width: '100%', height: '100%' }}
-        center={location}
-        zoom={14}
-      >
-        <Marker position={location} />
-      </GoogleMap>
-    </LoadScript>
+    <Container>
+      <LoadScript googleMapsApiKey="AIzaSyDYVtKwXhjWQyyxOgp7qfUHf3sH9fNTins">
+        <GoogleMap
+          mapContainerStyle={{
+            width: '100%', // O mapa deve ocupar toda a largura
+            height: '100%', // O mapa deve ocupar toda a altura do seu container
+          }}
+          center={location}
+          zoom={14}
+        >
+          <Marker position={location} />
+        </GoogleMap>
+      </LoadScript>
+    </Container>
   );
 };
 

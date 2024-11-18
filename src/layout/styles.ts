@@ -8,9 +8,7 @@ export const Container = styled.div`
 
 export const MainContent = styled.main`
   flex-grow: 1; /* O conteúdo principal ocupa o espaço restante */
-  padding: 20px;
-  padding-top: 80px; /* Ajuste conforme a altura do seu cabeçalho */
-  padding-bottom: 80px; /* Ajuste conforme a altura do seu rodapé */
+  padding: 0; /* Remove o padding original */
   box-sizing: border-box;
   overflow-y: auto; /* Habilita rolagem caso o conteúdo ultrapasse o limite da tela */
   display: flex;
@@ -18,9 +16,10 @@ export const MainContent = styled.main`
   align-items: center; /* Centraliza o conteúdo horizontalmente */
   justify-content: flex-start; /* Alinha o conteúdo no topo da área disponível */
 
+  height: calc(100vh - 80px - 80px); /* Subtrai as alturas do Header e Footer */
+  
   /* Responsividade */
   @media (max-width: 768px) {
-    padding-top: 60px; /* Menos espaçamento em telas menores */
-    padding-bottom: 60px;
+    height: calc(100vh - 60px - 60px); /* Menos altura em telas menores */
   }
 `;

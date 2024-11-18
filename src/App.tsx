@@ -8,7 +8,8 @@ import Layout from './layout/layout';
 import SignIn from './pages/SignIn/signIn';
 import SignUp from './pages/SignUp/signUp'
 import AddProperty from './pages/AddProperty/addProperty';
-import Contact from "./pages/Contact/contact";
+import Contact from './pages/Contact/contact';
+// import PropertyDetails from './pages/PropertyDetails'
 
 import GlobalStyles from './styles';
 
@@ -26,6 +27,7 @@ const App: React.FC = () => {
             <Route path="list" element={<ListScreen />} />
             <Route path="addProperty" element={<AddProperty />} />
             <Route path="/contact" element={<Contact />} />
+            {/* <Route path="/property/:id" element={<PropertyDetails />} /> */}
           </Route>
             <Route path="*" element={<Navigate to="/" />} />
         </Routes>
