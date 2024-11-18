@@ -46,7 +46,7 @@ const SignIn: React.FC = () => {
 
       if (response.ok) {
         alert("Login bem-sucedido!");
-        navigate("/profile"); // Redireciona para a página de perfil após o sucesso
+        navigate("/profile"); 
       } else {
         const data = await response.json();
         setError(data.error || "Erro ao fazer login.");

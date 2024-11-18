@@ -8,59 +8,53 @@ interface SlideMenuProps {
 }
 
 const SlideMenu: React.FC<SlideMenuProps> = ({ onClose, isVisible }) => {
-  const [slide, setSlide] = useState(-100); 
-  const menuRef = useRef<HTMLDivElement>(null); 
+  const [slide, setSlide] = useState(-100); // Inicializa o menu fora da tela
+  const menuRef = useRef<HTMLDivElement>(null);
 
+  // Lógica para fechar o menu se o clique for fora do menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setSlide(-100); 
-        setTimeout(() => onClose(), 300); 
+        setSlide(-100); // Fecha o menu
+        setTimeout(() => onClose(), 300); // Chama o onClose após a animação
       }
     };
 
     if (isVisible) {
+      setSlide(0); // Abre o menu
       document.addEventListener('click', handleClickOutside);
+    } else {
+      setSlide(-100); // Fecha o menu
     }
 
     return () => {
-      document.removeEventListener('click', handleClickOutside); 
+      document.removeEventListener('click', handleClickOutside);
     };
   }, [isVisible, onClose]);
 
-  useEffect(() => {
-    if (isVisible) {
-      setSlide(0); 
-    } else {
-      setSlide(-100);
-    }
-  }, [isVisible]);
-
+  // Função para lidar com o clique nos itens do menu
   const handleMenuItemClick = () => {
-    setSlide(-100); 
-    setTimeout(() => onClose(), 300); 
+    setSlide(-100); // Fecha o menu
+    setTimeout(() => onClose(), 300); // Chama onClose após a animação
   };
 
   return (
-    <SlideMenuContainer
-      ref={menuRef} 
-      style={{ transform: `translateX(${slide}%)`, transition: 'transform 0.3s ease' }}
-    >
+    <SlideMenuContainer ref={menuRef} $slide={slide}>
       <MenuContent>
         <MenuItem>
-          <Link to="signIn" onClick={handleMenuItemClick}>Entrar</Link> 
+          <Link to="signIn" onClick={handleMenuItemClick}>Entrar</Link>
         </MenuItem>
         <MenuItem>
-          <Link to="/" onClick={handleMenuItemClick}>Home</Link> 
+          <Link to="/" onClick={handleMenuItemClick}>Home</Link>
         </MenuItem>
         <MenuItem>
-          <Link to="/map" onClick={handleMenuItemClick}>Mapa</Link> 
+          <Link to="/map" onClick={handleMenuItemClick}>Mapa</Link>
         </MenuItem>
         <MenuItem>
-          <Link to="/list" onClick={handleMenuItemClick}>Lista</Link> 
+          <Link to="/list" onClick={handleMenuItemClick}>Lista</Link>
         </MenuItem>
         <MenuItem>
-          <Link to="/contact" onClick={handleMenuItemClick}>Fale conosco</Link> 
+          <Link to="/contact" onClick={handleMenuItemClick}>Fale conosco</Link>
         </MenuItem>
       </MenuContent>
     </SlideMenuContainer>

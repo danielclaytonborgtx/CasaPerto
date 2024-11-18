@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../../services/auth"; // Importando o hook de autenticação
-import { Container, Title, UserInfo, ErrorMessage, ImoveisList } from "./styles"; // Ajuste de estilos conforme necessário
+import { useAuth } from "../../services/auth";
+import { Container, Title, UserInfo, ErrorMessage, ImoveisList } from "./styles";
 
 interface Imovel {
   id: string;
@@ -10,21 +10,40 @@ interface Imovel {
 }
 
 const Profile: React.FC = () => {
-  const { user } = useAuth(); // Acessando o usuário autenticado
-  const [imoveis, setImoveis] = useState<Imovel[]>([]); // Estado para os imóveis
+  const { user } = useAuth();
+  const [imoveis, setImoveis] = useState<Imovel[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
-      // Aqui você pode fazer a chamada à API para obter os imóveis do usuário
+      console.log("Carregando imóveis para o usuário com ID:", user.id); // Log do user.id
+      setLoading(true);
       fetch(`https://casa-mais-perto-server-clone-production.up.railway.app/imoveis?userId=${user.id}`)
         .then((response) => response.json())
-        .then((data) => setImoveis(data))
-        .catch((error) => console.error("Erro ao carregar imóveis:", error));
+        .then((data) => {
+          console.log("Dados dos imóveis carregados:", data); // Log dos dados da API
+          setImoveis(data);
+          setLoading(false);
+        })
+        .catch((error) => {
+          setError("Erro ao carregar imóveis.");
+          setLoading(false);
+          console.error("Erro ao carregar imóveis:", error);
+        });
     }
-  }, [user]); // Vai ser executado quando o usuário mudar
+  }, [user]);  
 
   if (!user) {
     return <ErrorMessage>Usuário não encontrado. Faça o login.</ErrorMessage>;
+  }
+
+  if (loading) {
+    return <p>Carregando seus imóveis...</p>;
+  }
+
+  if (error) {
+    return <ErrorMessage>{error}</ErrorMessage>;
   }
 
   return (
