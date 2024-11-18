@@ -48,6 +48,9 @@ const SlideMenu: React.FC<SlideMenuProps> = ({ onClose, isVisible }) => {
     >
       <MenuContent>
         <MenuItem>
+          <Link to="signIn" onClick={handleMenuItemClick}>Entrar</Link> 
+        </MenuItem>
+        <MenuItem>
           <Link to="/" onClick={handleMenuItemClick}>Home</Link> 
         </MenuItem>
         <MenuItem>
@@ -55,6 +58,9 @@ const SlideMenu: React.FC<SlideMenuProps> = ({ onClose, isVisible }) => {
         </MenuItem>
         <MenuItem>
           <Link to="/list" onClick={handleMenuItemClick}>Lista</Link> 
+        </MenuItem>
+        <MenuItem>
+          <Link to="/contact" onClick={handleMenuItemClick}>Fale conosco</Link> 
         </MenuItem>
       </MenuContent>
     </SlideMenuContainer>
