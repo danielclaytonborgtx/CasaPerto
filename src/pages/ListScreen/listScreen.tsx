@@ -1,40 +1,43 @@
-// ListScreen.tsx
 import React from 'react';
-import { Container, Item, Image, Title, Button } from './styles';
+import { useNavigate } from 'react-router-dom';
 
 const ListScreen: React.FC = () => {
-  // Lista de imóveis simulada (substitua com dados reais)
   const properties = [
     {
       id: 1,
       title: 'Apartamento A',
-      image: 'https://via.placeholder.com/150', // Substitua pela URL da imagem real
-      detailsLink: '/property/1', // Link para mais detalhes
+      price: 'R$ 500.000',
+      description: 'Excelente apartamento no centro.',
+      images: [
+        'https://via.placeholder.com/150',
+        'https://via.placeholder.com/150',
+        'https://via.placeholder.com/150',
+      ],
     },
     {
       id: 2,
       title: 'Apartamento B',
-      image: 'https://via.placeholder.com/150', // Substitua pela URL da imagem real
-      detailsLink: '/property/2',
-    },
-    {
-      id: 3,
-      title: 'Apartamento C',
-      image: 'https://via.placeholder.com/150', // Substitua pela URL da imagem real
-      detailsLink: '/property/3',
+      price: 'R$ 300.000',
+      description: 'Apartamento de 2 quartos em boa localização.',
+      images: [
+        'https://via.placeholder.com/150',
+        'https://via.placeholder.com/150',
+      ],
     },
   ];
 
+  const navigate = useNavigate();
+
   return (
-    <Container>
+    <div>
       {properties.map((property) => (
-        <Item key={property.id}>
-          <Image src={property.image} alt={property.title} />
-          <Title>{property.title}</Title>
-          <Button onClick={() => window.location.href = property.detailsLink}>Ver detalhes</Button>
-        </Item>
+        <div key={property.id} onClick={() => navigate(`/property/${property.id}`, { state: property })}>
+          <h3>{property.title}</h3>
+          <img src={property.images[0]} alt={property.title} />
+          <p>{property.price}</p>
+        </div>
       ))}
-    </Container>
+    </div>
   );
 };
 
