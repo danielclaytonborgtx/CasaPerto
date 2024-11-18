@@ -76,3 +76,9 @@ export const LinkText = styled.span`
     color: #0056b3;
   }
 `;
+
+export const ErrorMessage = styled.div`
+  color: red;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+`;
