@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Container, Item, Image, Title, Button } from './styles';
 
 const ListScreen: React.FC = () => {
   const properties = [
@@ -29,15 +30,15 @@ const ListScreen: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div>
+    <Container>
       {properties.map((property) => (
-        <div key={property.id} onClick={() => navigate(`/property/${property.id}`, { state: property })}>
-          <h3>{property.title}</h3>
-          <img src={property.images[0]} alt={property.title} />
-          <p>{property.price}</p>
-        </div>
+        <Item key={property.id} onClick={() => navigate(`/property/${property.id}`, { state: property })}>
+          <Image src={property.images[0]} alt={property.title} />
+          <Title>{property.title}</Title>
+          <Button>Ver Detalhes</Button>
+        </Item>
       ))}
-    </div>
+    </Container>
   );
 };
 

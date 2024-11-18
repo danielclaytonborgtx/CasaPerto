@@ -1,23 +1,22 @@
-// styles.ts
 import styled from 'styled-components';
 
 export const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0; /* Remover padding do container para ocupar toda a largura */
-  margin-top: 80px; /* Ajuste para o header */
-  margin-bottom: 80px; /* Ajuste para o footer */
-  width: 100%; /* Garantir que o container ocupe 100% da largura */
-  box-sizing: border-box; /* Inclui o padding e a borda no cálculo da largura */
+  padding: 0;
+  margin-top: 80px;
+  margin-bottom: 80px;
+  width: 100%;
+  box-sizing: border-box;
 `;
 
 export const Item = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 90%; /* Reduz a largura para 90% da tela */
-  max-width: 1200px; /* Tamanho máximo para evitar que a imagem fique grande demais */
+  width: 90%;
+  max-width: 1200px;
   margin-bottom: 20px;
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -30,9 +29,9 @@ export const Item = styled.div`
 `;
 
 export const Image = styled.img`
-  width: 100%; /* Faz a imagem ocupar 100% da largura do item */
-  height: 200px;
-  object-fit: cover; /* Garante que a imagem ocupe totalmente o espaço sem distorção */
+  width: 100%; /* Imagem ocupa 100% da largura do item */
+  height: 250px; /* Ajuste a altura para que a imagem ocupe mais espaço vertical */
+  object-fit: cover; /* Garante que a imagem ocupe o espaço sem distorcer */
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
 `;
@@ -52,7 +51,7 @@ export const Button = styled.button`
   text-align: center;
   cursor: pointer;
   border-radius: 0 0 8px 8px;
-  font-size: 16px;
+  font-size: 14px; /* Texto menor para o botão */
   transition: background-color 0.3s;
 
   &:hover {
