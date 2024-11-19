@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { SlideMenuContainer, MenuContent, MenuItem } from './styles';
 import { Link } from 'react-router-dom';
 
@@ -8,34 +8,49 @@ interface SlideMenuProps {
 }
 
 const SlideMenu: React.FC<SlideMenuProps> = ({ onClose, isVisible }) => {
-  const [slide, setSlide] = useState(-100); // Inicializa o menu fora da tela
+  const [slide, setSlide] = useState(-100); 
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Lógica para fechar o menu se o clique for fora do menu
+  // Função de fechamento com animação
+  const closeMenu = useCallback(() => {
+    setSlide(-100); // Animação de fechamento
+    setTimeout(() => {
+      onClose(); // Chama onClose após a animação de 300ms
+    }, 300); // Tempo da animação
+  }, [onClose]);
+
   useEffect(() => {
+    // Função para fechar o menu quando clicado fora
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setSlide(-100); // Fecha o menu
-        setTimeout(() => onClose(), 300); // Chama o onClose após a animação
+        closeMenu();
       }
     };
 
+    // Mostra o menu ou fecha, dependendo do estado de "isVisible"
     if (isVisible) {
-      setSlide(0); // Abre o menu
-      document.addEventListener('click', handleClickOutside);
+      setSlide(0);  // Menu aparece
     } else {
-      setSlide(-100); // Fecha o menu
+      closeMenu(); // Chama a função de fechamento com animação
     }
+
+    // Adiciona evento de clique fora
+    document.addEventListener('click', handleClickOutside);
 
     return () => {
       document.removeEventListener('click', handleClickOutside);
     };
-  }, [isVisible, onClose]);
+  }, [isVisible, closeMenu]); // Adiciona closeMenu como dependência
 
-  // Função para lidar com o clique nos itens do menu
-  const handleMenuItemClick = () => {
-    setSlide(-100); // Fecha o menu
-    setTimeout(() => onClose(), 300); // Chama onClose após a animação
+  // Alteração para o clique nos itens do menu
+  const handleMenuItemClick = (event: React.MouseEvent) => {
+    event.preventDefault(); // Previne o comportamento padrão de navegação
+    closeMenu(); // Fecha o menu com animação
+
+    // Navega para a rota após o tempo da animação
+    setTimeout(() => {
+      window.location.href = (event.target as HTMLAnchorElement).href; // Navega para o link após animação
+    }, 300); // Espera o tempo da animação para navegar
   };
 
   return (
