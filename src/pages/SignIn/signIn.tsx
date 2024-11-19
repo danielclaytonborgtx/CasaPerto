@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -13,9 +15,9 @@ import {
 } from "./styles";
 
 const SignIn: React.FC = () => {
-  const [formData, setFormData] = useState({ login: "", password: "" }); // Alteração para "login"
+  const [formData, setFormData] = useState({ login: "", password: "" });
   const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false); // Para desabilitar o botão durante o envio
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,12 +27,12 @@ const SignIn: React.FC = () => {
   };
 
   const handleSignIn = async () => {
-    if (!formData.login || !formData.password) { // Alteração para "login"
+    if (!formData.login || !formData.password) {
       setError("Por favor, preencha todos os campos.");
       return;
     }
 
-    setIsSubmitting(true); // Bloqueia o botão enquanto está enviando os dados
+    setIsSubmitting(true);
 
     try {
       const response = await fetch("https://casa-mais-perto-server-clone-production.up.railway.app/login", {
@@ -39,7 +41,7 @@ const SignIn: React.FC = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          login: formData.login, // Mudança para "login"
+          login: formData.login,
           password: formData.password,
         }),
       });
@@ -47,6 +49,7 @@ const SignIn: React.FC = () => {
       if (response.ok) {
         alert("Login bem-sucedido!");
         navigate("/profile"); 
+        console.log("Navegando para o perfil...");
       } else {
         const data = await response.json();
         setError(data.error || "Erro ao fazer login.");
@@ -54,7 +57,7 @@ const SignIn: React.FC = () => {
     } catch (error) {
       setError("Erro ao conectar com o servidor.");
     } finally {
-      setIsSubmitting(false); // Libera o botão após o envio
+      setIsSubmitting(false); 
     }
   };
 
@@ -63,9 +66,9 @@ const SignIn: React.FC = () => {
       <Title>Entrar no CasaPerto</Title>
       <Form>
         <Input 
-          type="text"  // Alterado para "text" para permitir tanto email quanto username
-          name="login"  // Mudança para "login"
-          placeholder="Nome de usuário"  // Mensagem do placeholder mais geral
+          type="text" 
+          name="login" 
+          placeholder="Nome de usuário"
           value={formData.login} 
           onChange={handleInputChange} 
         />
@@ -76,6 +79,7 @@ const SignIn: React.FC = () => {
           value={formData.password} 
           onChange={handleInputChange} 
         />
+        {/* Verifica se error existe e exibe a mensagem */}
         {error && <ErrorMessage>{error}</ErrorMessage>}
         <Button onClick={handleSignIn} disabled={isSubmitting}>
           <ButtonText>{isSubmitting ? "Entrando..." : "Entrar"}</ButtonText>

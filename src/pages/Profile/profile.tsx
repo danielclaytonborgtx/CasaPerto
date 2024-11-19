@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../../services/auth";
+import { useAuth } from "../../services/authContext";
 import { Container, Title, UserInfo, ErrorMessage, ImoveisList } from "./styles";
 
 interface Imovel {
@@ -10,20 +10,26 @@ interface Imovel {
 }
 
 const Profile: React.FC = () => {
+  console.log("Componente Profile carregado");
+
   const { user } = useAuth();
   const [imoveis, setImoveis] = useState<Imovel[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user) {
+    if (user && user.id) {
       console.log("Carregando imóveis para o usuário com ID:", user.id); // Log do user.id
       setLoading(true);
       fetch(`https://casa-mais-perto-server-clone-production.up.railway.app/imoveis?userId=${user.id}`)
         .then((response) => response.json())
         .then((data) => {
           console.log("Dados dos imóveis carregados:", data); // Log dos dados da API
-          setImoveis(data);
+          if (Array.isArray(data)) {
+            setImoveis(data);
+          } else {
+            setError("Erro ao carregar imóveis.");
+          }
           setLoading(false);
         })
         .catch((error) => {
@@ -31,17 +37,23 @@ const Profile: React.FC = () => {
           setLoading(false);
           console.error("Erro ao carregar imóveis:", error);
         });
+    } else {
+      setError("Usuário não encontrado.");
+      setLoading(false);
     }
   }, [user]);  
 
+  // Se não houver usuário
   if (!user) {
     return <ErrorMessage>Usuário não encontrado. Faça o login.</ErrorMessage>;
   }
 
+  // Se estiver carregando
   if (loading) {
     return <p>Carregando seus imóveis...</p>;
   }
 
+  // Se houver erro
   if (error) {
     return <ErrorMessage>{error}</ErrorMessage>;
   }
@@ -62,7 +74,11 @@ const Profile: React.FC = () => {
             <div key={imovel.id}>
               <h3>{imovel.title}</h3>
               <p>{imovel.description}</p>
-              <img src={imovel.imageUrl} alt={imovel.title} />
+              {imovel.imageUrl ? (
+                <img src={imovel.imageUrl} alt={imovel.title} />
+              ) : (
+                <p>Imagem não disponível</p>
+              )}
             </div>
           ))
         )}
