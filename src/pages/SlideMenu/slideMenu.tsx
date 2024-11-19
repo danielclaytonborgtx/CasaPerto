@@ -1,75 +1,67 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { SlideMenuContainer, MenuContent, MenuItem } from './styles';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { SlideMenuContainer, MenuItem, MenuContent } from './styles';
 
-interface SlideMenuProps {
-  onClose: () => void;
-  isVisible: boolean;
-}
-
-const SlideMenu: React.FC<SlideMenuProps> = ({ onClose, isVisible }) => {
-  const [slide, setSlide] = useState(-100); 
+const SlideMenu: React.FC<{ onClose: () => void; isVisible: boolean }> = ({ onClose, isVisible }) => {
+  const [slide, setSlide] = useState(-100); // Inicialmente o menu está fechado
+  const [closing, setClosing] = useState(false); // Flag para controlar se o menu está fechando
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Função de fechamento com animação
-  const closeMenu = useCallback(() => {
-    setSlide(-100); // Animação de fechamento
-    setTimeout(() => {
-      onClose(); // Chama onClose após a animação de 300ms
-    }, 300); // Tempo da animação
-  }, [onClose]);
-
+  // Efeito para animar a transição de abertura e fechamento do menu
   useEffect(() => {
-    // Função para fechar o menu quando clicado fora
+    if (isVisible) {
+      setSlide(0); // Menu desliza para a posição visível
+      setClosing(false); // Garantir que o menu não está fechando
+    } else if (!closing) {
+      setClosing(true); // Marca o início do fechamento
+      setSlide(-100); // Inicia o movimento de fechamento
+    }
+  }, [isVisible, closing]);
+
+  // Detecta clique fora do menu para fechar
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        closeMenu();
+        onClose(); // Fecha o menu ao clicar fora
       }
     };
 
-    // Mostra o menu ou fecha, dependendo do estado de "isVisible"
-    if (isVisible) {
-      setSlide(0);  // Menu aparece
-    } else {
-      closeMenu(); // Chama a função de fechamento com animação
-    }
-
-    // Adiciona evento de clique fora
-    document.addEventListener('click', handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
 
     return () => {
-      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isVisible, closeMenu]); // Adiciona closeMenu como dependência
+  }, [onClose]);
 
-  // Alteração para o clique nos itens do menu
-  const handleMenuItemClick = (event: React.MouseEvent) => {
-    event.preventDefault(); // Previne o comportamento padrão de navegação
-    closeMenu(); // Fecha o menu com animação
-
-    // Navega para a rota após o tempo da animação
-    setTimeout(() => {
-      window.location.href = (event.target as HTMLAnchorElement).href; // Navega para o link após animação
-    }, 300); // Espera o tempo da animação para navegar
-  };
+  // Realiza o fechamento definitivo após a animação
+  useEffect(() => {
+    if (closing) {
+      const timeout = setTimeout(() => {
+        if (!isVisible) {
+          onClose(); // Chama onClose após o slide de fechamento
+        }
+      }, 300); // Delay para esperar a animação de fechamento
+      return () => clearTimeout(timeout); // Limpa o timeout
+    }
+  }, [closing, isVisible, onClose]);
 
   return (
     <SlideMenuContainer ref={menuRef} $slide={slide}>
       <MenuContent>
         <MenuItem>
-          <Link to="signIn" onClick={handleMenuItemClick}>Entrar</Link>
+          <Link to="/signIn" onClick={() => onClose()}>Entrar</Link>
         </MenuItem>
         <MenuItem>
-          <Link to="/" onClick={handleMenuItemClick}>Home</Link>
+          <Link to="/" onClick={() => onClose()}>Home</Link>
         </MenuItem>
         <MenuItem>
-          <Link to="/map" onClick={handleMenuItemClick}>Mapa</Link>
+          <Link to="/map" onClick={() => onClose()}>Mapa</Link>
         </MenuItem>
         <MenuItem>
-          <Link to="/list" onClick={handleMenuItemClick}>Lista</Link>
+          <Link to="/list" onClick={() => onClose()}>Lista</Link>
         </MenuItem>
         <MenuItem>
-          <Link to="/contact" onClick={handleMenuItemClick}>Fale conosco</Link>
+          <Link to="/contact" onClick={() => onClose()}>Fale conosco</Link>
         </MenuItem>
       </MenuContent>
     </SlideMenuContainer>

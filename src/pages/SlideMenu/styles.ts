@@ -16,7 +16,7 @@ export const SlideMenuContainer = styled.div<SlideMenuContainerProps>`
   z-index: 1000;
   display: flex;
   flex-direction: column;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease; /* Transição suave */
   transform: translateX(${props => props.$slide}%); /* Usando a prop $slide */
 `;
 
