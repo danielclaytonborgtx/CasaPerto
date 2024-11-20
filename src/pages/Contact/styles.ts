@@ -49,14 +49,14 @@ export const TextArea = styled.textarea`
 
   &:focus {
     outline: none;
-    border-color: #007bff;
+    border-color: #87CEFA;
   }
 `;
 
 export const SubmitButton = styled.button`
   padding: 12px;
   font-size: 16px;
-  background-color: #007bff;
+  background-color: #00BFFF;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -64,7 +64,7 @@ export const SubmitButton = styled.button`
   transition: background-color 0.3s ease;
 
   &:hover {
-    background-color: #0056b3;
+    background-color: #87CEEB;
   }
 
   &:disabled {

@@ -4,25 +4,32 @@ import { SlideMenuContainer, MenuItem, MenuContent } from './styles';
 
 const SlideMenu: React.FC<{ onClose: () => void; isVisible: boolean }> = ({ onClose, isVisible }) => {
   const [slide, setSlide] = useState(-100); // Inicialmente o menu está fechado
-  const [closing, setClosing] = useState(false); // Flag para controlar se o menu está fechando
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Efeito para animar a transição de abertura e fechamento do menu
+  // Detectar quando o menu deve abrir ou fechar
   useEffect(() => {
     if (isVisible) {
-      setSlide(0); // Menu desliza para a posição visível
-      setClosing(false); // Garantir que o menu não está fechando
-    } else if (!closing) {
-      setClosing(true); // Marca o início do fechamento
-      setSlide(-100); // Inicia o movimento de fechamento
+      setSlide(0); // Menu abre suavemente
+    } else {
+      setSlide(-100); // Menu começa a fechar
     }
-  }, [isVisible, closing]);
+  }, [isVisible]);
+
+  // Finaliza o fechamento com um timeout para garantir a animação
+  useEffect(() => {
+    if (slide === -100 && !isVisible) {
+      const timeout = setTimeout(() => {
+        onClose(); // Chama onClose após a animação de fechamento
+      }, 300); // Espera o tempo da animação para fechar
+      return () => clearTimeout(timeout);
+    }
+  }, [slide, isVisible, onClose]);
 
   // Detecta clique fora do menu para fechar
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        onClose(); // Fecha o menu ao clicar fora
+        setSlide(-100); // Inicia a animação de fechamento
       }
     };
 
@@ -31,37 +38,30 @@ const SlideMenu: React.FC<{ onClose: () => void; isVisible: boolean }> = ({ onCl
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [onClose]);
+  }, []);
 
-  // Realiza o fechamento definitivo após a animação
-  useEffect(() => {
-    if (closing) {
-      const timeout = setTimeout(() => {
-        if (!isVisible) {
-          onClose(); // Chama onClose após o slide de fechamento
-        }
-      }, 300); // Delay para esperar a animação de fechamento
-      return () => clearTimeout(timeout); // Limpa o timeout
-    }
-  }, [closing, isVisible, onClose]);
+  // Fechar menu ao clicar em qualquer item de menu
+  const handleLinkClick = () => {
+    setSlide(-100); // Inicia a animação de fechamento
+  };
 
   return (
     <SlideMenuContainer ref={menuRef} $slide={slide}>
       <MenuContent>
         <MenuItem>
-          <Link to="/signIn" onClick={() => onClose()}>Entrar</Link>
+          <Link to="/signIn" onClick={handleLinkClick}>Entrar</Link>
         </MenuItem>
         <MenuItem>
-          <Link to="/" onClick={() => onClose()}>Home</Link>
+          <Link to="/" onClick={handleLinkClick}>Home</Link>
         </MenuItem>
         <MenuItem>
-          <Link to="/map" onClick={() => onClose()}>Mapa</Link>
+          <Link to="/map" onClick={handleLinkClick}>Mapa</Link>
         </MenuItem>
         <MenuItem>
-          <Link to="/list" onClick={() => onClose()}>Lista</Link>
+          <Link to="/list" onClick={handleLinkClick}>Lista</Link>
         </MenuItem>
         <MenuItem>
-          <Link to="/contact" onClick={() => onClose()}>Fale conosco</Link>
+          <Link to="/contact" onClick={handleLinkClick}>Fale conosco</Link>
         </MenuItem>
       </MenuContent>
     </SlideMenuContainer>

@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 interface SlideMenuContainerProps {
-  $slide: number; // Usando a prop com o prefixo "$" para evitar passá-la para o DOM
+  $slide: number;
 }
 
 export const SlideMenuContainer = styled.div<SlideMenuContainerProps>`
@@ -10,14 +10,14 @@ export const SlideMenuContainer = styled.div<SlideMenuContainerProps>`
   left: 0;
   width: 70%;
   height: 100%;
-  background-color: #FFA07A;
+  background-color: #ADD8E6;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
   padding: 20px;
   z-index: 1000;
   display: flex;
   flex-direction: column;
   transition: transform 0.3s ease; /* Transição suave */
-  transform: translateX(${props => props.$slide}%); /* Usando a prop $slide */
+  transform: translateX(${props => props.$slide}%); /* Controle do movimento */
 `;
 
 export const MenuItem = styled.div`

@@ -84,14 +84,14 @@ export const MapContainer = styled.div`
 export const Button = styled.button`
   width: 100%;
   padding: 10px;
-  background-color: #28a745;
+  background-color: #00BFFF;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s;
 
   &:hover {
-    background-color: #218838;
+    background-color: #98FB98;
   }
 `;
 

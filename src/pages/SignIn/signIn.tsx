@@ -63,7 +63,7 @@ const SignIn: React.FC = () => {
 
   return (
     <Container>
-      <Title>Entrar no CasaPerto</Title>
+      <Title>Entrar no Casa Perto</Title>
       <Form>
         <Input 
           type="text" 

@@ -5,7 +5,7 @@ export const Container = styled.div`
   justify-content: space-around;
   align-items: center;
   padding: 10px 20px;
-  background-color: #FF7F50;
+  background-color: #87CEEB;
   border-top: 1px solid #000000;
   position: fixed;
   bottom: 0;
@@ -25,7 +25,7 @@ export const Button = styled.button`
   transition: background-color 0.3s;
 
   &:hover {
-    background-color: #FFA07A;
+    background-color: #87CEFA;
   }
 `;
 

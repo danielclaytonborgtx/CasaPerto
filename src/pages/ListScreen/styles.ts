@@ -43,7 +43,7 @@ export const Title = styled.h3`
 `;
 
 export const Button = styled.button`
-  background-color: #007bff;
+  background-color: #00BFFF;
   color: white;
   border: none;
   padding: 10px;

@@ -25,6 +25,67 @@ const ListScreen: React.FC = () => {
         'https://via.placeholder.com/150',
       ],
     },
+    {
+      id: 3,
+      title: 'Apartamento C',
+      price: 'R$ 700.000',
+      description: 'Excelente apartamento no centro.',
+      images: [
+        'https://via.placeholder.com/150',
+        'https://via.placeholder.com/150',
+        'https://via.placeholder.com/150',
+      ],
+    },{
+      id: 4,
+      title: 'Apartamento D',
+      price: 'R$ 100.000',
+      description: 'Excelente apartamento no centro.',
+      images: [
+        'https://via.placeholder.com/150',
+        'https://via.placeholder.com/150',
+        'https://via.placeholder.com/150',
+      ],
+    },{
+      id: 5,
+      title: 'Apartamento E',
+      price: 'R$ 400.000',
+      description: 'Excelente apartamento no centro.',
+      images: [
+        'https://via.placeholder.com/150',
+        'https://via.placeholder.com/150',
+        'https://via.placeholder.com/150',
+      ],
+    },{
+      id: 6,
+      title: 'Apartamento F',
+      price: 'R$ 500.000',
+      description: 'Excelente apartamento no centro.',
+      images: [
+        'https://via.placeholder.com/150',
+        'https://via.placeholder.com/150',
+        'https://via.placeholder.com/150',
+      ],
+    },{
+      id: 7,
+      title: 'Apartamento H',
+      price: 'R$ 300.000',
+      description: 'Excelente apartamento no centro.',
+      images: [
+        'https://via.placeholder.com/150',
+        'https://via.placeholder.com/150',
+        'https://via.placeholder.com/150',
+      ],
+    },{
+      id: 8,
+      title: 'Apartamento I',
+      price: 'R$ 600.000',
+      description: 'Excelente apartamento no centro.',
+      images: [
+        'https://via.placeholder.com/150',
+        'https://via.placeholder.com/150',
+        'https://via.placeholder.com/150',
+      ],
+    },
   ];
 
   const navigate = useNavigate();
