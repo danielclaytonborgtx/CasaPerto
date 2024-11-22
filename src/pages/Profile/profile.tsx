@@ -1,89 +1,99 @@
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../../services/authContext";
-import { Container, Title, UserInfo, ErrorMessage, ImoveisList } from "./styles";
+import { useNavigate } from "react-router-dom";
+import { ProfileContainer, UserName, UserInfo, UserList, Loading, LogoutIcon } from "./styles";
+import { FiLogOut } from "react-icons/fi";
 
-interface Imovel {
-  id: string;
+// Definindo o tipo User
+interface User {
+  id: number;
+  username: string;
+  email: string;
+}
+
+// Definindo o tipo Property (Imóvel)
+interface Property {
+  id: number;
   title: string;
   description: string;
-  imageUrl: string;
 }
 
 const Profile: React.FC = () => {
-  console.log("Componente Profile carregado");
-
-  const { user } = useAuth();
-  const [imoveis, setImoveis] = useState<Imovel[]>([]);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [properties, setProperties] = useState<Property[]>([]); // Lista de imóveis
+  const [error, setError] = useState<string | null>(null); // Estado para erros
+  const navigate = useNavigate();
 
+  // Efeito para ler o usuário do localStorage ao carregar o componente
   useEffect(() => {
-    if (user && user.id) {
-      console.log("Carregando imóveis para o usuário com ID:", user.id); // Log do user.id
-      setLoading(true);
-      fetch(`https://casa-mais-perto-server-clone-production.up.railway.app/imoveis?userId=${user.id}`)
-        .then((response) => response.json())
-        .then((data) => {
-          console.log("Dados dos imóveis carregados:", data); // Log dos dados da API
-          if (Array.isArray(data)) {
-            setImoveis(data);
-          } else {
-            setError("Erro ao carregar imóveis.");
-          }
-          setLoading(false);
-        })
-        .catch((error) => {
-          setError("Erro ao carregar imóveis.");
-          setLoading(false);
-          console.error("Erro ao carregar imóveis:", error);
-        });
-    } else {
-      setError("Usuário não encontrado.");
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser)); // Define o usuário no estado
+      fetchProperties(JSON.parse(storedUser).id); // Carrega os imóveis do usuário
       setLoading(false);
+    } else {
+      navigate("/login"); // Se não encontrar o usuário, redireciona para a página de login
     }
-  }, [user]);  
+  }, [navigate]);
 
-  // Se não houver usuário
-  if (!user) {
-    return <ErrorMessage>Usuário não encontrado. Faça o login.</ErrorMessage>;
-  }
+  // Função para buscar os imóveis do usuário
+  const fetchProperties = async (userId: number) => {
+    try {
+      const response = await fetch(`https://casa-mais-perto-server-clone-production.up.railway.app/imoveis?userId=${userId}`); // Substitua pela URL da sua API
+      const data = await response.json();
+      if (response.ok) {
+        setProperties(data); // Atualiza a lista de imóveis
+      } else {
+        setError("Erro ao carregar imóveis.");
+      }
+    } catch {
+      setError("Erro ao conectar com o servidor.");
+    }
+  };
 
-  // Se estiver carregando
+   // Função de logout
+   const handleLogout = () => {
+    localStorage.removeItem("user"); // Remove o usuário do localStorage
+    navigate("/login"); // Redireciona para a página de login
+  };
+
+  // Exibição enquanto o conteúdo está carregando
   if (loading) {
-    return <p>Carregando seus imóveis...</p>;
+    return <Loading>Carregando...</Loading>;
   }
 
-  // Se houver erro
+  // Exibição caso ocorra algum erro
   if (error) {
-    return <ErrorMessage>{error}</ErrorMessage>;
+    return <div>{error}</div>;
+  }
+
+  // Verificando se 'user' está definido antes de renderizar as propriedades
+  if (!user) {
+    return <div>Usuário não encontrado</div>;
   }
 
   return (
-    <Container>
-      <Title>Perfil de {user.username}</Title>
-      <UserInfo>
-        <img src="caminho-para-imagem.jpg" alt="Imagem de Perfil" />
-        <p>Email: {user.email}</p>
-      </UserInfo>
-      <ImoveisList>
-        <h2>Meus Imóveis</h2>
-        {imoveis.length === 0 ? (
-          <p>Você ainda não tem imóveis postados.</p>
-        ) : (
-          imoveis.map((imovel) => (
-            <div key={imovel.id}>
-              <h3>{imovel.title}</h3>
-              <p>{imovel.description}</p>
-              {imovel.imageUrl ? (
-                <img src={imovel.imageUrl} alt={imovel.title} />
-              ) : (
-                <p>Imagem não disponível</p>
-              )}
-            </div>
-          ))
-        )}
-      </ImoveisList>
-    </Container>
+    <ProfileContainer>
+      <LogoutIcon onClick={handleLogout}>
+        <FiLogOut size={24} />
+      </LogoutIcon>
+      <UserName>Bem-vindo, {user.username}</UserName>
+      <UserInfo>Email: {user.email}</UserInfo>
+      <UserInfo>ID do usuário: {user.id}</UserInfo>
+
+      <h2>Imóveis Postados</h2>
+      {properties.length === 0 ? (
+        <div>Você ainda não tem imóveis postados.</div> // Exibe mensagem caso não haja imóveis
+      ) : (
+        <UserList>
+          {properties.map((property) => (
+            <li key={property.id}>
+              <strong>{property.title}</strong>: {property.description}
+            </li>
+          ))}
+        </UserList>
+      )}
+    </ProfileContainer>
   );
 };
 

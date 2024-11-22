@@ -1,59 +1,64 @@
 import styled from "styled-components";
 
-export const Container = styled.div`
+// Contêiner principal do perfil
+export const ProfileContainer = styled.div`
+  padding: 20px;
+  text-align: center;
+  background-color: #f9f9f9;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
+`;
+
+// Nome do usuário (Título)
+export const UserName = styled.h1`
+  font-size: 2em;
+  color: #333;
+  margin-bottom: 10px;
+`;
+
+// Informações do usuário (email, ID, etc.)
+export const UserInfo = styled.p`
+  font-size: 1.2em;
+  color: #555;
+  margin-bottom: 10px;
+`;
+
+// Lista de imóveis postados
+export const UserList = styled.ul`
+  list-style-type: none;
+  padding: 0;
+  font-size: 1em;
+  color: #333;
+
+  li {
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+`;
+
+// Estilo para o carregamento (em caso de loading)
+export const Loading = styled.div`
+  font-size: 1.5em;
+  color: #888;
   padding: 20px;
-  background-color: #f8f8f8;
 `;
 
-export const Title = styled.h1`
-  font-size: 24px;
-  margin-bottom: 20px;
-`;
-
-export const UserInfo = styled.div`
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
-  width: 80%;
-  text-align: left;
-`;
-
-export const LogoutButton = styled.button`
-  padding: 10px 20px;
-  background-color: #ff6347;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
+export const LogoutIcon = styled.div`
+  position: absolute; /* Relativo ao contêiner do conteúdo */
+  top: 70px; /* Espaço ajustado abaixo do header */
+  right: 15px; /* Alinhado à direita com uma margem */
   cursor: pointer;
-  
+  color: #000000;
+  transition: transform 0.2s ease-in-out;
+
   &:hover {
-    background-color: #ff4500;
+    transform: scale(1.2);
   }
 `;
 
-export const ImoveisList = styled.div`
-  margin-top: 30px;
-  h2 {
-    font-size: 1.5rem;
-    margin-bottom: 20px;
-  }
-  div {
-    margin-bottom: 20px;
-  }
-  img {
-    width: 100%;
-    height: auto;
-    border-radius: 8px;
-  }
-`;
 
-export const ErrorMessage = styled.p`
-  color: red;
-  font-size: 1.2rem;
-  text-align: center;
-`;
