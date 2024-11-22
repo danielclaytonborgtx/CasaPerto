@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { Container, MenuButton, SearchInput, AddButton, Icon } from './styles';
-import SlideMenu from '../../pages/SlideMenu/slideMenu';
+import React, { useState } from "react";
+import { Container, MenuButton, SearchInput, AddButton, Icon } from "./styles";
+import SlideMenu from "../../pages/SlideMenu/slideMenu";
 import { useNavigate } from "react-router-dom";
 
-import { FaBars, FaPlus } from 'react-icons/fa';
+import { FaBars, FaPlus } from "react-icons/fa";
 
 const Header: React.FC = () => {
   const [isSlideMenuVisible, setSlideMenuVisible] = useState(false);
@@ -14,7 +14,12 @@ const Header: React.FC = () => {
   };
 
   const handleAddPropertyClick = () => {
-    navigate('/addProperty'); // Redireciona para a página de adicionar imóvel
+    const storedUser = localStorage.getItem("user"); // Verifica se o usuário está logado
+    if (storedUser) {
+      navigate("/addProperty"); // Redireciona para adicionar imóvel
+    } else {
+      navigate("/signIn"); // Redireciona para a tela de login
+    }
   };
 
   return (

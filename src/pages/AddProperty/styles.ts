@@ -1,103 +1,133 @@
 import styled from "styled-components";
 
 export const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background-color: #f5f5f5;
+  max-width: 800px;
+  margin: 0 auto;
   padding: 20px;
 `;
 
 export const Title = styled.h1`
-  font-size: 24px;
-  font-weight: bold;
-  color: #333;
+  text-align: center;
   margin-bottom: 20px;
 `;
 
-export const Form = styled.form`
+export const Form = styled.div`
   display: flex;
   flex-direction: column;
-  width: 100%;
-  max-width: 400px;
-  gap: 15px;
 `;
 
 export const Input = styled.input`
-  width: 100%;
   padding: 10px;
+  margin-bottom: 15px;
   font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  outline: none;
-
-  &:focus {
-    border-color: #333;
-  }
 `;
 
 export const TextArea = styled.textarea`
-  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  font-size: 16px;
+  resize: none;
+`;
+
+export const Button = styled.button`
+  background-color: #007bff;
+  color: #fff;
   padding: 10px;
   font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  outline: none;
-  resize: none;
-  height: 100px;
-
-  &:focus {
-    border-color: #333;
+  border: none;
+  cursor: pointer;
+  &:hover {
+    background-color: #0056b3;
   }
+`;
+
+export const ButtonText = styled.span`
+  font-weight: bold;
+`;
+
+export const PhotoPreviewContainer = styled.div`
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+`;
+
+export const PhotoPreview = styled.div`
+  position: relative;
+  img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border: 1px solid #ddd;
+  }
+`;
+
+export const RemovePhotoButton = styled.button`
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 5px;
+  cursor: pointer;
+  font-size: 12px;
+`;
+
+export const MapContainer = styled.div`
+  margin-bottom: 15px;
 `;
 
 export const AddPhotoIcon = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
-  font-size: 16px;
-  color: #007bff;
-
+  justify-content: center;
+  margin: 10px 0;
   label {
     cursor: pointer;
+    color: #007bff;
+    font-size: 16px;
+    text-decoration: underline;
   }
-
   input {
     display: none;
   }
 `;
 
-export const MapContainer = styled.div`
-  width: 100%;
-  height: 200px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #e0e0e0;
-`;
+export const ImagePreview = styled.div`
+  position: relative;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  width: 100px;
+  height: 100px;
+  overflow: hidden;
+  border-radius: 8px; /* Para bordas arredondadas */
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 
-export const Button = styled.button`
-  width: 100%;
-  padding: 10px;
-  background-color: #00BFFF;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-
-  &:hover {
-    background-color: #98FB98;
+  button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    padding: 5px;
+    cursor: pointer;
   }
 `;
 
-export const ButtonText = styled.span`
-  font-size: 16px;
-  font-weight: bold;
-  color: white;
-  text-align: center;
+export const MapWrapper = styled.div`
+  width: 100%;
+  height: 400px; /* Ajuste o tamanho conforme necessário */
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 20px;
+
+  /* Você pode adicionar outras regras de estilo conforme necessário */
 `;
