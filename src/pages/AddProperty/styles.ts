@@ -1,119 +1,61 @@
-import styled from "styled-components";
+import styled from 'styled-components';
 
-export const Container = styled.div`
-  max-width: 800px;
+export const AddPropertyContainer = styled.div`
+  width: 100%;
+  max-width: 600px;
   margin: 0 auto;
   padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 `;
 
-export const Title = styled.h1`
-  text-align: center;
-  margin-bottom: 20px;
-`;
-
-export const Form = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
-export const Input = styled.input`
+export const FormInput = styled.input`
+  width: 100%;
   padding: 10px;
-  margin-bottom: 15px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
   font-size: 16px;
-`;
-
-export const TextArea = styled.textarea`
-  padding: 10px;
-  margin-bottom: 15px;
-  font-size: 16px;
-  resize: none;
 `;
 
 export const Button = styled.button`
-  background-color: #007bff;
-  color: #fff;
-  padding: 10px;
-  font-size: 16px;
-  border: none;
-  cursor: pointer;
-  &:hover {
-    background-color: #0056b3;
-  }
-`;
-
-export const ButtonText = styled.span`
-  font-weight: bold;
-`;
-
-export const PhotoPreviewContainer = styled.div`
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 15px;
-`;
-
-export const PhotoPreview = styled.div`
-  position: relative;
-  img {
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
-    border: 1px solid #ddd;
-  }
-`;
-
-export const RemovePhotoButton = styled.button`
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  background-color: red;
+  width: 100%;
+  padding: 12px;
+  background-color: #4caf50;
   color: white;
   border: none;
-  padding: 5px;
+  border-radius: 4px;
+  font-size: 16px;
   cursor: pointer;
-  font-size: 12px;
+  margin-bottom: 50px;
+
+  &:hover {
+    background-color: #45a049;
+  }
 `;
 
-export const MapContainer = styled.div`
-  margin-bottom: 15px;
-`;
-
-export const AddPhotoIcon = styled.div`
+export const ImagePreviewContainer = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 10px 0;
-  label {
-    cursor: pointer;
-    color: #007bff;
-    font-size: 16px;
-    text-decoration: underline;
-  }
-  input {
-    display: none;
-  }
+  gap: 10px;
+  margin-bottom: 20px;
 `;
 
 export const ImagePreview = styled.div`
   position: relative;
-  margin-right: 10px;
-  margin-bottom: 10px;
-  width: 100px;
-  height: 100px;
-  overflow: hidden;
-  border-radius: 8px; /* Para bordas arredondadas */
-  
+
   img {
-    width: 100%;
-    height: 100%;
+    width: 100px;
+    height: 100px;
     object-fit: cover;
+    border-radius: 8px;
   }
 
   button {
     position: absolute;
-    top: 5px;
-    right: 5px;
-    background-color: red;
+    top: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.5);
     color: white;
     border: none;
     border-radius: 50%;
@@ -123,11 +65,9 @@ export const ImagePreview = styled.div`
 `;
 
 export const MapWrapper = styled.div`
+  margin-top: 20px;
   width: 100%;
-  height: 400px; /* Ajuste o tamanho conforme necessário */
+  height: 400px;
   border-radius: 8px;
   overflow: hidden;
-  margin-bottom: 20px;
-
-  /* Você pode adicionar outras regras de estilo conforme necessário */
 `;

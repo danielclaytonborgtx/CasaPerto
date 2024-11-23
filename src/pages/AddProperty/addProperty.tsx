@@ -1,230 +1,190 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../services/authContext';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { GoogleMap, LoadScript, Marker, InfoWindow } from '@react-google-maps/api';
 import {
-  Container,
-  Title,
-  Form,
-  Input,
-  TextArea,
+  AddPropertyContainer,
+  FormInput,
   Button,
-  ButtonText,
-  AddPhotoIcon,
+  ImagePreviewContainer,
   ImagePreview,
   MapWrapper,
-} from "./styles";
-import { GoogleMap, Marker, useLoadScript, Circle } from "@react-google-maps/api";
+} from './styles';
 
-const AddProperty: React.FC = () => {
+const AddProperty = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    title: "",
-    price: "",
-    description: "",
-    location: { lat: 0, lng: 0 },
-    photos: [] as File[],
-  });
-  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const mapRef = useRef<google.maps.Map | null>(null);
 
-  const { isLoaded } = useLoadScript({
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "",
-  });
+  const [name, setName] = useState('');
+  const [images, setImages] = useState<File[]>([]);
+  const [price, setPrice] = useState<string>(''); 
+  const [details, setDetails] = useState('');
+  const [latitude, setLatitude] = useState(0);
+  const [longitude, setLongitude] = useState(0);
+  const [mapPosition, setMapPosition] = useState({ lat: 0, lng: 0 });
+  const [selectedMarker, setSelectedMarker] = useState<{ lat: number; lng: number } | null>(null);
+  const [loading, setLoading] = useState(false);  // Estado para carregar o botão de envio
+  const [errorMessage, setErrorMessage] = useState(''); // Para mensagens de erro
 
+  // Pega a localização atual do usuário
   useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setUserLocation({ lat: latitude, lng: longitude });
-        setFormData((prev) => ({
-          ...prev,
-          location: { lat: latitude, lng: longitude },
-        }));
-      },
-      () => {
-        alert("Não foi possível obter a localização.");
+    const getCurrentLocation = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(position => {
+          setLatitude(position.coords.latitude);
+          setLongitude(position.coords.longitude);
+          setMapPosition({ lat: position.coords.latitude, lng: position.coords.longitude });
+        }, () => {
+          alert('Falha ao obter a localização. Usando localização padrão.');
+          setMapPosition({ lat: -23.55052, lng: -46.633308 }); // Localização padrão (São Paulo)
+        });
+      } else {
+        alert('Localização não disponível');
+        setMapPosition({ lat: -23.55052, lng: -46.633308 }); // Localização padrão
       }
-    );
+    };
+    getCurrentLocation();
   }, []);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleMapClick = (event: google.maps.MapMouseEvent) => {
+    const newLat = event.latLng?.lat() ?? 0;
+    const newLng = event.latLng?.lng() ?? 0;
+    setLatitude(newLat);
+    setLongitude(newLng);
+    setMapPosition({ lat: newLat, lng: newLng });
+    setSelectedMarker({ lat: newLat, lng: newLng });  // Exibe o marcador na posição clicada
   };
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files ? Array.from(e.target.files) : [];
-    setFormData((prev) => ({
-      ...prev,
-      photos: [...prev.photos, ...files],
-    }));
-  };
-
-  const handleMapDrag = () => {
-    if (mapRef.current) {
-      const center = mapRef.current.getCenter();
-      if (center) {
-        const lat = center.lat();
-        const lng = center.lng();
-        setFormData((prev) => ({
-          ...prev,
-          location: { lat, lng },
-        }));
-      }
-    }
-  };
-
-  const handleRemovePhoto = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      photos: prev.photos.filter((_, i) => i !== index),
-    }));
-  };
-
+  // Função para adicionar o imóvel
   const handleAddProperty = async () => {
-    const { title, price, description, photos, location } = formData;
-
-    if (!title || !price || !description || photos.length === 0) {
-      alert("Por favor, preencha todos os campos.");
+    // Valida os campos obrigatórios
+    if (!name || images.length === 0 || !price || !details || !user) {
+      setErrorMessage('Por favor, preencha todos os campos e certifique-se de estar logado.');
       return;
     }
+    setErrorMessage(''); // Limpa mensagem de erro
+    setLoading(true); // Inicia o carregamento
+
+    const formData = new FormData();
+    formData.append('titulo', name);
+    formData.append('valor', price);  // Enviar preço como string
+    formData.append('descricao', details);
+    formData.append('userId', (user?.id || '').toString());
+    formData.append('latitude', latitude.toString());
+    formData.append('longitude', longitude.toString());
+
+    images.forEach((image) => {
+      formData.append('imagens[]', image);
+    });
 
     try {
-      const formDataToSend = new FormData();
-      formDataToSend.append("titulo", title);
-      formDataToSend.append("valor", price);
-      formDataToSend.append("descricao", description);
-      formDataToSend.append("latitude", location.lat.toString());
-      formDataToSend.append("longitude", location.lng.toString());
-      photos.forEach((photo) => formDataToSend.append("imagens", photo));
-
-      const response = await fetch(
-        "https://casa-mais-perto-server-clone-production.up.railway.app/imoveis",
-        {
-          method: "POST",
-          body: formDataToSend,
-        }
+      // Certifique-se de que a URL do seu backend está correta
+      const response = await axios.post(
+        'https://casa-mais-perto-server-clone-production.up.railway.app/imoveis',
+        formData,
       );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Erro ao adicionar imóvel:", errorData);
-        throw new Error(errorData.message || "Erro ao adicionar imóvel.");
+      // Verifique a resposta
+      if (response.status === 200) {
+        alert('Imóvel adicionado com sucesso!');
+        setName('');
+        setImages([]);
+        setPrice('');
+        setDetails('');
+        setLatitude(0);
+        setLongitude(0);
+        navigate('/profile'); // Redireciona para o perfil do usuário
+      } else {
+        alert('Erro ao adicionar imóvel. Tente novamente.');
       }
-
-      alert("Imóvel adicionado com sucesso!");
-      navigate("/profile");
     } catch (error) {
-      console.error("Erro:", error);
-      alert("Erro ao adicionar imóvel. Tente novamente.");
+      console.error(error);
+      alert('Erro ao adicionar imóvel. Tente novamente.');
+    } finally {
+      setLoading(false); // Finaliza o carregamento
     }
   };
 
-  if (!isLoaded) return <div>Carregando mapa...</div>;
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      setImages(prevImages => [...prevImages, ...Array.from(files)]);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setImages(prevImages => prevImages.filter((_, i) => i !== index));
+  };
+
+  const handlePriceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    if (/^\d*\.?\d*$/.test(value) && (value === '' || parseFloat(value) > 0)) {
+      setPrice(value);  // Mantém o valor como string para envio
+    }
+  };
 
   return (
-    <Container>
-      <Title>Adicionar Imóvel</Title>
-      <Form>
-        <Input
-          type="text"
-          name="title"
-          placeholder="Título do Imóvel"
-          value={formData.title}
-          onChange={handleInputChange}
-        />
-        <Input
-          type="text"
-          name="price"
-          placeholder="Preço do Imóvel (R$)"
-          value={formData.price}
-          onChange={handleInputChange}
-        />
-        <TextArea
-          name="description"
-          placeholder="Descrição do Imóvel"
-          value={formData.description}
-          onChange={handleInputChange}
-        />
-        <AddPhotoIcon>
-          <label htmlFor="photo-upload">📷 Adicionar Fotos</label>
-          <input
-            type="file"
-            id="photo-upload"
-            multiple
-            accept="image/*"
-            onChange={handlePhotoUpload}
-          />
-        </AddPhotoIcon>
-        <ImagePreview>
-          {formData.photos.map((photo, index) => (
-            <div key={index} style={{ position: "relative", margin: "5px" }}>
-              <img
-                src={URL.createObjectURL(photo)}
-                alt={`Foto ${index + 1}`}
-                style={{ width: "100px", height: "100px", objectFit: "cover" }}
-              />
-              <button
-                onClick={() => handleRemovePhoto(index)}
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  right: 0,
-                  backgroundColor: "red",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "50%",
-                  width: "20px",
-                  height: "20px",
-                  cursor: "pointer",
-                }}
-              >
-                X
-              </button>
-            </div>
-          ))}
-        </ImagePreview>
-        <MapWrapper>
+    <AddPropertyContainer>
+      <h1>Adicionar Imóvel</h1>
+      
+      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+
+      <FormInput
+        type="text"
+        placeholder="Título"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+      <FormInput
+        type="text"
+        placeholder="Preço"
+        value={price}
+        onChange={handlePriceChange}
+      />
+      <FormInput
+        type="text"
+        placeholder="Descrição"
+        value={details}
+        onChange={(e) => setDetails(e.target.value)}
+      />
+
+      <ImagePreviewContainer>
+        {images.map((image, index) => (
+          <ImagePreview key={index}>
+            <img src={URL.createObjectURL(image)} alt={`preview-${index}`} />
+            <button onClick={() => removeImage(index)}>Remover</button>
+          </ImagePreview>
+        ))}
+        <input type="file" accept="image/*" multiple onChange={handleImageChange} />
+      </ImagePreviewContainer>
+
+      <MapWrapper>
+        <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
           <GoogleMap
-            mapContainerStyle={{
-              width: "100%",
-              height: "300px",
-            }}
-            center={formData.location}
+            mapContainerStyle={{ width: '100%', height: '400px' }}
+            center={mapPosition}
             zoom={15}
-            options={{
-              disableDefaultUI: true,
-              zoomControl: false,
-            }}
-            onLoad={(map) => {
-              mapRef.current = map;
-            }}
-            onDragEnd={handleMapDrag}
+            onClick={handleMapClick}
           >
-            {/* Ponto Azul para localização do usuário */}
-            {userLocation && (
-              <Circle
-                center={userLocation}
-                radius={10}
-                options={{
-                  fillColor: "#0000FF",
-                  fillOpacity: 1,
-                  strokeColor: "#0000FF",
-                  strokeOpacity: 0.5,
-                  strokeWeight: 2,
-                }}
-              />
+            <Marker position={mapPosition} onClick={() => setSelectedMarker(mapPosition)} />
+            {selectedMarker && (
+              <InfoWindow position={mapPosition} onCloseClick={() => setSelectedMarker(null)}>
+                <div>
+                  <h3>Localização Selecionada</h3>
+                  <p>Latitude: {mapPosition.lat}</p>
+                  <p>Longitude: {mapPosition.lng}</p>
+                </div>
+              </InfoWindow>
             )}
-            {/* Marcador vermelho no centro */}
-            <Marker position={formData.location} />
           </GoogleMap>
-        </MapWrapper>
-        <Button onClick={handleAddProperty} style={{ marginBottom: 70 }}>
-          <ButtonText>Adicionar Imóvel</ButtonText>
-        </Button>
-      </Form>
-    </Container>
+        </LoadScript>
+      </MapWrapper>
+
+      <Button onClick={handleAddProperty} disabled={loading}>
+        {loading ? 'Carregando...' : 'Adicionar Imóvel'}
+      </Button>
+    </AddPropertyContainer>
   );
 };
 
