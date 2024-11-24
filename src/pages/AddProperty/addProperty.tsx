@@ -24,24 +24,27 @@ const AddProperty = () => {
   const [longitude, setLongitude] = useState(0);
   const [mapPosition, setMapPosition] = useState({ lat: 0, lng: 0 });
   const [selectedMarker, setSelectedMarker] = useState<{ lat: number; lng: number } | null>(null);
-  const [loading, setLoading] = useState(false);  // Estado para carregar o botão de envio
-  const [errorMessage, setErrorMessage] = useState(''); // Para mensagens de erro
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  // Pega a localização atual do usuário
+  // Obter localização atual do usuário
   useEffect(() => {
     const getCurrentLocation = () => {
       if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(position => {
-          setLatitude(position.coords.latitude);
-          setLongitude(position.coords.longitude);
-          setMapPosition({ lat: position.coords.latitude, lng: position.coords.longitude });
-        }, () => {
-          alert('Falha ao obter a localização. Usando localização padrão.');
-          setMapPosition({ lat: -23.55052, lng: -46.633308 }); // Localização padrão (São Paulo)
-        });
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setLatitude(position.coords.latitude);
+            setLongitude(position.coords.longitude);
+            setMapPosition({ lat: position.coords.latitude, lng: position.coords.longitude });
+          },
+          () => {
+            alert('Falha ao obter localização. Usando localização padrão.');
+            setMapPosition({ lat: -23.55052, lng: -46.633308 });
+          }
+        );
       } else {
         alert('Localização não disponível');
-        setMapPosition({ lat: -23.55052, lng: -46.633308 }); // Localização padrão
+        setMapPosition({ lat: -23.55052, lng: -46.633308 });
       }
     };
     getCurrentLocation();
@@ -53,81 +56,83 @@ const AddProperty = () => {
     setLatitude(newLat);
     setLongitude(newLng);
     setMapPosition({ lat: newLat, lng: newLng });
-    setSelectedMarker({ lat: newLat, lng: newLng });  // Exibe o marcador na posição clicada
+    setSelectedMarker({ lat: newLat, lng: newLng });
   };
 
-  // Função para adicionar o imóvel
+  // Função para adicionar imóvel
   const handleAddProperty = async () => {
-    // Valida os campos obrigatórios
     if (!name || images.length === 0 || !price || !details || !user) {
       setErrorMessage('Por favor, preencha todos os campos e certifique-se de estar logado.');
       return;
     }
-    setErrorMessage(''); // Limpa mensagem de erro
-    setLoading(true); // Inicia o carregamento
+
+    setErrorMessage('');
+    setLoading(true);
 
     const formData = new FormData();
     formData.append('titulo', name);
-    formData.append('valor', price);  // Enviar preço como string
+    formData.append('valor', price); 
     formData.append('descricao', details);
-    formData.append('userId', (user?.id || '').toString());
+    formData.append('userId', user.id.toString());
     formData.append('latitude', latitude.toString());
     formData.append('longitude', longitude.toString());
 
-    images.forEach((image) => {
-      formData.append('imagens[]', image);
-    });
+    images.forEach((image) => formData.append('imagens[]', image));
 
     try {
-      // Certifique-se de que a URL do seu backend está correta
       const response = await axios.post(
         'https://casa-mais-perto-server-clone-production.up.railway.app/imoveis',
-        formData,
+        formData
       );
 
-      // Verifique a resposta
-      if (response.status === 200) {
+      if (response.status === 201) {
         alert('Imóvel adicionado com sucesso!');
+        // Limpar os campos após o sucesso
         setName('');
         setImages([]);
         setPrice('');
         setDetails('');
         setLatitude(0);
         setLongitude(0);
-        navigate('/profile'); // Redireciona para o perfil do usuário
+        navigate('/profile');
       } else {
         alert('Erro ao adicionar imóvel. Tente novamente.');
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(error);
-      alert('Erro ao adicionar imóvel. Tente novamente.');
+
+      if (axios.isAxiosError(error)) {
+        alert(`Erro: ${error.response?.data.message || 'Tente novamente.'}`);
+      } else {
+        alert('Erro ao adicionar imóvel. Tente novamente.');
+      }
     } finally {
-      setLoading(false); // Finaliza o carregamento
+      setLoading(false);
     }
   };
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files) {
-      setImages(prevImages => [...prevImages, ...Array.from(files)]);
+      setImages((prevImages) => [...prevImages, ...Array.from(files)]);
     }
   };
 
   const removeImage = (index: number) => {
-    setImages(prevImages => prevImages.filter((_, i) => i !== index));
+    setImages((prevImages) => prevImages.filter((_, i) => i !== index));
   };
 
   const handlePriceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     if (/^\d*\.?\d*$/.test(value) && (value === '' || parseFloat(value) > 0)) {
-      setPrice(value);  // Mantém o valor como string para envio
+      setPrice(value);
     }
   };
 
   return (
     <AddPropertyContainer>
       <h1>Adicionar Imóvel</h1>
-      
+
       {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
 
       <FormInput

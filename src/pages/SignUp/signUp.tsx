@@ -60,7 +60,7 @@ const SignUp: React.FC = () => {
         const data = await response.json();
         setError(data.message || "Erro ao criar conta.");
       }
-    } catch (error) {
+    } catch {
       setError("Erro ao conectar com o servidor.");
     } finally {
       setIsSubmitting(false); // Libera o botão após o envio
@@ -75,7 +75,7 @@ const SignUp: React.FC = () => {
         <Input 
           type="text" 
           name="name" 
-          placeholder="Nome" 
+          placeholder="Nome de usuário" 
           value={formData.name} 
           onChange={handleInputChange} 
         />
