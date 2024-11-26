@@ -26,6 +26,7 @@ const AddProperty = () => {
   const [selectedMarker, setSelectedMarker] = useState<{ lat: number; lng: number } | null>(null);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   // Obter localização atual do usuário
   useEffect(() => {
@@ -67,6 +68,7 @@ const AddProperty = () => {
     }
 
     setErrorMessage('');
+    setSuccessMessage('');
     setLoading(true);
 
     const formData = new FormData();
@@ -86,7 +88,7 @@ const AddProperty = () => {
       );
 
       if (response.status === 201) {
-        alert('Imóvel adicionado com sucesso!');
+        setSuccessMessage('Imóvel adicionado com sucesso!');
         // Limpar os campos após o sucesso
         setName('');
         setImages([]);
@@ -96,15 +98,15 @@ const AddProperty = () => {
         setLongitude(0);
         navigate('/profile');
       } else {
-        alert('Erro ao adicionar imóvel. Tente novamente.');
+        setErrorMessage('Erro ao adicionar imóvel. Tente novamente.');
       }
     } catch (error: unknown) {
       console.error(error);
 
       if (axios.isAxiosError(error)) {
-        alert(`Erro: ${error.response?.data.message || 'Tente novamente.'}`);
+        setErrorMessage(`Erro: ${error.response?.data.message || 'Tente novamente.'}`);
       } else {
-        alert('Erro ao adicionar imóvel. Tente novamente.');
+        setErrorMessage('Erro ao adicionar imóvel. Tente novamente.');
       }
     } finally {
       setLoading(false);
@@ -119,7 +121,9 @@ const AddProperty = () => {
   };
 
   const removeImage = (index: number) => {
+    const removedImage = images[index];
     setImages((prevImages) => prevImages.filter((_, i) => i !== index));
+    URL.revokeObjectURL(URL.createObjectURL(removedImage)); // Limpa a memória
   };
 
   const handlePriceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -133,7 +137,8 @@ const AddProperty = () => {
     <AddPropertyContainer>
       <h1>Adicionar Imóvel</h1>
 
-      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+      {errorMessage && <p style={{ color: 'red', fontWeight: 'bold', margin: '10px 0' }}>{errorMessage}</p>}
+      {successMessage && <p style={{ color: 'green', fontWeight: 'bold', margin: '10px 0' }}>{successMessage}</p>}
 
       <FormInput
         type="text"
