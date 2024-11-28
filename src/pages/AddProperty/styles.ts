@@ -24,6 +24,12 @@ export const FormInput = styled.input`
     -moz-appearance: none;
     cursor: pointer;
   }
+
+  // Estilo para textarea
+  &.textarea {
+    resize: vertical; // Permite que o usuário redimensione o campo verticalmente
+    height: 100px; // Altura inicial, mas pode ser ajustada
+  }
 `;
 
 export const Button = styled.button`
@@ -41,12 +47,33 @@ export const Button = styled.button`
   &:hover {
     background-color: #45a049;
   }
+
+  &:disabled {
+    background-color: #cfcfcf;
+    cursor: not-allowed;
+  }
+`;
+
+export const ImageUploadButton = styled.div`
+  margin-bottom: 20px;
+  label {
+    padding: 12px;
+    background-color: #4caf50;
+    color: white;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+  }
 `;
 
 export const ImagePreviewContainer = styled.div`
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 `;
 
 export const ImagePreview = styled.div`
@@ -87,4 +114,3 @@ export const CategorySelect = styled(FormInput)`
   border-radius: 4px;
   border: 1px solid #ddd;
 `;
-

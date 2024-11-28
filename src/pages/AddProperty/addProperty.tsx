@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../services/authContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -7,6 +7,7 @@ import {
   AddPropertyContainer,
   FormInput,
   Button,
+  ImageUploadButton,
   ImagePreviewContainer,
   ImagePreview,
   MapWrapper,
@@ -16,7 +17,7 @@ const AddProperty = () => {
   const { user } = useAuth(); // Verificando se o usuário está logado
   const navigate = useNavigate();
 
-  const [category, setCategory] = useState<'aluguel' | 'venda'>('aluguel');
+  const [category, setCategory] = useState<'aluguel' | 'venda'>('venda');
   const [name, setName] = useState('');
   const [images, setImages] = useState<File[]>([]);
   const [price, setPrice] = useState('');
@@ -48,21 +49,18 @@ const AddProperty = () => {
       alert('Localização não disponível');
       setMapPosition({ lat: -23.55052, lng: -46.633308 });
     }
-  }, []);
+  }, []); // Esse useEffect roda uma única vez ao inicializar o componente
 
-  const handleMapClick = (event: google.maps.MapMouseEvent) => {
+  const handleMapClick = useCallback((event: google.maps.MapMouseEvent) => {
     const newLat = event.latLng?.lat() ?? 0;
     const newLng = event.latLng?.lng() ?? 0;
     setLatitude(newLat);
     setLongitude(newLng);
     setMapPosition({ lat: newLat, lng: newLng });
     setSelectedMarker({ lat: newLat, lng: newLng });
-  };
+  }, []);
 
-  // Função para adicionar imóvel
   const handleAddProperty = async () => {
-    console.log('Campos:', { category, name, images, price, details, user }); // Log para debug
-
     // Validação de campos
     if (!category || !name.trim() || images.length === 0 || !price.trim() || parseFloat(price) <= 0 || !details.trim() || !user) {
       setErrorMessage('Por favor, preencha todos os campos corretamente e certifique-se de estar logado.');
@@ -89,8 +87,6 @@ const AddProperty = () => {
         'https://casa-mais-perto-server-clone-production.up.railway.app/imoveis',
         formData
       );
-      console.log(response);
-
       if (response.status === 201) {
         setSuccessMessage('Imóvel adicionado com sucesso!');
         resetForm(); // Limpar os campos após o sucesso
@@ -131,7 +127,7 @@ const AddProperty = () => {
   };
 
   const resetForm = () => {
-    setCategory('aluguel');
+    setCategory('venda');
     setName('');
     setImages([]);
     setPrice('');
@@ -145,17 +141,16 @@ const AddProperty = () => {
   return (
     <AddPropertyContainer>
       <h1>Adicionar Imóvel</h1>
-
       {errorMessage && <p style={{ color: 'red', fontWeight: 'bold', margin: '10px 0' }}>{errorMessage}</p>}
       {successMessage && <p style={{ color: 'green', fontWeight: 'bold', margin: '10px 0' }}>{successMessage}</p>}
 
       <FormInput
         as="select"
         value={category}
-        onChange={(e) => setCategory(e.target.value as 'aluguel' | 'venda')}
+        onChange={(e) => setCategory(e.target.value as 'venda' | 'aluguel')}
       >
-        <option value="aluguel">Aluguel</option>
         <option value="venda">Venda</option>
+        <option value="aluguel">Aluguel</option>
       </FormInput>
 
       <FormInput
@@ -171,24 +166,17 @@ const AddProperty = () => {
         onChange={handlePriceChange}
       />
       <FormInput
-        type="text"
+        as="textarea"
         placeholder="Descrição"
         value={details}
         onChange={(e) => setDetails(e.target.value)}
+        rows={4} // Definindo a altura inicial, mas você pode ajustar conforme necessário
       />
 
-      <ImagePreviewContainer>
-        {images.map((image, index) => (
-          <ImagePreview key={index}>
-            <img src={URL.createObjectURL(image)} alt={`preview-${index}`} />
-            <button onClick={() => removeImage(index)}>Remover</button>
-          </ImagePreview>
-        ))}
-        
-        {/* Campo para adicionar imagens */}
-        <label htmlFor="image-upload" style={{ cursor: 'pointer', display: 'block', marginTop: '10px', textAlign: 'center', backgroundColor: '#4CAF50', color: 'white', padding: '12px', borderRadius: '4px' }}>
-          Adicionar imagens
-        </label>
+
+      {/* Botão de adicionar imagens - sempre fixo acima das imagens */}
+      <ImageUploadButton>
+        <label htmlFor="image-upload">Adicionar imagens</label>
         <input
           id="image-upload"
           type="file"
@@ -197,6 +185,16 @@ const AddProperty = () => {
           style={{ display: 'none' }}
           onChange={handleImageChange}
         />
+      </ImageUploadButton>
+
+      {/* Visualização das imagens */}
+      <ImagePreviewContainer>
+        {images.map((image, index) => (
+          <ImagePreview key={index}>
+            <img src={URL.createObjectURL(image)} alt={`preview-${index}`} />
+            <button onClick={() => removeImage(index)}>Remover</button>
+          </ImagePreview>
+        ))}
       </ImagePreviewContainer>
 
       <MapWrapper>
@@ -207,11 +205,11 @@ const AddProperty = () => {
             zoom={15}
             onClick={handleMapClick}
             options={{
-              disableDefaultUI: true, // Desativa todos os controles padrão
-              zoomControl: false, // Habilita controle de zoom
-              streetViewControl: false, // Desativa Street View
-              mapTypeControl: false, // Desativa os controles de tipo de mapa
-              fullscreenControl: true, // Desativa o controle de tela cheia
+              disableDefaultUI: true,
+              zoomControl: false,
+              streetViewControl: false,
+              mapTypeControl: false,
+              fullscreenControl: true,
             }}
           >
             {selectedMarker && <Marker position={selectedMarker} />}
