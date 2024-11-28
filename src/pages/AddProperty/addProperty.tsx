@@ -16,6 +16,7 @@ const AddProperty = () => {
   const { user } = useAuth(); // Verificando se o usuário está logado
   const navigate = useNavigate();
 
+  const [category, setCategory] = useState<'aluguel' | 'venda'>('aluguel');
   const [name, setName] = useState('');
   const [images, setImages] = useState<File[]>([]);
   const [price, setPrice] = useState('');
@@ -60,10 +61,10 @@ const AddProperty = () => {
 
   // Função para adicionar imóvel
   const handleAddProperty = async () => {
-    console.log('Campos:', { name, images, price, details, user }); // Log para debug
+    console.log('Campos:', { category, name, images, price, details, user }); // Log para debug
 
     // Validação de campos
-    if (!name.trim() || images.length === 0 || !price.trim() || parseFloat(price) <= 0 || !details.trim() || !user) {
+    if (!category || !name.trim() || images.length === 0 || !price.trim() || parseFloat(price) <= 0 || !details.trim() || !user) {
       setErrorMessage('Por favor, preencha todos os campos corretamente e certifique-se de estar logado.');
       return;
     }
@@ -73,6 +74,7 @@ const AddProperty = () => {
     setLoading(true);
 
     const formData = new FormData();
+    formData.append('categoria', category);
     formData.append('titulo', name);
     formData.append('valor', price);
     formData.append('descricao', details);
@@ -129,6 +131,7 @@ const AddProperty = () => {
   };
 
   const resetForm = () => {
+    setCategory('aluguel');
     setName('');
     setImages([]);
     setPrice('');
@@ -145,6 +148,15 @@ const AddProperty = () => {
 
       {errorMessage && <p style={{ color: 'red', fontWeight: 'bold', margin: '10px 0' }}>{errorMessage}</p>}
       {successMessage && <p style={{ color: 'green', fontWeight: 'bold', margin: '10px 0' }}>{successMessage}</p>}
+
+      <FormInput
+        as="select"
+        value={category}
+        onChange={(e) => setCategory(e.target.value as 'aluguel' | 'venda')}
+      >
+        <option value="aluguel">Aluguel</option>
+        <option value="venda">Venda</option>
+      </FormInput>
 
       <FormInput
         type="text"
@@ -172,7 +184,19 @@ const AddProperty = () => {
             <button onClick={() => removeImage(index)}>Remover</button>
           </ImagePreview>
         ))}
-        <input type="file" accept="image/*" multiple onChange={handleImageChange} />
+        
+        {/* Campo para adicionar imagens */}
+        <label htmlFor="image-upload" style={{ cursor: 'pointer', display: 'block', marginTop: '10px', textAlign: 'center', backgroundColor: '#4CAF50', color: 'white', padding: '12px', borderRadius: '4px' }}>
+          Adicionar imagens
+        </label>
+        <input
+          id="image-upload"
+          type="file"
+          accept="image/*"
+          multiple
+          style={{ display: 'none' }}
+          onChange={handleImageChange}
+        />
       </ImagePreviewContainer>
 
       <MapWrapper>
@@ -182,16 +206,22 @@ const AddProperty = () => {
             center={mapPosition}
             zoom={15}
             onClick={handleMapClick}
+            options={{
+              disableDefaultUI: true, // Desativa todos os controles padrão
+              zoomControl: false, // Habilita controle de zoom
+              streetViewControl: false, // Desativa Street View
+              mapTypeControl: false, // Desativa os controles de tipo de mapa
+              fullscreenControl: true, // Desativa o controle de tela cheia
+            }}
           >
-            {selectedMarker && (
-              <Marker position={selectedMarker} />
-            )}
+            {selectedMarker && <Marker position={selectedMarker} />}
+            <Marker position={mapPosition} icon="http://maps.google.com/mapfiles/ms/icons/blue-dot.png" />
           </GoogleMap>
         </LoadScript>
       </MapWrapper>
 
       <Button onClick={handleAddProperty} disabled={loading}>
-        {loading ? 'Carregando...' : 'Adicionar Imóvel'}
+        {loading ? 'Adicionando...' : 'Adicionar Imóvel'}
       </Button>
     </AddPropertyContainer>
   );

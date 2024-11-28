@@ -17,6 +17,13 @@ export const FormInput = styled.input`
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 16px;
+
+  &.select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+  }
 `;
 
 export const Button = styled.button`
@@ -29,6 +36,7 @@ export const Button = styled.button`
   font-size: 16px;
   cursor: pointer;
   margin-bottom: 50px;
+  margin-top: 10px;
 
   &:hover {
     background-color: #45a049;
@@ -71,3 +79,12 @@ export const MapWrapper = styled.div`
   border-radius: 8px;
   overflow: hidden;
 `;
+
+export const CategorySelect = styled(FormInput)`
+  margin-top: 10px;
+  font-size: 16px;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+`;
+
