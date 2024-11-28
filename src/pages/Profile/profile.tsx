@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ProfileContainer, UserName, UserInfo, UserList, Loading, LogoutIcon } from "./styles";
+import { ProfileContainer, UserName, UserInfo, UserList, Loading, LogoutIcon, ErrorMessage } from "./styles";
 import { FiLogOut } from "react-icons/fi";
 
 // Definindo o tipo User
@@ -28,8 +28,9 @@ const Profile: React.FC = () => {
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      setUser(JSON.parse(storedUser)); // Define o usuário no estado
-      fetchProperties(JSON.parse(storedUser).id); // Carrega os imóveis do usuário
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser); // Define o usuário no estado
+      fetchProperties(parsedUser.id); // Carrega os imóveis do usuário
       setLoading(false);
     } else {
       navigate("/login"); // Se não encontrar o usuário, redireciona para a página de login
@@ -39,15 +40,21 @@ const Profile: React.FC = () => {
   // Função para buscar os imóveis do usuário
   const fetchProperties = async (userId: number) => {
     try {
-      const response = await fetch(`https://casa-mais-perto-server-clone-production.up.railway.app/imoveis/user?userId=${userId}`);
-      const data = await response.json();
+      const response = await fetch(
+        `https://casa-mais-perto-server-clone-production.up.railway.app/imoveis/user?userId=${userId}`
+      );
       if (response.ok) {
+        const data = await response.json();
         if (data.message) {
           setProperties([]); // Se não houver imóveis, garantimos que a lista seja vazia
           setError(data.message); // Exibe a mensagem do servidor
         } else {
           setProperties(data); // Atualiza a lista de imóveis
         }
+      } else if (response.status === 404) {
+        // Se o erro for 404 (não encontrado), tratamos isso como um caso normal (sem imóveis)
+        setProperties([]); // Garantir que a lista esteja vazia
+        setError(null); // Limpar erro, pois não é um erro fatal
       } else {
         setError("Erro ao carregar imóveis.");
       }
@@ -69,7 +76,7 @@ const Profile: React.FC = () => {
 
   // Exibição caso ocorra algum erro
   if (error) {
-    return <div>{error}</div>;
+    return <ErrorMessage>{error}</ErrorMessage>;
   }
 
   // Verificando se 'user' está definido antes de renderizar as propriedades

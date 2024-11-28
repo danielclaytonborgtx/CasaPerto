@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../services/authContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { GoogleMap, LoadScript, Marker, InfoWindow } from '@react-google-maps/api';
+import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import {
   AddPropertyContainer,
   FormInput,
@@ -13,7 +13,7 @@ import {
 } from './styles';
 
 const AddProperty = () => {
-  const { user } = useAuth();
+  const { user } = useAuth(); // Verificando se o usuário está logado
   const navigate = useNavigate();
 
   const [name, setName] = useState('');
@@ -60,8 +60,11 @@ const AddProperty = () => {
 
   // Função para adicionar imóvel
   const handleAddProperty = async () => {
-    if (!name.trim() || images.length === 0 || !price.trim() || !details.trim() || !user) {
-      setErrorMessage('Por favor, preencha todos os campos e certifique-se de estar logado.');
+    console.log('Campos:', { name, images, price, details, user }); // Log para debug
+
+    // Validação de campos
+    if (!name.trim() || images.length === 0 || !price.trim() || parseFloat(price) <= 0 || !details.trim() || !user) {
+      setErrorMessage('Por favor, preencha todos os campos corretamente e certifique-se de estar logado.');
       return;
     }
 
@@ -73,7 +76,7 @@ const AddProperty = () => {
     formData.append('titulo', name);
     formData.append('valor', price);
     formData.append('descricao', details);
-    formData.append('userId', user.id.toString());
+    formData.append('userId', user.id.toString()); // Certificando-se de que o usuário está logado
     formData.append('latitude', latitude.toString());
     formData.append('longitude', longitude.toString());
 
@@ -85,17 +88,16 @@ const AddProperty = () => {
         formData
       );
       console.log(response);
+
       if (response.status === 201) {
         setSuccessMessage('Imóvel adicionado com sucesso!');
-        // Limpar os campos após o sucesso
-        resetForm();
-        navigate('/profile');
+        resetForm(); // Limpar os campos após o sucesso
+        navigate('/profile'); // Redirecionar para o perfil
       } else {
         setErrorMessage('Erro ao adicionar imóvel. Tente novamente.');
       }
     } catch (error) {
       console.error(error);
-
       if (axios.isAxiosError(error)) {
         setErrorMessage(`Erro: ${error.response?.data.message || 'Tente novamente.'}`);
       } else {
@@ -134,6 +136,7 @@ const AddProperty = () => {
     setLatitude(0);
     setLongitude(0);
     setMapPosition({ lat: 0, lng: 0 });
+    setSelectedMarker(null);
   };
 
   return (
@@ -180,15 +183,8 @@ const AddProperty = () => {
             zoom={15}
             onClick={handleMapClick}
           >
-            <Marker position={mapPosition} onClick={() => setSelectedMarker(mapPosition)} />
             {selectedMarker && (
-              <InfoWindow position={mapPosition} onCloseClick={() => setSelectedMarker(null)}>
-                <div>
-                  <h3>Localização Selecionada</h3>
-                  <p>Latitude: {mapPosition.lat}</p>
-                  <p>Longitude: {mapPosition.lng}</p>
-                </div>
-              </InfoWindow>
+              <Marker position={selectedMarker} />
             )}
           </GoogleMap>
         </LoadScript>

@@ -61,4 +61,14 @@ export const LogoutIcon = styled.div`
   }
 `;
 
+export const ErrorMessage = styled.div`
+  color: red;
+  font-size: 18px;
+  text-align: center;
+  padding: 20px;
+  background-color: #ffe6e6;
+  border-radius: 5px;
+  margin-top: 20px;
+`;
+
 
