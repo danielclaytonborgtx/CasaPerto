@@ -39,10 +39,15 @@ const Profile: React.FC = () => {
   // Função para buscar os imóveis do usuário
   const fetchProperties = async (userId: number) => {
     try {
-      const response = await fetch(`https://casa-mais-perto-server-clone-production.up.railway.app/imoveis?userId=${userId}`); // Substitua pela URL da sua API
+      const response = await fetch(`https://casa-mais-perto-server-clone-production.up.railway.app/imoveis/user?userId=${userId}`);
       const data = await response.json();
       if (response.ok) {
-        setProperties(data); // Atualiza a lista de imóveis
+        if (data.message) {
+          setProperties([]); // Se não houver imóveis, garantimos que a lista seja vazia
+          setError(data.message); // Exibe a mensagem do servidor
+        } else {
+          setProperties(data); // Atualiza a lista de imóveis
+        }
       } else {
         setError("Erro ao carregar imóveis.");
       }
@@ -51,8 +56,8 @@ const Profile: React.FC = () => {
     }
   };
 
-   // Função de logout
-   const handleLogout = () => {
+  // Função de logout
+  const handleLogout = () => {
     localStorage.removeItem("user"); // Remove o usuário do localStorage
     navigate("/login"); // Redireciona para a página de login
   };
@@ -83,7 +88,7 @@ const Profile: React.FC = () => {
 
       <h2>Imóveis Postados</h2>
       {properties.length === 0 ? (
-        <div>Você ainda não tem imóveis postados.</div> // Exibe mensagem caso não haja imóveis
+        <div>{error || "Você ainda não tem imóveis postados."}</div> // Exibe mensagem de erro ou sem imóveis
       ) : (
         <UserList>
           {properties.map((property) => (

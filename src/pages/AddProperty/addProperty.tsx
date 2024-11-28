@@ -18,7 +18,7 @@ const AddProperty = () => {
 
   const [name, setName] = useState('');
   const [images, setImages] = useState<File[]>([]);
-  const [price, setPrice] = useState<string>(''); 
+  const [price, setPrice] = useState('');
   const [details, setDetails] = useState('');
   const [latitude, setLatitude] = useState(0);
   const [longitude, setLongitude] = useState(0);
@@ -30,25 +30,23 @@ const AddProperty = () => {
 
   // Obter localização atual do usuário
   useEffect(() => {
-    const getCurrentLocation = () => {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            setLatitude(position.coords.latitude);
-            setLongitude(position.coords.longitude);
-            setMapPosition({ lat: position.coords.latitude, lng: position.coords.longitude });
-          },
-          () => {
-            alert('Falha ao obter localização. Usando localização padrão.');
-            setMapPosition({ lat: -23.55052, lng: -46.633308 });
-          }
-        );
-      } else {
-        alert('Localização não disponível');
-        setMapPosition({ lat: -23.55052, lng: -46.633308 });
-      }
-    };
-    getCurrentLocation();
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setLatitude(latitude);
+          setLongitude(longitude);
+          setMapPosition({ lat: latitude, lng: longitude });
+        },
+        () => {
+          alert('Falha ao obter localização. Usando localização padrão.');
+          setMapPosition({ lat: -23.55052, lng: -46.633308 });
+        }
+      );
+    } else {
+      alert('Localização não disponível');
+      setMapPosition({ lat: -23.55052, lng: -46.633308 });
+    }
   }, []);
 
   const handleMapClick = (event: google.maps.MapMouseEvent) => {
@@ -62,7 +60,7 @@ const AddProperty = () => {
 
   // Função para adicionar imóvel
   const handleAddProperty = async () => {
-    if (!name || images.length === 0 || !price || !details || !user) {
+    if (!name.trim() || images.length === 0 || !price.trim() || !details.trim() || !user) {
       setErrorMessage('Por favor, preencha todos os campos e certifique-se de estar logado.');
       return;
     }
@@ -73,7 +71,7 @@ const AddProperty = () => {
 
     const formData = new FormData();
     formData.append('titulo', name);
-    formData.append('valor', price); 
+    formData.append('valor', price);
     formData.append('descricao', details);
     formData.append('userId', user.id.toString());
     formData.append('latitude', latitude.toString());
@@ -86,21 +84,16 @@ const AddProperty = () => {
         'https://casa-mais-perto-server-clone-production.up.railway.app/imoveis',
         formData
       );
-
+      console.log(response);
       if (response.status === 201) {
         setSuccessMessage('Imóvel adicionado com sucesso!');
         // Limpar os campos após o sucesso
-        setName('');
-        setImages([]);
-        setPrice('');
-        setDetails('');
-        setLatitude(0);
-        setLongitude(0);
+        resetForm();
         navigate('/profile');
       } else {
         setErrorMessage('Erro ao adicionar imóvel. Tente novamente.');
       }
-    } catch (error: unknown) {
+    } catch (error) {
       console.error(error);
 
       if (axios.isAxiosError(error)) {
@@ -131,6 +124,16 @@ const AddProperty = () => {
     if (/^\d*\.?\d*$/.test(value) && (value === '' || parseFloat(value) > 0)) {
       setPrice(value);
     }
+  };
+
+  const resetForm = () => {
+    setName('');
+    setImages([]);
+    setPrice('');
+    setDetails('');
+    setLatitude(0);
+    setLongitude(0);
+    setMapPosition({ lat: 0, lng: 0 });
   };
 
   return (

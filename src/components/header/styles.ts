@@ -28,17 +28,6 @@ export const MenuButton = styled.button`
   margin-top: 8px;
 `;
 
-export const SearchInput = styled.input`
-  flex: 1;
-  height: 35px;
-  border: 1px solid #000;
-  border-radius: 5px;
-  padding-left: 30px;  
-  padding-right: 30px; 
-  background-color: #fff;
-  margin-top: 3px;
-`;
-
 export const AddButton = styled.button`
   display: flex;
   justify-content: center;
@@ -56,3 +45,14 @@ export const Icon = styled.span`
   font-size: 25px;
   color: black;
 `;
+
+export const SwitchContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center; // Garante que o Switch fique centralizado
+`;
+
+
+
+
+
