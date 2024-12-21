@@ -1,60 +1,59 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ProfileContainer, UserName, UserInfo, UserList, Loading, LogoutIcon, ErrorMessage } from "./styles";
+import { ProfileContainer, UserName, UserInfo, UserList, Loading, LogoutIcon, ErrorMessage, PropertyItem, PropertyImage, PropertyDetails, TrashIcon } from "./styles";
 import { FiLogOut } from "react-icons/fi";
+import { FaTrashAlt } from "react-icons/fa"; 
 
-// Definindo o tipo User
 interface User {
   id: number;
   username: string;
   email: string;
 }
 
-// Definindo o tipo Property (Imóvel)
 interface Property {
   id: number;
   title: string;
   description: string;
+  images: string;  
+  price: string;  
 }
 
 const Profile: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [properties, setProperties] = useState<Property[]>([]); // Lista de imóveis
-  const [error, setError] = useState<string | null>(null); // Estado para erros
+  const [properties, setProperties] = useState<Property[]>([]); 
+  const [error, setError] = useState<string | null>(null); 
   const navigate = useNavigate();
 
-  // Efeito para ler o usuário do localStorage ao carregar o componente
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
-      setUser(parsedUser); // Define o usuário no estado
-      fetchProperties(parsedUser.id); // Carrega os imóveis do usuário
+      setUser(parsedUser); 
+      fetchProperties(parsedUser.id); 
       setLoading(false);
     } else {
-      navigate("/login"); // Se não encontrar o usuário, redireciona para a página de login
+      navigate("/login"); 
     }
   }, [navigate]);
 
-  // Função para buscar os imóveis do usuário
   const fetchProperties = async (userId: number) => {
     try {
       const response = await fetch(
-        `https://casa-mais-perto-server-clone-production.up.railway.app/imoveis/user?userId=${userId}`
+        `http://localhost:3333/property/user?userId=${userId}`
       );
       if (response.ok) {
         const data = await response.json();
+   
         if (data.message) {
-          setProperties([]); // Se não houver imóveis, garantimos que a lista seja vazia
-          setError(data.message); // Exibe a mensagem do servidor
+          setProperties([]);
+          setError(data.message); 
         } else {
-          setProperties(data); // Atualiza a lista de imóveis
+          setProperties(data); 
         }
       } else if (response.status === 404) {
-        // Se o erro for 404 (não encontrado), tratamos isso como um caso normal (sem imóveis)
-        setProperties([]); // Garantir que a lista esteja vazia
-        setError(null); // Limpar erro, pois não é um erro fatal
+        setProperties([]); 
+        setError(null);
       } else {
         setError("Erro ao carregar imóveis.");
       }
@@ -63,26 +62,44 @@ const Profile: React.FC = () => {
     }
   };
 
-  // Função de logout
   const handleLogout = () => {
-    localStorage.removeItem("user"); // Remove o usuário do localStorage
-    navigate("/login"); // Redireciona para a página de login
+    localStorage.removeItem("user"); 
+    navigate("/login"); 
   };
 
-  // Exibição enquanto o conteúdo está carregando
+  const handleDeleteProperty = async (propertyId: number) => {
+    try {
+      const response = await fetch(`http://localhost:3333/property/${propertyId}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        setProperties(properties.filter(property => property.id !== propertyId)); // Remove o imóvel da lista
+      } else {
+        setError("Erro ao deletar o imóvel.");
+      }
+    } catch {
+      setError("Erro ao conectar com o servidor.");
+    }
+  };
+
   if (loading) {
     return <Loading>Carregando...</Loading>;
   }
 
-  // Exibição caso ocorra algum erro
   if (error) {
     return <ErrorMessage>{error}</ErrorMessage>;
   }
 
-  // Verificando se 'user' está definido antes de renderizar as propriedades
   if (!user) {
     return <div>Usuário não encontrado</div>;
   }
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(price);
+  };
 
   return (
     <ProfileContainer>
@@ -95,14 +112,30 @@ const Profile: React.FC = () => {
 
       <h2>Imóveis Postados</h2>
       {properties.length === 0 ? (
-        <div>{error || "Você ainda não tem imóveis postados."}</div> // Exibe mensagem de erro ou sem imóveis
+        <div>{error || "Você ainda não tem imóveis postados."}</div> 
       ) : (
         <UserList>
-          {properties.map((property) => (
-            <li key={property.id}>
-              <strong>{property.title}</strong>: {property.description}
-            </li>
-          ))}
+          {properties.map((property) => {
+            const imageUrl = property.images && property.images[0]
+              ? property.images[0]  
+              : '/path/to/default-image.jpg'; 
+
+            return (
+              <PropertyItem key={property.id}>
+                <PropertyImage src={imageUrl} alt={property.title} />
+                <PropertyDetails>
+                  <strong>{property.title}</strong>
+                  <p>{property.description}</p>
+                  <p>Preço: {formatPrice(Number(property.price))}</p>
+                </PropertyDetails>
+
+                {/* Ícone de lixeira para deletar o imóvel */}
+                <TrashIcon onClick={() => handleDeleteProperty(property.id)}>
+                  <FaTrashAlt size={18} color="black" />
+                </TrashIcon>
+              </PropertyItem>
+            );
+          })}
         </UserList>
       )}
     </ProfileContainer>

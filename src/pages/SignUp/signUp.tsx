@@ -13,57 +13,86 @@ import {
 } from "./styles";
 
 const SignUp: React.FC = () => {
-  const [formData, setFormData] = useState({ name: "", email: "", password: "", confirmPassword: "" });
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    username: "",
+    password: "",
+    confirmPassword: "",
+  });
   const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false); // Para desabilitar o botão durante o envio
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  // Função para atualizar os campos do formulário
+  // Atualiza os campos do formulário
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
     setError(null); // Limpa o erro ao alterar os campos
   };
 
-  // Função para validar e enviar os dados do formulário
+  // Valida e envia os dados do formulário
   const handleSignUp = async () => {
-    if (formData.password !== formData.confirmPassword) {
-      setError("As senhas não correspondem.");
-      return;
-    }
+    const { name, email, username, password, confirmPassword } = formData;
 
-    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
+    if (!name || !email || !username || !password || !confirmPassword) {
       setError("Por favor, preencha todos os campos.");
       return;
     }
 
-    setIsSubmitting(true); // Bloqueia o botão enquanto está enviando os dados
+    if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+      setError("O nome de usuário deve ter entre 3 e 20 caracteres, sem espaços ou caracteres especiais.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("As senhas não correspondem.");
+      return;
+    }
+
+    if (password.length < 8) {
+      setError("A senha deve ter pelo menos 8 caracteres.");
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
-      const response = await fetch("https://casa-mais-perto-server-clone-production.up.railway.app/register", {
+      const response = await fetch("http://localhost:3333/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          username: formData.name,
-          email: formData.email,
-          password: formData.password,
+          name,
+          email,
+          username,
+          password,
         }),
       });
 
-      // Checa se a resposta foi bem-sucedida
       if (response.ok) {
         alert("Conta criada com sucesso!");
-        navigate("/signin"); // Redireciona para a tela de login após o sucesso
+        navigate("/signin"); // Redireciona para a página de login
       } else {
         const data = await response.json();
-        setError(data.message || "Erro ao criar conta.");
+        setError(data.error || "Erro ao criar conta.");
       }
     } catch {
       setError("Erro ao conectar com o servidor.");
     } finally {
-      setIsSubmitting(false); // Libera o botão após o envio
+      setIsSubmitting(false);
+    }
+  };
+
+  // Lida com a tecla Enter para mover o foco ou enviar o formulário
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>, nextField?: string) => {
+    if (e.key === "Enter") {
+      if (nextField) {
+        document.querySelector<HTMLInputElement>(`input[name='${nextField}']`)?.focus();
+      } else {
+        handleSignUp();
+      }
     }
   };
 
@@ -71,37 +100,50 @@ const SignUp: React.FC = () => {
     <Container>
       <Title>Criar Conta</Title>
       <Form>
-        {/* Campo Nome */}
-        <Input 
-          type="text" 
-          name="name" 
-          placeholder="Nome de usuário" 
-          value={formData.name} 
-          onChange={handleInputChange} 
+        {/* Campo Nome Completo */}
+        <Input
+          type="text"
+          name="name"
+          placeholder="Nome completo"
+          value={formData.name}
+          onChange={handleInputChange}
+          onKeyPress={(e) => handleKeyPress(e, "email")}
         />
         {/* Campo Email */}
-        <Input 
-          type="email" 
-          name="email" 
-          placeholder="Email" 
-          value={formData.email} 
-          onChange={handleInputChange} 
+        <Input
+          type="email"
+          name="email"
+          placeholder="Email"
+          value={formData.email}
+          onChange={handleInputChange}
+          onKeyPress={(e) => handleKeyPress(e, "username")}
+        />
+        {/* Campo Nome de Usuário */}
+        <Input
+          type="text"
+          name="username"
+          placeholder="Nome de usuário"
+          value={formData.username}
+          onChange={handleInputChange}
+          onKeyPress={(e) => handleKeyPress(e, "password")}
         />
         {/* Campo Senha */}
-        <Input 
-          type="password" 
-          name="password" 
-          placeholder="Senha" 
-          value={formData.password} 
-          onChange={handleInputChange} 
+        <Input
+          type="password"
+          name="password"
+          placeholder="Senha"
+          value={formData.password}
+          onChange={handleInputChange}
+          onKeyPress={(e) => handleKeyPress(e, "confirmPassword")}
         />
         {/* Campo Confirmar Senha */}
-        <Input 
-          type="password" 
-          name="confirmPassword" 
-          placeholder="Confirmar Senha" 
-          value={formData.confirmPassword} 
-          onChange={handleInputChange} 
+        <Input
+          type="password"
+          name="confirmPassword"
+          placeholder="Confirmar Senha"
+          value={formData.confirmPassword}
+          onChange={handleInputChange}
+          onKeyPress={(e) => handleKeyPress(e)}
         />
         {/* Exibição de erro */}
         {error && <ErrorMessage>{error}</ErrorMessage>}

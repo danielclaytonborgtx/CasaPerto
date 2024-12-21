@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -15,7 +13,7 @@ import {
 } from "./styles";
 
 const SignIn: React.FC = () => {
-  const [formData, setFormData] = useState({ login: "", password: "" });
+  const [formData, setFormData] = useState({ username: "", password: "" });
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
@@ -29,7 +27,7 @@ const SignIn: React.FC = () => {
 
   // Função para lidar com o envio do formulário
   const handleSignIn = async () => {
-    if (!formData.login || !formData.password) {
+    if (!formData.username || !formData.password) {
       setError("Por favor, preencha todos os campos.");
       return;
     }
@@ -38,13 +36,13 @@ const SignIn: React.FC = () => {
 
     try {
       // Envia a requisição de login para o backend
-      const response = await fetch("https://casa-mais-perto-server-clone-production.up.railway.app/login", {
+      const response = await fetch("http://localhost:3333/session", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          login: formData.login,
+          username: formData.username, // Altere 'login' para 'username'
           password: formData.password,
         }),
       });
@@ -59,7 +57,7 @@ const SignIn: React.FC = () => {
         const data = await response.json();
         setError(data.error || "Erro ao fazer login."); // Exibe erro retornado pela API
       }
-    } catch (error) {
+    } catch {
       setError("Erro ao conectar com o servidor."); // Mensagem de erro caso falhe a requisição
     } finally {
       setIsSubmitting(false); // Desativa o estado de carregamento
@@ -72,9 +70,9 @@ const SignIn: React.FC = () => {
       <Form>
         <Input 
           type="text" 
-          name="login" 
+          name="username" // Altere 'login' para 'username'
           placeholder="Nome de usuário"
-          value={formData.login} 
+          value={formData.username} 
           onChange={handleInputChange} 
         />
         <Input 

@@ -21,7 +21,7 @@ const AddProperty = () => {
   const [name, setName] = useState('');
   const [images, setImages] = useState<File[]>([]);
   const [price, setPrice] = useState('');
-  const [details, setDetails] = useState('');
+  const [description, setDescription] = useState('');
   const [latitude, setLatitude] = useState(0);
   const [longitude, setLongitude] = useState(0);
   const [mapPosition, setMapPosition] = useState({ lat: 0, lng: 0 });
@@ -61,9 +61,13 @@ const AddProperty = () => {
   }, []);
 
   const handleAddProperty = async () => {
-    // Validação de campos
-    if (!category || !name.trim() || images.length === 0 || !price.trim() || parseFloat(price) <= 0 || !details.trim() || !user) {
-      setErrorMessage('Por favor, preencha todos os campos corretamente e certifique-se de estar logado.');
+    if (!user) {
+      setErrorMessage('Você precisa estar logado para adicionar um imóvel.');
+      return;
+    }
+
+    if (!category || !name.trim() || images.length === 0 || !price.trim() || parseFloat(price) <= 0 || !description.trim()) {
+      setErrorMessage('Por favor, preencha todos os campos corretamente.');
       return;
     }
 
@@ -72,25 +76,31 @@ const AddProperty = () => {
     setLoading(true);
 
     const formData = new FormData();
-    formData.append('categoria', category);
-    formData.append('titulo', name);
-    formData.append('valor', price);
-    formData.append('descricao', details);
-    formData.append('userId', user.id.toString()); // Certificando-se de que o usuário está logado
+    formData.append('category', category);
+    formData.append('title', name);
+    formData.append('price', price);
+    formData.append('description', description);
+    formData.append('userId', user.id.toString());
     formData.append('latitude', latitude.toString());
     formData.append('longitude', longitude.toString());
 
-    images.forEach((image) => formData.append('imagens[]', image));
+    images.forEach((image) => formData.append('images[]', image));
+
+    // Adicione este console.log para inspecionar os dados
+    for (const [key, value] of formData.entries()) {
+      console.log(`${key}:`, value);
+    }
 
     try {
       const response = await axios.post(
-        'https://casa-mais-perto-server-clone-production.up.railway.app/imoveis',
+        'http://localhost:3333/property',
         formData
       );
+
       if (response.status === 201) {
         setSuccessMessage('Imóvel adicionado com sucesso!');
-        resetForm(); // Limpar os campos após o sucesso
-        navigate('/profile'); // Redirecionar para o perfil
+        resetForm();
+        navigate('/profile');
       } else {
         setErrorMessage('Erro ao adicionar imóvel. Tente novamente.');
       }
@@ -131,7 +141,7 @@ const AddProperty = () => {
     setName('');
     setImages([]);
     setPrice('');
-    setDetails('');
+    setDescription('');
     setLatitude(0);
     setLongitude(0);
     setMapPosition({ lat: 0, lng: 0 });
@@ -168,11 +178,10 @@ const AddProperty = () => {
       <FormInput
         as="textarea"
         placeholder="Descrição"
-        value={details}
-        onChange={(e) => setDetails(e.target.value)}
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
         rows={4} // Definindo a altura inicial, mas você pode ajustar conforme necessário
       />
-
 
       {/* Botão de adicionar imagens - sempre fixo acima das imagens */}
       <ImageUploadButton>

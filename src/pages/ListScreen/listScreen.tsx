@@ -1,104 +1,73 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Item, Image, Title, Button } from './styles';
 
+interface Property {
+  id: number;
+  title: string;
+  price: string;
+  description: string;
+  images: { url: string }[]; 
+}
 const ListScreen: React.FC = () => {
-  const properties = [
-    {
-      id: 1,
-      title: 'Apartamento A',
-      price: 'R$ 500.000',
-      description: 'Excelente apartamento no centro.',
-      images: [
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
-      ],
-    },
-    {
-      id: 2,
-      title: 'Apartamento B',
-      price: 'R$ 300.000',
-      description: 'Apartamento de 2 quartos em boa localização.',
-      images: [
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
-      ],
-    },
-    {
-      id: 3,
-      title: 'Apartamento C',
-      price: 'R$ 700.000',
-      description: 'Excelente apartamento no centro.',
-      images: [
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
-      ],
-    },{
-      id: 4,
-      title: 'Apartamento D',
-      price: 'R$ 100.000',
-      description: 'Excelente apartamento no centro.',
-      images: [
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
-      ],
-    },{
-      id: 5,
-      title: 'Apartamento E',
-      price: 'R$ 400.000',
-      description: 'Excelente apartamento no centro.',
-      images: [
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
-      ],
-    },{
-      id: 6,
-      title: 'Apartamento F',
-      price: 'R$ 500.000',
-      description: 'Excelente apartamento no centro.',
-      images: [
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
-      ],
-    },{
-      id: 7,
-      title: 'Apartamento H',
-      price: 'R$ 300.000',
-      description: 'Excelente apartamento no centro.',
-      images: [
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
-      ],
-    },{
-      id: 8,
-      title: 'Apartamento I',
-      price: 'R$ 600.000',
-      description: 'Excelente apartamento no centro.',
-      images: [
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
-      ],
-    },
-  ];
-
+  const [properties, setProperties] = useState<Property[]>([]); 
+  const [loading, setLoading] = useState(true); 
+  const [error, setError] = useState<string | null>(null); 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        const response = await fetch('http://localhost:3333/property'); 
+        if (response.ok) {
+          const data = await response.json();
+          setProperties(data); 
+        } else {
+          setError("Erro ao carregar os imóveis.");
+        }
+      } catch {
+        setError("Erro ao conectar com o servidor.");
+      } finally {
+        setLoading(false); 
+      }
+    };
+
+    fetchProperties(); 
+  }, []);
+
+  const formatPrice = (price: string | number) => {
+    const priceString = typeof price === 'string' ? price : String(price);
+    const priceNumber = parseFloat(priceString.replace('R$ ', '').replace('.', '').replace(',', '.'));
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(priceNumber);
+  };
+
+  if (loading) {
+    return <div>Carregando...</div>;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
 
   return (
     <Container>
-      {properties.map((property) => (
-        <Item key={property.id} onClick={() => navigate(`/property/${property.id}`, { state: property })}>
-          <Image src={property.images[0]} alt={property.title} />
-          <Title>{property.title}</Title>
-          <Button>Ver Detalhes</Button>
-        </Item>
-      ))}
+      {properties.map((property) => {
+        const imageUrl = property.images && property.images.length > 0 
+          ? `http://localhost:3333${property.images[0]}` 
+          : '/images/default-image.jpg';
+
+        return (
+          <Item key={property.id}>
+            <Image src={imageUrl} alt={property.title} />
+            <Title>{property.title}</Title>
+            <p>{formatPrice(property.price)}</p>
+            <Button onClick={() => navigate(`/property/${property.id}`, { state: property })}>Ver Detalhes</Button>
+          </Item>
+        );
+      })}
     </Container>
   );
 };

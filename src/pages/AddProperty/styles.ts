@@ -35,7 +35,7 @@ export const FormInput = styled.input`
 export const Button = styled.button`
   width: 100%;
   padding: 12px;
-  background-color: #4caf50;
+  background-color: #00BFFF;
   color: white;
   border: none;
   border-radius: 4px;
@@ -45,11 +45,11 @@ export const Button = styled.button`
   margin-top: 10px;
 
   &:hover {
-    background-color: #45a049;
+    background-color: #87CEEB;
   }
 
   &:disabled {
-    background-color: #cfcfcf;
+    background-color: #87CEEB;
     cursor: not-allowed;
   }
 `;
@@ -58,7 +58,7 @@ export const ImageUploadButton = styled.div`
   margin-bottom: 20px;
   label {
     padding: 12px;
-    background-color: #4caf50;
+    background-color: #00BFFF;
     color: white;
     border-radius: 4px;
     font-size: 16px;
