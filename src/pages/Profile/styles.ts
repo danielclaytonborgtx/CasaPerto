@@ -17,7 +17,7 @@ export const UserName = styled.h1`
   font-size: 2em;
   color: #333;
   margin-bottom: 10px;
-  margin-top: 40px;
+  margin-top: 20px;
 `;
 
 // Informações do usuário (email, ID, etc.)
@@ -82,9 +82,8 @@ export const Loading = styled.div`
 
 // Ícone de logout
 export const LogoutIcon = styled.div`
-  position: absolute;
-  top: 80px;
-  right: 15px;
+  margin-left: 330px;
+  top: 10px;
   cursor: pointer;
   color: #000;
   transition: transform 0.2s ease-in-out;

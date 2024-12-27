@@ -12,6 +12,7 @@ import {
   Description,
 } from './styles';
 
+const API_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_REACT_APP_API_URL;
 interface PropertyDetailsProps {
   title: string;
   price: number;
@@ -47,7 +48,7 @@ const PropertyDetails: React.FC = () => {
           <Slider {...settings}>
             {images.map((img, index) => (
               <ImageWrapper key={index}>
-                <Image src={`http://localhost:3333${img}`} alt={`Imagem do imóvel ${index + 1}`} />
+                <Image src={`${API_URL}${img}`} alt={`Imagem do imóvel ${index + 1}`} />
               </ImageWrapper>
             ))}
           </Slider>

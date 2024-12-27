@@ -18,7 +18,7 @@ const ListScreen: React.FC = () => {
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        const response = await fetch('http://localhost:3333/property'); 
+        const response = await fetch('${API_URL}/property'); 
         if (response.ok) {
           const data = await response.json();
           setProperties(data); 

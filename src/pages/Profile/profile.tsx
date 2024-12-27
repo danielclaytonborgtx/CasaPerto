@@ -63,11 +63,23 @@ const Profile: React.FC = () => {
   };
 
   const handleLogout = () => {
+    const confirmLogout = window.confirm("certeza que deseja sair?");
+
+    if (!confirmLogout) {
+      return; // Não faz nada se o usuário clicar em "Cancelar"
+    }
+
     localStorage.removeItem("user"); 
     navigate("/login"); 
   };
 
   const handleDeleteProperty = async (propertyId: number) => {
+    const confirmDelete = window.confirm("Deseja excluir este imóvel?");
+
+    if (!confirmDelete) {
+      return; // Não faz nada se o usuário clicar em "Cancelar"
+    }
+
     try {
       const response = await fetch(`http://localhost:3333/property/${propertyId}`, {
         method: "DELETE",

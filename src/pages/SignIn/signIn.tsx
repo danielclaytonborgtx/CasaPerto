@@ -36,7 +36,7 @@ const SignIn: React.FC = () => {
 
     try {
       // Envia a requisição de login para o backend
-      const response = await fetch("http://localhost:3333/session", {
+      const response = await fetch("${API_URL}/session", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

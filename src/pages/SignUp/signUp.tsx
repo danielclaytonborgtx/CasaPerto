@@ -58,7 +58,7 @@ const SignUp: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("http://localhost:3333/users", {
+      const response = await fetch("${API_URL}/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
