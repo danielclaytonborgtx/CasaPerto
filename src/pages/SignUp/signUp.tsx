@@ -60,7 +60,7 @@ const SignUp: React.FC = () => {
     console.log(import.meta.env.VITE_API_URL);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
+      const response = await fetch("https://soft-items-camp.loca.lt/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
