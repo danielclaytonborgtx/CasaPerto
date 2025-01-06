@@ -1,10 +1,9 @@
+// src/services/api.ts
 import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_REACT_APP_API_URL;
-console.log('API_URL:', API_URL);
+import Constants from 'expo-constants';
 
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: Constants.manifest?.extra?.API_URL || 'http://0.0.0.0:8080',
   headers: {
     'Content-Type': 'application/json',
   },
