@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import { Container, MenuButton, AddButton, Icon, SwitchContainer } from "./styles";
 import SlideMenu from "../../pages/SlideMenu/slideMenu";
 import { useNavigate } from "react-router-dom";
-
 import { FaBars, FaPlus } from "react-icons/fa";
-import Switch from "react-switch"; 
+import Switch from "react-switch";
+import { usePropertyContext } from "../../contexts/PropertyContext";
 
 const Header: React.FC = () => {
   const [isSlideMenuVisible, setSlideMenuVisible] = useState(false);
-  const [isRent, setIsRent] = useState(true); // true para "Aluguel", false para "Venda"
+  const { isRent, setIsRent } = usePropertyContext();
   const navigate = useNavigate();
 
   const toggleSlideMenu = () => {
@@ -16,15 +16,14 @@ const Header: React.FC = () => {
   };
 
   const handleAddPropertyClick = () => {
-    const storedUser = localStorage.getItem("user"); 
+    const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      navigate("/addProperty"); 
+      navigate("/addProperty");
     } else {
-      navigate("/signIn"); 
+      navigate("/signIn");
     }
   };
 
-  // Função para mudar o estado do slider
   const handleSwitchChange = (checked: boolean) => {
     setIsRent(checked);
   };
@@ -41,15 +40,15 @@ const Header: React.FC = () => {
         <Switch
           checked={isRent}
           onChange={handleSwitchChange}
-          offColor="#ffffff"   // Cor de fundo quando "Aluguel" (cinza claro)
-          onColor="#ffffff"    // Cor de fundo quando "Venda" (cinza claro)
-          height={40}          
-          width={160}           
+          offColor="#ffffff"
+          onColor="#ffffff"
+          height={40}
+          width={160}
           uncheckedIcon={<span style={{ fontSize: '20px', color: 'black', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%', paddingRight: '100px' }}>Aluguel</span>}   
           checkedIcon={<span style={{ fontSize: '20px', color: 'black', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%', paddingLeft: '60px' }}>Venda</span>}  
-          handleDiameter={35}   // Tamanho do botão redondo
-          onHandleColor="#00BFFF" // Cor do botão redondo fixo (azul claro)
-          offHandleColor="#00BFFF"  // Também aplica o azul claro ao botão redondo
+          handleDiameter={35}
+          onHandleColor="#00BFFF"
+          offHandleColor="#00BFFF"
         />
       </SwitchContainer>
 

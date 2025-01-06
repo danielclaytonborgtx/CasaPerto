@@ -6,7 +6,8 @@ export const Container = styled.div`
   flex-direction: column;
   width: 100%;
   height: 100vh; /* O container vai ocupar toda a altura da tela */
-  margin: 0; /* Remove qualquer margem indesejada */
+  margin-top: 60px; /* Espaço reservado para o header de 10px */
+  margin-bottom: 50px; /* Espaço reservado para o footer de 10px */
   padding: 0; /* Remove qualquer padding adicional */
 
   /* Garante que o mapa ocupe o restante do espaço */
@@ -23,9 +24,9 @@ export const Container = styled.div`
 export const UpdateButton = styled.button`
   position: absolute;
   bottom: 20px;
-  right: 20px;
-  background-color: #007bff;
-  color: white;
+  right: 10px;
+  background-color: white;
+  color: black;
   border: none;
   border-radius: 50%;
   width: 50px;
@@ -37,15 +38,5 @@ export const UpdateButton = styled.button`
   cursor: pointer;
   font-size: 20px;
   transition: background-color 0.3s ease, transform 0.2s ease;
-  margin-bottom: 50px;
-
-  &:hover {
-    background-color: #0056b3;
-    transform: scale(1.1);
-  }
-
-  &:active {
-    background-color: #003f7f;
-    transform: scale(0.9);
-  }
+  margin-bottom: 60px;
 `;

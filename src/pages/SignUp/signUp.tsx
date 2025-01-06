@@ -57,10 +57,8 @@ const SignUp: React.FC = () => {
 
     setIsSubmitting(true);
 
-    console.log(import.meta.env.VITE_API_URL);
-
     try {
-      const response = await fetch("https://soft-items-camp.loca.lt/users", {
+      const response = await fetch("https://casa-mais-perto-server-clone-production.up.railway.app/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -14,7 +14,7 @@ import {
 } from './styles';
 
 const AddProperty = () => {
-  const { user } = useAuth(); // Verificando se o usuário está logado
+  const { user } = useAuth(); 
   const navigate = useNavigate();
 
   const [category, setCategory] = useState<'aluguel' | 'venda'>('venda');
@@ -30,7 +30,6 @@ const AddProperty = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Obter localização atual do usuário
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -49,7 +48,7 @@ const AddProperty = () => {
       alert('Localização não disponível');
       setMapPosition({ lat: -23.55052, lng: -46.633308 });
     }
-  }, []); // Esse useEffect roda uma única vez ao inicializar o componente
+  }, []); 
 
   const handleMapClick = useCallback((event: google.maps.MapMouseEvent) => {
     const newLat = event.latLng?.lat() ?? 0;
@@ -86,14 +85,13 @@ const AddProperty = () => {
 
     images.forEach((image) => formData.append('images[]', image));
 
-    // Adicione este console.log para inspecionar os dados
     for (const [key, value] of formData.entries()) {
       console.log(`${key}:`, value);
     }
 
     try {
       const response = await axios.post(
-        'http://localhost:3333/property',
+        'https://casa-mais-perto-server-clone-production.up.railway.app/property',
         formData
       );
 
@@ -126,7 +124,7 @@ const AddProperty = () => {
   const removeImage = (index: number) => {
     const removedImage = images[index];
     setImages((prevImages) => prevImages.filter((_, i) => i !== index));
-    URL.revokeObjectURL(URL.createObjectURL(removedImage)); // Limpa a memória
+    URL.revokeObjectURL(URL.createObjectURL(removedImage)); 
   };
 
   const handlePriceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -180,10 +178,9 @@ const AddProperty = () => {
         placeholder="Descrição"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
-        rows={4} // Definindo a altura inicial, mas você pode ajustar conforme necessário
+        rows={4} 
       />
 
-      {/* Botão de adicionar imagens - sempre fixo acima das imagens */}
       <ImageUploadButton>
         <label htmlFor="image-upload">Adicionar imagens</label>
         <input
@@ -196,7 +193,6 @@ const AddProperty = () => {
         />
       </ImageUploadButton>
 
-      {/* Visualização das imagens */}
       <ImagePreviewContainer>
         {images.map((image, index) => (
           <ImagePreview key={index}>
@@ -218,7 +214,45 @@ const AddProperty = () => {
               zoomControl: false,
               streetViewControl: false,
               mapTypeControl: false,
-              fullscreenControl: true,
+              fullscreenControl: false,
+              styles: [
+                {
+                  featureType: "poi", 
+                  elementType: "all",
+                  stylers: [
+                    {
+                      visibility: "off",
+                    },
+                  ],
+                },
+                {
+                  featureType: "poi.business", 
+                  elementType: "all",
+                  stylers: [
+                    {
+                      visibility: "off",
+                    },
+                  ],
+                },
+                {
+                  featureType: "poi.park", 
+                  elementType: "all",
+                  stylers: [
+                    {
+                      visibility: "off",
+                    },
+                  ],
+                },
+                {
+                  featureType: "poi.school", 
+                  elementType: "all",
+                  stylers: [
+                    {
+                      visibility: "off",
+                    },
+                  ],
+                },
+              ],
             }}
           >
             {selectedMarker && <Marker position={selectedMarker} />}

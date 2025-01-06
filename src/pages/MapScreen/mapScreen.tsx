@@ -1,23 +1,32 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { GoogleMap, LoadScript, Marker, InfoWindow } from "@react-google-maps/api";
+import { FaCrosshairs } from "react-icons/fa";
 import { Container, UpdateButton } from "./styles";
+import { usePropertyContext } from "../../contexts/PropertyContext";
 
+// Interface de imóveis
 interface Property {
   id: number;
-  titulo: string;
+  title: string;
+  price: string;
   latitude: number;
   longitude: number;
+  category: string;
   images: { url: string }[];
 }
 
 const MapComponent: React.FC = () => {
+  const { isRent } = usePropertyContext(); // Obtém o estado do contexto para alternar entre aluguel e venda
   const [location, setLocation] = useState<google.maps.LatLngLiteral | null>(null);
   const [properties, setProperties] = useState<Property[]>([]);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
-  const [map, setMap] = useState<google.maps.Map | null>(null); // Adicionando o estado do mapa
+  const [map, setMap] = useState<google.maps.Map | null>(null);
+  const markersRef = useRef<google.maps.Marker[]>([]);
+  const userMarkerRef = useRef<google.maps.Marker | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Obter localização atual do usuário
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -26,15 +35,12 @@ const MapComponent: React.FC = () => {
         },
         (error) => {
           console.error("Erro ao obter localização: ", error);
-          setLocation({ lat: -22.9068, lng: -43.1729 }); // Localização padrão (Rio de Janeiro)
+          setLocation({ lat: -22.9068, lng: -43.1729 }); // Coordenadas padrão caso ocorra erro
         }
       );
-    } else {
-      console.error("Geolocalização não é suportada pelo navegador.");
     }
 
-    // Fetch das propriedades da API
-    fetch("http://localhost:3333/property")
+    fetch("https://casa-mais-perto-server-clone-production.up.railway.app/property")
       .then((response) => {
         if (!response.ok) {
           throw new Error("Erro ao buscar as propriedades");
@@ -42,19 +48,68 @@ const MapComponent: React.FC = () => {
         return response.json();
       })
       .then((data) => {
-        setProperties(data); // Atualiza as propriedades com os dados da API
+        setProperties(data);
       })
       .catch((error) => {
         console.error("Erro ao carregar propriedades:", error);
       });
   }, []);
 
-  const handleMarkerClick = (property: Property) => {
-    setSelectedProperty(property);
-  };
+  // Filtrando propriedades com base na categoria (venda ou aluguel)
+  const filteredProperties = properties.filter((property) => {
+    const category = isRent ? "venda" : "aluguel";
+    return property.category.toLowerCase() === category.toLowerCase();
+  });
+
+  useEffect(() => {
+    if (map && location) {
+      if (!userMarkerRef.current) {
+        const userMarker = new google.maps.Marker({
+          position: location,
+          map,
+          title: "Sua Localização",
+        });
+        userMarkerRef.current = userMarker;
+      } else {
+        userMarkerRef.current.setPosition(location);
+      }
+
+      const currentMarkers: google.maps.Marker[] = [];
+      filteredProperties.forEach((property) => {
+        const propertyMarker = new google.maps.Marker({
+          position: { lat: property.latitude, lng: property.longitude },
+          map,
+          title: property.title,
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: "#007bff",
+            fillOpacity: 1,
+            strokeColor: "#007bff",
+            strokeWeight: 2,
+            scale: 8,
+          },
+        });
+
+        currentMarkers.push(propertyMarker);
+
+        propertyMarker.addListener("click", () => {
+          setSelectedProperty(property); // Abre o InfoWindow
+        });
+      });
+
+      markersRef.current = currentMarkers;
+
+      return () => {
+        currentMarkers.forEach((marker) => marker.setMap(null));
+        if (userMarkerRef.current) {
+          userMarkerRef.current.setMap(null);
+        }
+      };
+    }
+  }, [map, location, filteredProperties]);
 
   const handleCloseInfoWindow = () => {
-    setSelectedProperty(null);
+    setSelectedProperty(null); // Fecha o InfoWindow
   };
 
   const handleUpdateLocation = () => {
@@ -65,9 +120,8 @@ const MapComponent: React.FC = () => {
           setLocation({ lat: latitude, lng: longitude });
 
           if (map) {
-            // Atualiza o centro e o zoom do mapa após obter a nova localização
-            map.panTo({ lat: latitude, lng: longitude }); // Centraliza o mapa na nova localização
-            map.setZoom(14); // Reseta o zoom para 14
+            map.panTo({ lat: latitude, lng: longitude });
+            map.setZoom(14);
           }
         },
         (error) => {
@@ -77,7 +131,22 @@ const MapComponent: React.FC = () => {
     }
   };
 
-  // Se a localização ainda não foi obtida, renderiza um carregamento
+  const formatPrice = (price: string | number) => {
+    const priceString = typeof price === 'string' ? price : String(price);
+    const priceNumber = parseFloat(priceString.replace('R$ ', '').replace('.', '').replace(',', '.'));
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(priceNumber);
+  };
+
+  const handleImageClick = (propertyId: number) => {
+    const property = properties.find(p => p.id === propertyId);
+    if (property) {
+      navigate(`/property/${propertyId}`, { state: property });
+    }
+  };
+
   if (!location) {
     return <div>Carregando mapa...</div>;
   }
@@ -96,33 +165,36 @@ const MapComponent: React.FC = () => {
             disableDefaultUI: true,
             streetViewControl: false,
             mapTypeControl: false,
-            fullscreenControl: true,
+            fullscreenControl: false,
+            styles: [
+              {
+                featureType: "poi",
+                elementType: "all",
+                stylers: [
+                  {
+                    visibility: "off",
+                  },
+                ],
+              },
+            ],
           }}
-          onLoad={(mapInstance) => setMap(mapInstance)} // Armazena o mapa após a carga
+          onLoad={(mapInstance) => setMap(mapInstance)}
         >
-          {/* Marcador do usuário */}
-          <Marker position={location} />
+          <Marker position={location} title="Sua Localização" />
 
-          {/* Marcadores das propriedades */}
-          {properties.map((property) => (
-            <Marker
-              key={property.id}
-              position={{ lat: property.latitude, lng: property.longitude }}
-              onClick={() => handleMarkerClick(property)}
-            />
-          ))}
-
-          {/* Janela de informações */}
           {selectedProperty && (
             <InfoWindow
               position={{ lat: selectedProperty.latitude, lng: selectedProperty.longitude }}
-              onCloseClick={handleCloseInfoWindow}
+              onCloseClick={handleCloseInfoWindow} // Fechar a janela ao clicar no "X"
             >
               <div>
-                <h3>{selectedProperty.titulo}</h3>
+                <h3>{selectedProperty.title}</h3>
+                <p>{formatPrice(selectedProperty.price)}</p>
                 <img
-                  src={selectedProperty.images[0]?.url || "/placeholder.jpg"}
+                  src={`https://casa-mais-perto-server-clone-production.up.railway.app${selectedProperty.images?.[0]}`}
                   style={{ width: "100px", height: "100px", objectFit: "cover" }}
+                  alt={selectedProperty.title}
+                  onClick={() => handleImageClick(selectedProperty.id)} // Navega para a página do imóvel
                 />
               </div>
             </InfoWindow>
@@ -130,9 +202,8 @@ const MapComponent: React.FC = () => {
         </GoogleMap>
       </LoadScript>
 
-      {/* Botão para atualizar localização */}
       <UpdateButton onClick={handleUpdateLocation}>
-        Atualizar Localização
+        <FaCrosshairs size={20} />
       </UpdateButton>
     </Container>
   );
