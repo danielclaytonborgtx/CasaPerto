@@ -58,7 +58,7 @@ const SignUp: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("http://localhost:3333/users", {
+      const response = await fetch("http://191.221.31.247:3333/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
