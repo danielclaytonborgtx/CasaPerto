@@ -113,6 +113,6 @@ export const TrashIcon = styled.div`
   color: black; /* Cor preta para o ícone */
 
   &:hover {
-    color: red; /* Muda a cor para vermelho ao passar o mouse */
+    transform: scale(1.2);
   }
 `;
