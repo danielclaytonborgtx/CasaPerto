@@ -41,7 +41,7 @@ const Profile: React.FC = () => {
   const fetchProperties = async (userId: number) => {
     try {
       const response = await fetch(
-        `http://localhost:3333/property/user?userId=${userId}`
+        `http://191.221.31.247:3333/property/user?userId=${userId}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -82,7 +82,7 @@ const Profile: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:3333/property/${propertyId}`, {
+      const response = await fetch(`http://191.221.31.247:3333/property/${propertyId}`, {
         method: "DELETE",
       });
       if (response.ok) {
