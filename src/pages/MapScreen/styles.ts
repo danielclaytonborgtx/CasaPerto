@@ -40,3 +40,4 @@ export const UpdateButton = styled.button`
   transition: background-color 0.3s ease, transform 0.2s ease;
   margin-bottom: 60px;
 `;
+

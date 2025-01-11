@@ -1,6 +1,8 @@
-import React from 'react';
-import { useLocation } from 'react-router-dom';
-import Slider from 'react-slick';
+import React from "react";
+import { useLocation } from "react-router-dom";
+import Slider from "react-slick";
+import { parseISO, format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import {
   Container,
   ContentWrapper,
@@ -10,35 +12,57 @@ import {
   Title,
   Price,
   Description,
-} from './styles';
+  FooterText,
+} from "./styles";
 
 interface PropertyDetailsProps {
   title: string;
   price: number;
   description: string;
-  images: string[]; // Array de URLs de imagens
+  images: { url: string }[]; // Array de objetos de imagem com `url`
+  user?: { username: string }; // Tornando opcional para evitar erro se não vier preenchido
+  createdAt: string; // Data de postagem no formato ISO
 }
 
 const PropertyDetails: React.FC = () => {
   const location = useLocation();
-  const { title, price, description, images } = location.state as PropertyDetailsProps;
+  const property = location.state as PropertyDetailsProps;
+
+  if (!property) {
+    return <p>Erro: Nenhuma propriedade foi encontrada.</p>;
+  }
+
+  const { title, price, description, images, user, createdAt } = property;
+
+  console.log("Dados recebidos:", property);
 
   const settings = {
     dots: true,
-    infinite: images.length > 1, // Apenas ativa o loop infinito se houver mais de uma imagem
+    infinite: images.length > 1,
     speed: 500,
     slidesToShow: 1,
     slidesToScroll: 1,
-    adaptiveHeight: true, // Ajusta a altura do slider com base no conteúdo
-    arrows: true, // Exibe as setas de navegação (caso necessário)
+    adaptiveHeight: true,
+    arrows: true,
   };
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
     }).format(price);
   };
+
+  const formatDate = (date: string) => {
+    try {
+      const parsedDate = parseISO(date);
+      return format(parsedDate, "dd MMMM yyyy", { locale: ptBR });
+    } catch {
+      return "Data inválida";
+    }
+  };
+
+  const username = user?.username || "Usuário desconhecido";
 
   return (
     <Container>
@@ -47,7 +71,10 @@ const PropertyDetails: React.FC = () => {
           <Slider {...settings}>
             {images.map((img, index) => (
               <ImageWrapper key={index}>
-                <Image src={`https://casa-mais-perto-server-clone-production.up.railway.app${img}`} alt={`Imagem do imóvel ${index + 1}`} />
+                <Image
+                  src={`http://localhost:3333${img}`}
+                  alt={`Imagem do imóvel ${index + 1}`}
+                />
               </ImageWrapper>
             ))}
           </Slider>
@@ -56,6 +83,9 @@ const PropertyDetails: React.FC = () => {
         <Title>{title}</Title>
         <Price>{formatPrice(price)}</Price>
         <Description>{description}</Description>
+        <FooterText>
+          Postado por <strong>{username}</strong> em {formatDate(createdAt)}
+        </FooterText>
       </ContentWrapper>
     </Container>
   );

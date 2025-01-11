@@ -67,3 +67,9 @@ export const Description = styled.p`
   margin-bottom: 30px;
   line-height: 1.5;
 `;
+export const FooterText = styled.p`
+  font-size: 12px;
+  color: #555;
+  margin-top: 20px;
+  text-align: center;
+`;

@@ -105,7 +105,7 @@ export const ErrorMessage = styled.div`
 
 export const TrashIcon = styled.div`
   position: absolute;
-  bottom: 10px; /* Ajusta a distância da parte inferior */
+ top: 10px; /* Ajusta a distância da parte inferior */
   right: 10px; /* Ajusta a distância da parte direita */
   cursor: pointer;
   transition: color 0.3s ease;

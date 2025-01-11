@@ -14,6 +14,7 @@ interface Property {
   id: number;
   title: string;
   description: string;
+  description1: string;
   images: string;  
   price: string;  
 }
@@ -40,20 +41,20 @@ const Profile: React.FC = () => {
   const fetchProperties = async (userId: number) => {
     try {
       const response = await fetch(
-        `https://casa-mais-perto-server-clone-production.up.railway.app/property/user?userId=${userId}`
+        `http://localhost:3333/property/user?userId=${userId}`
       );
       if (response.ok) {
         const data = await response.json();
    
         if (data.message) {
-          setProperties([]);
+          setProperties([]); // Não há propriedades para o usuário
           setError(data.message); 
         } else {
-          setProperties(data); 
+          setProperties(data); // Propriedades carregadas
         }
       } else if (response.status === 404) {
         setProperties([]); 
-        setError(null);
+        setError(null); // Não encontrou propriedades
       } else {
         setError("Erro ao carregar imóveis.");
       }
@@ -63,10 +64,10 @@ const Profile: React.FC = () => {
   };
 
   const handleLogout = () => {
-    const confirmLogout = window.confirm("certeza que deseja sair?");
+    const confirmLogout = window.confirm("Tem certeza que deseja sair?");
 
     if (!confirmLogout) {
-      return; // Não faz nada se o usuário clicar em "Cancelar"
+      return; 
     }
 
     localStorage.removeItem("user"); 
@@ -77,15 +78,15 @@ const Profile: React.FC = () => {
     const confirmDelete = window.confirm("Deseja excluir este imóvel?");
 
     if (!confirmDelete) {
-      return; // Não faz nada se o usuário clicar em "Cancelar"
+      return; 
     }
 
     try {
-      const response = await fetch(`https://casa-mais-perto-server-clone-production.up.railway.app/property/${propertyId}`, {
+      const response = await fetch(`http://localhost:3333/property/${propertyId}`, {
         method: "DELETE",
       });
       if (response.ok) {
-        setProperties(properties.filter(property => property.id !== propertyId)); // Remove o imóvel da lista
+        setProperties(properties.filter(property => property.id !== propertyId));
       } else {
         setError("Erro ao deletar o imóvel.");
       }
@@ -128,19 +129,21 @@ const Profile: React.FC = () => {
         <UserList>
           {properties.map((property) => {
             const imageUrl = property.images && property.images[0]
-              ? property.images[0]  
+              ? property.images[0]
               : '/path/to/default-image.jpg'; 
 
             return (
               <PropertyItem key={property.id}>
-                <PropertyImage src={imageUrl} alt={property.title} />
+                <PropertyImage 
+                  src={imageUrl} 
+                  alt={property.title} 
+                />
                 <PropertyDetails>
                   <strong>{property.title}</strong>
                   <p>{property.description}</p>
                   <p>Preço: {formatPrice(Number(property.price))}</p>
+                  {property.description1 && <p>{property.description1}</p>} 
                 </PropertyDetails>
-
-                {/* Ícone de lixeira para deletar o imóvel */}
                 <TrashIcon onClick={() => handleDeleteProperty(property.id)}>
                   <FaTrashAlt size={18} color="black" />
                 </TrashIcon>

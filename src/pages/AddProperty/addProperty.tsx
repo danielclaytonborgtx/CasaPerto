@@ -17,11 +17,15 @@ const AddProperty = () => {
   const { user } = useAuth(); 
   const navigate = useNavigate();
 
+  // Adicionando o estado para o username
+  const [username, setUsername] = useState<string>('');
+
   const [category, setCategory] = useState<'aluguel' | 'venda'>('venda');
   const [name, setName] = useState('');
   const [images, setImages] = useState<File[]>([]);
   const [price, setPrice] = useState('');
   const [description, setDescription] = useState('');
+  const [description1, setDescription1] = useState('');
   const [latitude, setLatitude] = useState(0);
   const [longitude, setLongitude] = useState(0);
   const [mapPosition, setMapPosition] = useState({ lat: 0, lng: 0 });
@@ -29,6 +33,13 @@ const AddProperty = () => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+
+  // Atualizando o estado do username quando o usuário muda
+  useEffect(() => {
+    if (user) {
+      setUsername(user.username);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -79,7 +90,9 @@ const AddProperty = () => {
     formData.append('title', name);
     formData.append('price', price);
     formData.append('description', description);
+    formData.append('description1', description1);
     formData.append('userId', user.id.toString());
+    formData.append('username', username); // Adicionando o username ao formData
     formData.append('latitude', latitude.toString());
     formData.append('longitude', longitude.toString());
 
@@ -91,7 +104,7 @@ const AddProperty = () => {
 
     try {
       const response = await axios.post(
-        'https://casa-mais-perto-server-clone-production.up.railway.app/property',
+        'http://localhost:3333/property',
         formData
       );
 
@@ -180,7 +193,13 @@ const AddProperty = () => {
         onChange={(e) => setDescription(e.target.value)}
         rows={4} 
       />
-
+      <FormInput
+        as="textarea"
+        placeholder="Detalhes ocultos, somente você verá no seu perfil."
+        value={description1}
+        onChange={(e) => setDescription1(e.target.value)}
+        rows={4} 
+      />
       <ImageUploadButton>
         <label htmlFor="image-upload">Adicionar imagens</label>
         <input
