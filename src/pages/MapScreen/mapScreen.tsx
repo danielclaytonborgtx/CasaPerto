@@ -77,7 +77,7 @@ const MapComponent: React.FC = () => {
           title: property.title,
           icon: {
             path: google.maps.SymbolPath.CIRCLE,
-            fillColor: "#0000FF",
+            fillColor: "#0000ff",
             fillOpacity: 1,
             strokeColor: "#1E90FF",
             strokeWeight: 2,
