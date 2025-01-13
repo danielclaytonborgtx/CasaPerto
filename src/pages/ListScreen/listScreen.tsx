@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Container, Item, Image, Title, Button } from './styles';
 import { usePropertyContext } from "../../contexts/PropertyContext";
 
-// Interface de imóveis
 interface Property {
   id: number;
   title: string;
@@ -16,24 +15,23 @@ interface Property {
 }
 
 const ListScreen: React.FC = () => {
-  const { isRent } = usePropertyContext(); // Obtém o estado do contexto para alternar entre aluguel e venda
+  const { isRent } = usePropertyContext(); 
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null); // Estado para armazenar a localização do usuário
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null); 
   const navigate = useNavigate();
 
-  // Função para calcular a distância entre dois pontos (latitude/longitude)
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
     const toRad = (value: number) => value * (Math.PI / 180);
-    const R = 6371; // Raio da Terra em km
+    const R = 6371; 
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
     const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
       Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c; // Distância em km
+    return R * c; 
   };
 
   useEffect(() => {
@@ -55,7 +53,6 @@ const ListScreen: React.FC = () => {
 
     fetchProperties();
 
-    // Obter a localização do usuário
     const getUserLocation = () => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -81,7 +78,7 @@ const ListScreen: React.FC = () => {
     ? filteredProperties.sort((a, b) => {
         const distanceA = calculateDistance(userLocation.latitude, userLocation.longitude, a.latitude, a.longitude);
         const distanceB = calculateDistance(userLocation.latitude, userLocation.longitude, b.latitude, b.longitude);
-        return distanceA - distanceB; // Ordena por proximidade (menor distância primeiro)
+        return distanceA - distanceB; 
       })
     : filteredProperties;
 
@@ -109,7 +106,7 @@ const ListScreen: React.FC = () => {
       ) : (
         sortedProperties.map((property) => {
           const imageUrl = property.images && property.images.length > 0
-            ? `https://server-2-production.up.railway.app${property.images[0]}` // Corrigido para acessar o campo `url`
+            ? `https://server-2-production.up.railway.app${property.images[0]}` 
             : '/images/default-image.jpg';
 
           return (

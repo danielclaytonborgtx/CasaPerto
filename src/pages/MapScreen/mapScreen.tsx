@@ -5,7 +5,6 @@ import { FaCrosshairs } from "react-icons/fa";
 import { Container, UpdateButton } from "./styles";
 import { usePropertyContext } from "../../contexts/PropertyContext";
 
-// Interface de imóveis
 interface Property {
   id: number;
   title: string;
@@ -26,7 +25,7 @@ const MapComponent: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Obter localização do usuário
+
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -35,12 +34,11 @@ const MapComponent: React.FC = () => {
         },
         (error) => {
           console.error("Erro ao obter localização: ", error);
-          setLocation({ lat: -22.9068, lng: -43.1729 }); // Localização padrão
+          setLocation({ lat: -22.9068, lng: -43.1729 }); 
         }
       );
     }
 
-    // Obter propriedades
     fetch("https://server-2-production.up.railway.app/property")
       .then((response) => {
         if (!response.ok) {
@@ -56,7 +54,6 @@ const MapComponent: React.FC = () => {
       });
   }, []);
 
-  // Filtrar propriedades com base na categoria
   const filteredProperties = properties.filter((property) => {
     const category = isRent ? "venda" : "aluguel";
     return property.category.toLowerCase() === category.toLowerCase();
@@ -64,11 +61,9 @@ const MapComponent: React.FC = () => {
 
   useEffect(() => {
     if (map && location) {
-      // Remover marcadores antigos
       markersRef.current.forEach((marker) => marker.setMap(null));
       markersRef.current = [];
 
-      // Criar novos marcadores para os imóveis
       const newMarkers: google.maps.Marker[] = [];
       filteredProperties.forEach((property) => {
         const propertyMarker = new google.maps.Marker({
@@ -88,13 +83,12 @@ const MapComponent: React.FC = () => {
         newMarkers.push(propertyMarker);
 
         propertyMarker.addListener("click", () => {
-          setSelectedProperty(property); // Abre o InfoWindow
+          setSelectedProperty(property); 
         });
       });
 
       markersRef.current = newMarkers;
 
-      // Criar marcador para localização do usuário
       new google.maps.Marker({
         position: location,
         map,
@@ -107,11 +101,10 @@ const MapComponent: React.FC = () => {
           strokeWeight: 2,
           scale: 10,
         },
-        clickable: false, // Não abrir InfoWindow
+        clickable: false, 
       });
 
       return () => {
-        // Limpar marcadores antigos
         newMarkers.forEach((marker) => marker.setMap(null));
       };
     }

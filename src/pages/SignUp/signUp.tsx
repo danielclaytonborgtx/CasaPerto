@@ -24,14 +24,12 @@ const SignUp: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  // Atualiza os campos do formulário
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    setError(null); // Limpa o erro ao alterar os campos
+    setError(null); 
   };
 
-  // Valida e envia os dados do formulário
   const handleSignUp = async () => {
     const { name, email, username, password, confirmPassword } = formData;
 
@@ -73,7 +71,7 @@ const SignUp: React.FC = () => {
 
       if (response.ok) {
         alert("Conta criada com sucesso!");
-        navigate("/signin"); // Redireciona para a página de login
+        navigate("/signin"); 
       } else {
         const data = await response.json();
         setError(data.error || "Erro ao criar conta.");
@@ -85,7 +83,6 @@ const SignUp: React.FC = () => {
     }
   };
 
-  // Lida com a tecla Enter para mover o foco ou enviar o formulário
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>, nextField?: string) => {
     if (e.key === "Enter") {
       if (nextField) {
@@ -100,7 +97,6 @@ const SignUp: React.FC = () => {
     <Container>
       <Title>Criar Conta</Title>
       <Form>
-        {/* Campo Nome Completo */}
         <Input
           type="text"
           name="name"
@@ -109,7 +105,6 @@ const SignUp: React.FC = () => {
           onChange={handleInputChange}
           onKeyPress={(e) => handleKeyPress(e, "email")}
         />
-        {/* Campo Email */}
         <Input
           type="email"
           name="email"
@@ -118,7 +113,6 @@ const SignUp: React.FC = () => {
           onChange={handleInputChange}
           onKeyPress={(e) => handleKeyPress(e, "username")}
         />
-        {/* Campo Nome de Usuário */}
         <Input
           type="text"
           name="username"
@@ -127,7 +121,6 @@ const SignUp: React.FC = () => {
           onChange={handleInputChange}
           onKeyPress={(e) => handleKeyPress(e, "password")}
         />
-        {/* Campo Senha */}
         <Input
           type="password"
           name="password"
@@ -136,7 +129,6 @@ const SignUp: React.FC = () => {
           onChange={handleInputChange}
           onKeyPress={(e) => handleKeyPress(e, "confirmPassword")}
         />
-        {/* Campo Confirmar Senha */}
         <Input
           type="password"
           name="confirmPassword"
@@ -145,9 +137,9 @@ const SignUp: React.FC = () => {
           onChange={handleInputChange}
           onKeyPress={(e) => handleKeyPress(e)}
         />
-        {/* Exibição de erro */}
+
         {error && <ErrorMessage>{error}</ErrorMessage>}
-        {/* Botão de envio */}
+     
         <Button onClick={handleSignUp} disabled={isSubmitting}>
           <ButtonText>{isSubmitting ? "Criando..." : "Criar Conta"}</ButtonText>
         </Button>

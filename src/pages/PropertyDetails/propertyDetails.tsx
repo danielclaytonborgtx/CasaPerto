@@ -19,9 +19,9 @@ interface PropertyDetailsProps {
   title: string;
   price: number;
   description: string;
-  images: { url: string }[]; // Array de objetos de imagem com `url`
-  user?: { username: string }; // Tornando opcional para evitar erro se não vier preenchido
-  createdAt: string; // Data de postagem no formato ISO
+  images: { url: string }[]; 
+  user?: { username: string }; 
+  createdAt: string; 
 }
 
 const PropertyDetails: React.FC = () => {

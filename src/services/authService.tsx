@@ -2,7 +2,7 @@
 
 export const loginService = async (email: string, password: string) => {
     try {
-      const response = await fetch("https://casa-mais-perto-server-clone-production.up.railway.app/login", {
+      const response = await fetch("https://server-2-production.up.railway.app/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -13,7 +13,7 @@ export const loginService = async (email: string, password: string) => {
       }
   
       const data = await response.json();
-      return data.user;  // Retorna os dados do usuário após o login
+      return data.user; 
     } catch (error) {
       console.error("Erro ao fazer login:", error);
       throw error;

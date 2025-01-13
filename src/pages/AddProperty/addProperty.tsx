@@ -17,7 +17,6 @@ const AddProperty = () => {
   const { user } = useAuth(); 
   const navigate = useNavigate();
 
-  // Adicionando o estado para o username
   const [username, setUsername] = useState<string>('');
 
   const [category, setCategory] = useState<'aluguel' | 'venda'>('venda');
@@ -34,7 +33,6 @@ const AddProperty = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Atualizando o estado do username quando o usuário muda
   useEffect(() => {
     if (user) {
       setUsername(user.username);
@@ -92,7 +90,7 @@ const AddProperty = () => {
     formData.append('description', description);
     formData.append('description1', description1);
     formData.append('userId', user.id.toString());
-    formData.append('username', username); // Adicionando o username ao formData
+    formData.append('username', username); 
     formData.append('latitude', latitude.toString());
     formData.append('longitude', longitude.toString());
 

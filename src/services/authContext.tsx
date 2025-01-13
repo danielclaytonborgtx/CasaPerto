@@ -1,9 +1,8 @@
 // src/services/authContext.tsx
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { loginService, logoutService } from './authService'; // Agora importa funções de authService
+import { loginService, logoutService } from './authService'; 
 
-// Tipagem do usuário
 interface User {
   id: number;
   username: string;
@@ -17,12 +16,10 @@ interface AuthContextType {
   logout: () => void;
 }
 
-// Tipagem das props do AuthProvider
 interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Criação do contexto
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Componente AuthProvider (somente componente sendo exportado)
@@ -37,14 +34,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, []);
 
-  // Função de login (chama o serviço de login)
   const login = async (email: string, password: string) => {
     const userData = await loginService(email, password);
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
   };
 
-  // Função de logout (chama o serviço de logout)
   const logout = () => {
     logoutService();
     setUser(null);
@@ -57,7 +52,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   );
 };
 
-// Hook para acessar o contexto
 // eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);

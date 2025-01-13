@@ -8,7 +8,7 @@ import {
   Button, 
   ButtonText, 
   FooterText, 
-  LinkText, 
+  // LinkText, 
   ErrorMessage 
 } from "./styles";
 
@@ -18,49 +18,46 @@ const SignIn: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  // Função para manipular as mudanças nos campos de entrada
+ 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    setError(null); // Limpa o erro quando o campo é alterado
+    setError(null); 
   };
 
-  // Função para lidar com o envio do formulário
   const handleSignIn = async () => {
     if (!formData.username || !formData.password) {
       setError("Por favor, preencha todos os campos.");
       return;
     }
 
-    setIsSubmitting(true); // Ativa o estado de carregamento
+    setIsSubmitting(true);
 
     try {
-      // Envia a requisição de login para o backend
       const response = await fetch("https://server-2-production.up.railway.app/session", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          username: formData.username, // Altere 'login' para 'username'
+          username: formData.username, 
           password: formData.password,
         }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        // Armazena o usuário no localStorage e no estado
         localStorage.setItem("user", JSON.stringify(data.user));
         alert("Login bem-sucedido!");
-        navigate("/profile"); // Navega para o perfil
+        navigate("/profile"); 
       } else {
         const data = await response.json();
-        setError(data.error || "Erro ao fazer login."); // Exibe erro retornado pela API
+        setError(data.error || "Erro ao fazer login."); 
       }
     } catch {
-      setError("Erro ao conectar com o servidor."); // Mensagem de erro caso falhe a requisição
+      setError("Erro ao conectar com o servidor."); 
     } finally {
-      setIsSubmitting(false); // Desativa o estado de carregamento
+      setIsSubmitting(false);
     }
   };
 
@@ -70,7 +67,7 @@ const SignIn: React.FC = () => {
       <Form>
         <Input 
           type="text" 
-          name="username" // Altere 'login' para 'username'
+          name="username" 
           placeholder="Nome de usuário"
           value={formData.username} 
           onChange={handleInputChange} 
@@ -82,14 +79,13 @@ const SignIn: React.FC = () => {
           value={formData.password} 
           onChange={handleInputChange} 
         />
-        {/* Exibe mensagem de erro se houver algum */}
         {error && <ErrorMessage>{error}</ErrorMessage>}
         <Button onClick={handleSignIn} disabled={isSubmitting}>
           <ButtonText>{isSubmitting ? "Entrando..." : "Entrar"}</ButtonText>
         </Button>
       </Form>
       <FooterText>
-        Não tem conta? <LinkText onClick={() => navigate("/signup")}>Criar conta</LinkText>
+        {/* Não tem conta? <LinkText onClick={() => navigate("/signup")}>Criar conta</LinkText> */}
       </FooterText>
     </Container>
   );

@@ -41,20 +41,20 @@ const Profile: React.FC = () => {
   const fetchProperties = async (userId: number) => {
     try {
       const response = await fetch(
-        `https://server-2-production.up.railway.app/user?userId=${userId}`
+        `https://server-2-production.up.railway.app/property/user?userId=${userId}`
       );
       if (response.ok) {
         const data = await response.json();
    
         if (data.message) {
-          setProperties([]); // Não há propriedades para o usuário
+          setProperties([]); 
           setError(data.message); 
         } else {
-          setProperties(data); // Propriedades carregadas
+          setProperties(data); 
         }
       } else if (response.status === 404) {
         setProperties([]); 
-        setError(null); // Não encontrou propriedades
+        setError(null);
       } else {
         setError("Erro ao carregar imóveis.");
       }

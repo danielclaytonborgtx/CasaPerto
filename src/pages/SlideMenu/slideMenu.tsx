@@ -1,38 +1,35 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../services/authContext'; // Importando o contexto de autenticação
+import { useAuth } from '../../services/authContext'; 
 import { SlideMenuContainer, MenuItem, MenuContent } from './styles';
 
 const SlideMenu: React.FC<{ onClose: () => void; isVisible: boolean }> = ({ onClose, isVisible }) => {
-  const { user } = useAuth(); // Acessando o usuário autenticado
-  const [slide, setSlide] = useState(-100); // Inicialmente o menu está fechado
+  const { user } = useAuth(); 
+  const [slide, setSlide] = useState(-100); 
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  // Detectar quando o menu deve abrir ou fechar
   useEffect(() => {
     if (isVisible) {
-      setSlide(0); // Menu abre suavemente
+      setSlide(0);
     } else {
-      setSlide(-100); // Menu começa a fechar
+      setSlide(-100); 
     }
   }, [isVisible]);
 
-  // Finaliza o fechamento com um timeout para garantir a animação
   useEffect(() => {
     if (slide === -100 && !isVisible) {
       const timeout = setTimeout(() => {
-        onClose(); // Chama onClose após a animação de fechamento
-      }, 300); // Espera o tempo da animação para fechar
+        onClose(); 
+      }, 300); 
       return () => clearTimeout(timeout);
     }
   }, [slide, isVisible, onClose]);
 
-  // Detecta clique fora do menu para fechar
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setSlide(-100); // Inicia a animação de fechamento
+        setSlide(-100);
       }
     };
 
@@ -43,32 +40,28 @@ const SlideMenu: React.FC<{ onClose: () => void; isVisible: boolean }> = ({ onCl
     };
   }, []);
 
-  // Fechar menu ao clicar em qualquer item de menu
   const handleLinkClick = () => {
-    setSlide(-100); // Inicia a animação de fechamento
+    setSlide(-100); 
   };
 
   const handleUserClick = () => {
     navigate('/profile');
-    handleLinkClick(); // Fecha o menu após clicar no nome do usuário
+    handleLinkClick(); 
   };
 
   return (
     <SlideMenuContainer ref={menuRef} $slide={slide}>
       <MenuContent>
-        {/* Verifica se o usuário está logado */}
         {user ? (
-          // Exibe o nome do usuário e direciona para o perfil
           <MenuItem>
             <span 
               onClick={handleUserClick} 
-              style={{ cursor: 'pointer', fontSize: '18px', fontWeight: 'bold' }} // Garantir que o estilo seja consistente
+              style={{ cursor: 'pointer', fontSize: '18px', fontWeight: 'bold' }} 
             >
               {user.username}
             </span>
           </MenuItem>
         ) : (
-          // Exibe a opção de "Entrar" caso o usuário não esteja logado
           <MenuItem>
             <Link to="/signIn" onClick={handleLinkClick}>Entrar</Link>
           </MenuItem>
