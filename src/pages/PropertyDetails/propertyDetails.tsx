@@ -72,7 +72,7 @@ const PropertyDetails: React.FC = () => {
             {images.map((img, index) => (
               <ImageWrapper key={index}>
                 <Image
-                  src={`https://casa-mais-perto-server-clone-production.up.railway.app${img}`}
+                  src={`https://server-2-production.up.railway.app${img}`}
                   alt={`Imagem do imóvel ${index + 1}`}
                 />
               </ImageWrapper>

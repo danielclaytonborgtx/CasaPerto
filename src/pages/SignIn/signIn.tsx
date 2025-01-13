@@ -36,7 +36,7 @@ const SignIn: React.FC = () => {
 
     try {
       // Envia a requisição de login para o backend
-      const response = await fetch("https://casa-mais-perto-server-clone-production.up.railway.app/session", {
+      const response = await fetch("https://server-2-production.up.railway.app/session", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

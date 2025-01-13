@@ -41,7 +41,7 @@ const MapComponent: React.FC = () => {
     }
 
     // Obter propriedades
-    fetch("https://casa-mais-perto-server-clone-production.up.railway.app/property")
+    fetch("https://server-2-production.up.railway.app/property")
       .then((response) => {
         if (!response.ok) {
           throw new Error("Erro ao buscar as propriedades");
@@ -200,7 +200,7 @@ const MapComponent: React.FC = () => {
                 <h3>{selectedProperty.title}</h3>
                 <p>{formatPrice(selectedProperty.price)}</p>
                 <img
-                  src={`https://casa-mais-perto-server-clone-production.up.railway.app${selectedProperty.images?.[0]}`}
+                  src={`https://server-2-production.up.railway.app${selectedProperty.images?.[0]}`}
                   style={{ width: "100px", height: "100px", objectFit: "cover" }}
                   alt={selectedProperty.title}
                   onClick={() => handleImageClick(selectedProperty.id)}
