@@ -1,11 +1,6 @@
 import axios from 'axios';
 
-// Determinar a URL correta com base no ambiente
-const API_URL =
-  import.meta.env.MODE === 'production'
-    ? import.meta.env.VITE_API_URL
-    : import.meta.env.VITE_API_URL_DEV;
-
+const API_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_REACT_APP_API_URL;
 console.log('API_URL:', API_URL);
 
 const api = axios.create({
