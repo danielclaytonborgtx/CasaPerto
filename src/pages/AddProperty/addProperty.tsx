@@ -214,7 +214,7 @@ const AddProperty = () => {
         {images.map((image, index) => (
           <ImagePreview key={index}>
             <img src={URL.createObjectURL(image)} alt={`preview-${index}`} />
-            <button onClick={() => removeImage(index)}>Remover</button>
+            <button onClick={() => removeImage(index)}>X</button>
           </ImagePreview>
         ))}
       </ImagePreviewContainer>
@@ -232,6 +232,7 @@ const AddProperty = () => {
               streetViewControl: false,
               mapTypeControl: false,
               fullscreenControl: false,
+              gestureHandling: "greedy",
               styles: [
                 {
                   featureType: "poi", 

@@ -157,7 +157,7 @@ const MapComponent: React.FC = () => {
 
   return (
     <Container>
-      <LoadScriptNext googleMapsApiKey="AIzaSyDYVtKwXhjWQyyxOgp7qfUHf3sH9fNTins" preventGoogleFontsLoading>
+      <LoadScriptNext googleMapsApiKey="AIzaSyDYVtKwXhjWQyyxOgp7qfUHf3sH9fNTins" >
         <GoogleMap
           mapContainerStyle={{
             width: "100%",
@@ -208,7 +208,6 @@ const MapComponent: React.FC = () => {
       <UpdateButton onClick={handleUpdateLocation}>
         <FaCrosshairs size={20} />
       </UpdateButton>
-
     </Container>
   );
 };
