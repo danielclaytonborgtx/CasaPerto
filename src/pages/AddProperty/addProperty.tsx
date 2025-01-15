@@ -214,7 +214,7 @@ const AddProperty = () => {
         {images.map((image, index) => (
           <ImagePreview key={index}>
             <img src={URL.createObjectURL(image)} alt={`preview-${index}`} />
-            <button onClick={() => removeImage(index)}></button>
+            <button onClick={() => removeImage(index)}>X</button>
           </ImagePreview>
         ))}
       </ImagePreviewContainer>

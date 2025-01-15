@@ -17,6 +17,7 @@ interface Property {
   description1: string;
   images: string;  
   price: string;  
+  createdAt: string;
 }
 
 const Profile: React.FC = () => {
@@ -50,7 +51,12 @@ const Profile: React.FC = () => {
           setProperties([]); 
           setError(data.message); 
         } else {
-          setProperties(data); 
+          const sortedProperties = data.sort((a: Property, b: Property) => {
+            const dateA = new Date(a.createdAt);
+            const dateB = new Date(b.createdAt);
+            return dateB.getTime() - dateA.getTime(); // Ordem decrescente
+          });
+          setProperties(sortedProperties);
         }
       } else if (response.status === 404) {
         setProperties([]); 
