@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { GoogleMap, LoadScript, InfoWindow } from "@react-google-maps/api";
+import { GoogleMap, LoadScriptNext, InfoWindow } from "@react-google-maps/api";
 import { FaCrosshairs } from "react-icons/fa";
 import { Container, UpdateButton } from "./styles";
 import { usePropertyContext } from "../../contexts/PropertyContext";
@@ -99,7 +99,7 @@ const MapComponent: React.FC = () => {
           fillOpacity: 1,
           strokeColor: "#E0FFFF",
           strokeWeight: 2,
-          scale: 10,
+          scale: 8,
         },
         clickable: false, 
       });
@@ -157,7 +157,7 @@ const MapComponent: React.FC = () => {
 
   return (
     <Container>
-      <LoadScript googleMapsApiKey="AIzaSyDYVtKwXhjWQyyxOgp7qfUHf3sH9fNTins">
+      <LoadScriptNext googleMapsApiKey="AIzaSyDYVtKwXhjWQyyxOgp7qfUHf3sH9fNTins" preventGoogleFontsLoading>
         <GoogleMap
           mapContainerStyle={{
             width: "100%",
@@ -170,6 +170,7 @@ const MapComponent: React.FC = () => {
             streetViewControl: false,
             mapTypeControl: false,
             fullscreenControl: false,
+            gestureHandling: "greedy",
             styles: [
               {
                 featureType: "poi",
@@ -202,11 +203,12 @@ const MapComponent: React.FC = () => {
             </InfoWindow>
           )}
         </GoogleMap>
-      </LoadScript>
+      </LoadScriptNext>
 
       <UpdateButton onClick={handleUpdateLocation}>
         <FaCrosshairs size={20} />
       </UpdateButton>
+
     </Container>
   );
 };

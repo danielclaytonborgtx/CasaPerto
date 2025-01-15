@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../services/authContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+import { GoogleMap, LoadScriptNext, Marker } from '@react-google-maps/api';
 import {
   AddPropertyContainer,
   FormInput,
@@ -220,7 +220,7 @@ const AddProperty = () => {
       </ImagePreviewContainer>
 
       <MapWrapper>
-        <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
+        <LoadScriptNext googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
           <GoogleMap
             mapContainerStyle={{ width: '100%', height: '400px' }}
             center={mapPosition}
@@ -275,7 +275,7 @@ const AddProperty = () => {
             {selectedMarker && <Marker position={selectedMarker} />}
             <Marker position={mapPosition} icon="http://maps.google.com/mapfiles/ms/icons/blue-dot.png" />
           </GoogleMap>
-        </LoadScript>
+        </LoadScriptNext>
       </MapWrapper>
 
       <Button onClick={handleAddProperty} disabled={loading}>

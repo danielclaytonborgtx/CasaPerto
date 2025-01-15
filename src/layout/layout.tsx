@@ -9,7 +9,7 @@ const Layout: React.FC = () => {
     <Container>
       <Header />
       <MainContent>
-        <Outlet /> {/* Aqui é onde o conteúdo das páginas será renderizado */}
+        <Outlet /> 
       </MainContent>
       <Footer />
     </Container>
