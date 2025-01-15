@@ -3,11 +3,14 @@ import styled from 'styled-components';
 export const AddPropertyContainer = styled.div`
   width: 100%;
   max-width: 600px;
-  margin: 0 auto;
+  margin: 50px auto;
   padding: 20px;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  h1 {
+    text-align: center;
+  }
 `;
 
 export const FormInput = styled.input`
@@ -42,7 +45,7 @@ export const Button = styled.button`
   font-size: 16px;
   cursor: pointer;
   margin-bottom: 50px;
-  margin-top: 10px;
+  margin-top: 20px;
 
   &:hover {
     background-color: #87CEEB;
@@ -66,6 +69,14 @@ export const ImageUploadButton = styled.div`
     display: inline-block;
     width: 100%;
     text-align: center;
+    &:hover {
+    background-color: #87CEEB;
+  }
+
+  &:disabled {
+    background-color: #87CEEB;
+    cursor: not-allowed;
+  }
   }
 `;
 

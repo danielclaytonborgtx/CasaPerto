@@ -214,11 +214,11 @@ const AddProperty = () => {
         {images.map((image, index) => (
           <ImagePreview key={index}>
             <img src={URL.createObjectURL(image)} alt={`preview-${index}`} />
-            <button onClick={() => removeImage(index)}>Remover</button>
+            <button onClick={() => removeImage(index)}></button>
           </ImagePreview>
         ))}
       </ImagePreviewContainer>
-
+      <p>Agora abaixo, arraste a tela e com um clique marque o local do imóvel no mapa.</p>
       <MapWrapper>
         <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
           <GoogleMap
