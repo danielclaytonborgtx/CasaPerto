@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { GoogleMap, LoadScriptNext, InfoWindow } from "@react-google-maps/api";
+import { GoogleMap, LoadScript, InfoWindow } from "@react-google-maps/api";
 import { FaCrosshairs } from "react-icons/fa";
 import { Container, UpdateButton } from "./styles";
 import { usePropertyContext } from "../../contexts/PropertyContext";
@@ -157,14 +157,14 @@ const MapComponent: React.FC = () => {
 
   return (
     <Container>
-      <LoadScriptNext googleMapsApiKey="AIzaSyDYVtKwXhjWQyyxOgp7qfUHf3sH9fNTins" >
+      <LoadScript googleMapsApiKey="AIzaSyDYVtKwXhjWQyyxOgp7qfUHf3sH9fNTins">
         <GoogleMap
           mapContainerStyle={{
             width: "100%",
             height: "100%",
           }}
           center={location}
-          zoom={14}
+          zoom={13}
           options={{
             disableDefaultUI: true,
             streetViewControl: false,
@@ -203,7 +203,7 @@ const MapComponent: React.FC = () => {
             </InfoWindow>
           )}
         </GoogleMap>
-      </LoadScriptNext>
+      </LoadScript>
 
       <UpdateButton onClick={handleUpdateLocation}>
         <FaCrosshairs size={20} />
