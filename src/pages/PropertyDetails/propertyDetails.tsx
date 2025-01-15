@@ -34,8 +34,6 @@ const PropertyDetails: React.FC = () => {
 
   const { title, price, description, images, user, createdAt } = property;
 
-  console.log("Dados recebidos:", property);
-
   const settings = {
     dots: true,
     infinite: images.length > 1,
@@ -67,6 +65,7 @@ const PropertyDetails: React.FC = () => {
   return (
     <Container>
       <ContentWrapper>
+
         <SliderContainer>
           <Slider {...settings}>
             {images.map((img, index) => (
@@ -87,6 +86,7 @@ const PropertyDetails: React.FC = () => {
           Postado por <strong>{username}</strong> em {formatDate(createdAt)}
         </FooterText>
       </ContentWrapper>
+      
     </Container>
   );
 };

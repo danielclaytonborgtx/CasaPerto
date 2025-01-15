@@ -25,13 +25,13 @@ export const ContentWrapper = styled.div`
 
 export const SliderContainer = styled.div`
   width: 100%;
-  height: 500px; /* Manter uma altura fixa para o slide */
-  margin-bottom: 20px;
+  height: 500px; 
+  margin-bottom: 0;
 `;
 
 export const ImageWrapper = styled.div`
   width: 100%;
-  height: 100%;
+  height: 350px;
   overflow: hidden;
   border-radius: 10px;
 `;
@@ -39,16 +39,16 @@ export const ImageWrapper = styled.div`
 export const Image = styled.img`
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Faz a imagem cobrir o espaço do contêiner sem distorcer */
-  object-position: center center; /* Centraliza a imagem para evitar cortes indesejados */
+  object-fit: contain;
+  object-position: center center; 
 `;
 
 export const Title = styled.h1`
   font-size: 24px;
   font-weight: bold;
   text-align: center;
-  margin: 10px 0;
-  word-wrap: break-word; /* Garante que o texto não ultrapasse a largura */
+  margin: 0px 0 10px 0;
+  word-wrap: break-word; 
 `;
 
 export const Price = styled.p`
@@ -56,7 +56,7 @@ export const Price = styled.p`
   color: green;
   font-weight: bold;
   margin-bottom: 10px;
-  word-wrap: break-word; /* Garante que o texto não ultrapasse a largura */
+  word-wrap: break-word; 
 `;
 
 export const Description = styled.p`
