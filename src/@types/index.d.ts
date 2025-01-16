@@ -3,7 +3,7 @@ export interface User {
     username: string; 
   }
   
-  export interface Imovel {
+  export interface Property {
     id: number;
     titulo: string;
     descricao: string;

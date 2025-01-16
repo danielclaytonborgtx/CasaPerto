@@ -1,8 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ProfileContainer, UserName, UserInfo, UserList, Loading, LogoutIcon, ErrorMessage, PropertyItem, PropertyImage, PropertyDetails, TrashIcon } from "./styles";
+import { 
+  ProfileContainer, 
+  UserName, 
+  UserInfo, 
+  UserList, 
+  Loading, 
+  LogoutIcon, 
+  ErrorMessage, 
+  PropertyItem, 
+  PropertyImage, 
+  PropertyDetails, 
+  TrashIcon,
+  EditIcon } from "./styles";
+
 import { FiLogOut } from "react-icons/fi";
-import { FaTrashAlt } from "react-icons/fa"; 
+import { FaTrashAlt, FaPen } from "react-icons/fa"; 
 
 interface User {
   id: number;
@@ -101,6 +114,14 @@ const Profile: React.FC = () => {
     }
   };
 
+  const handleEditProperty = (propertyId: number) => {
+    console.log("Navigating to editProperty with ID:", propertyId);
+    const property = properties.find((p) => p.id === propertyId);
+    if (property) {
+      navigate(`/editProperty/${propertyId}`, { state: property });
+    }
+  };
+
   if (loading) {
     return <Loading>Carregando...</Loading>;
   }
@@ -150,9 +171,14 @@ const Profile: React.FC = () => {
                   <p>Preço: {formatPrice(Number(property.price))}</p>
                   {property.description1 && <p>{property.description1}</p>} 
                 </PropertyDetails>
-                <TrashIcon onClick={() => handleDeleteProperty(property.id)}>
-                  <FaTrashAlt size={18} color="black" />
-                </TrashIcon>
+                <div>
+                  <TrashIcon onClick={() => handleDeleteProperty(property.id)}>
+                    <FaTrashAlt size={18} color="black" />
+                  </TrashIcon>
+                  <EditIcon onClick={() => handleEditProperty(property.id)}>
+                    <FaPen size={18} color="black" />
+                  </EditIcon>
+                </div>
               </PropertyItem>
             );
           })}

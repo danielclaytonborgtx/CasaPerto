@@ -116,3 +116,17 @@ export const TrashIcon = styled.div`
     transform: scale(1.2);
   }
 `;
+
+export const EditIcon = styled.div`
+  position: absolute;
+  top: 10px; /* Ajusta a distância da parte inferior */
+  right: 35px; /* Ajusta a distância da parte direita */
+  cursor: pointer;
+  transition: color 0.3s ease;
+  font-size: 18px; /* Tamanho reduzido para o ícone */
+  color: black; /* Cor preta para o ícone */
+
+  &:hover {
+    transform: scale(1.2);
+  }
+`;

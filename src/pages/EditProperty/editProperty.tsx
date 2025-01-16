@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../../services/authContext';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
 import {
-  AddPropertyContainer,
+  EditPropertyContainer,
   FormInput,
   Button,
   ImageUploadButton,
@@ -13,118 +12,85 @@ import {
   MapWrapper,
 } from './styles';
 
-const AddProperty = () => {
-  const { user } = useAuth(); 
+interface PropertyData {
+  category: 'venda' | 'aluguel';
+  title: string;
+  price: string;
+  description: string;
+  description1?: string;
+  latitude: number;
+  longitude: number;
+  images: string[];
+}
+
+const EditProperty = () => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const [username, setUsername] = useState<string>('');
-
+  const [propertyData, setPropertyData] = useState<PropertyData | null>(null);
   const [category, setCategory] = useState<'aluguel' | 'venda'>('venda');
-  const [name, setName] = useState('');
-  const [images, setImages] = useState<File[]>([]);
+  const [title, setTitle] = useState('');
   const [price, setPrice] = useState('');
   const [description, setDescription] = useState('');
   const [description1, setDescription1] = useState('');
   const [latitude, setLatitude] = useState(0);
   const [longitude, setLongitude] = useState(0);
+  const [images, setImages] = useState<File[]>([]);
+  const [existingImages, setExistingImages] = useState<{ url: string }[]>([]);
   const [mapPosition, setMapPosition] = useState({ lat: 0, lng: 0 });
   const [selectedMarker, setSelectedMarker] = useState<{ lat: number; lng: number } | null>(null);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
+  // Fetch property data on component mount
   useEffect(() => {
-    if (user) {
-      setUsername(user.username);
-    }
-  }, [user]);
+    const fetchProperty = async () => {
+        console.log(id); // Verifique se o ID está correto
 
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setLatitude(latitude);
-          setLongitude(longitude);
-          setMapPosition({ lat: latitude, lng: longitude });
-        },
-        () => {
-          alert('Falha ao obter localização. Usando localização padrão.');
-          setMapPosition({ lat: -23.55052, lng: -46.633308 });
-        }
-      );
-    } else {
-      alert('Localização não disponível');
-      setMapPosition({ lat: -23.55052, lng: -46.633308 });
-    }
-  }, []); 
+      try {
+        const response = await axios.get(
+          `https://server-2-production.up.railway.app/property/${id}`
+        );
+        console.log("Resposta da API:", response);
 
+        const data = response.data;
+
+        console.log("Fetched property data:", data);
+
+        setPropertyData(data);
+        setCategory(data.category);
+        setTitle(data.title);
+        setPrice(data.price);
+        setDescription(data.description);
+        setDescription1(data.description1);
+        setLatitude(data.latitude);
+        setLongitude(data.longitude);
+        setMapPosition({ lat: data.latitude, lng: data.longitude });
+        setExistingImages(data.images || []);
+      } catch (error) {
+        console.error(error);
+        setErrorMessage('Erro ao carregar os dados do imóvel.');
+      }
+    };
+
+    fetchProperty();
+  }, [id]);
+
+  // Handle map click event
   const handleMapClick = useCallback((event: google.maps.MapMouseEvent) => {
     const newLat = event.latLng?.lat() ?? 0;
     const newLng = event.latLng?.lng() ?? 0;
+
+    console.log("Map clicked at:", { lat: newLat, lng: newLng });
+
     setLatitude(newLat);
     setLongitude(newLng);
     setMapPosition({ lat: newLat, lng: newLng });
     setSelectedMarker({ lat: newLat, lng: newLng });
   }, []);
 
-  const handleAddProperty = async () => {
-    if (!user) {
-      setErrorMessage('Você precisa estar logado para adicionar um imóvel.');
-      return;
-    }
-
-    if (!category || !name.trim() || images.length === 0 || !price.trim() || parseFloat(price) <= 0 || !description.trim()) {
-      setErrorMessage('Por favor, preencha todos os campos corretamente.');
-      return;
-    }
-
-    setErrorMessage('');
-    setSuccessMessage('');
-    setLoading(true);
-
-    const formData = new FormData();
-    formData.append('category', category);
-    formData.append('title', name);
-    formData.append('price', price);
-    formData.append('description', description);
-    formData.append('description1', description1);
-    formData.append('userId', user.id.toString());
-    formData.append('username', username); 
-    formData.append('latitude', latitude.toString());
-    formData.append('longitude', longitude.toString());
-
-    images.forEach((image) => formData.append('images[]', image));
-
-    for (const [key, value] of formData.entries()) {
-      console.log(`${key}:`, value);
-    }
-
-    try {
-      const response = await axios.post(
-        'https://server-2-production.up.railway.app/property',
-        formData
-      );
-
-      if (response.status === 201) {
-        setSuccessMessage('Imóvel adicionado com sucesso!');
-        resetForm();
-        navigate('/profile');
-      } else {
-        setErrorMessage('Erro ao adicionar imóvel. Tente novamente.');
-      }
-    } catch (error) {
-      console.error(error);
-      if (axios.isAxiosError(error)) {
-        setErrorMessage(`Erro: ${error.response?.data.message || 'Tente novamente.'}`);
-      } else {
-        setErrorMessage('Erro ao adicionar imóvel. Tente novamente.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Handle image upload
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files) {
@@ -132,34 +98,86 @@ const AddProperty = () => {
     }
   };
 
-  const removeImage = (index: number) => {
-    const removedImage = images[index];
-    setImages((prevImages) => prevImages.filter((_, i) => i !== index));
-    URL.revokeObjectURL(URL.createObjectURL(removedImage)); 
+  // Remove existing image
+  const removeExistingImage = (index: number) => {
+    setExistingImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handlePriceChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    if (/^\d*\.?\d*$/.test(value) && (value === '' || parseFloat(value) > 0)) {
-      setPrice(value);
+  // Handle property update
+  const handleUpdateProperty = async () => {
+    console.log("Preparing to update property with data:", {
+      category,
+      title,
+      price,
+      description,
+      description1,
+      latitude,
+      longitude,
+      existingImages,
+      newImages: images,
+    });
+
+    const parsedPrice = parseFloat(price); // Converte price para um número
+  
+    if (
+      !category ||
+      !title.trim() ||
+      (!images.length && !existingImages.length) ||
+      isNaN(parsedPrice) || // Verifica se parsedPrice não é um número válido
+      parsedPrice <= 0 || // Verifica se o preço é maior que 0
+      !description.trim()
+    ) {
+      console.warn("Validation failed. Check input values.");
+      setErrorMessage('Por favor, preencha todos os campos corretamente.');
+      return;
+    }
+  
+    setErrorMessage('');
+    setSuccessMessage('');
+    setLoading(true);
+
+    const formData = new FormData();
+    formData.append('category', category);
+    formData.append('title', title);
+    formData.append('price', price);
+    formData.append('description', description);
+    formData.append('description1', description1);
+    formData.append('latitude', latitude.toString());
+    formData.append('longitude', longitude.toString());
+    formData.append('existingImages', JSON.stringify(existingImages));
+
+    images.forEach((image) => formData.append('images[]', image));
+
+    try {
+      console.log("Sending update request to API...");
+      const response = await axios.put(
+        `https://server-2-production.up.railway.app/property/${id}`,
+        formData
+      );
+
+      if (response.status === 200) {
+        console.log("Property updated successfully:", response.data);
+        setSuccessMessage('Imóvel atualizado com sucesso!');
+        navigate('/profile');
+      } else {
+        console.error("Unexpected API response:", response);
+        setErrorMessage('Erro ao atualizar imóvel. Tente novamente.');
+      }
+    } catch (error) {
+      console.error(error);
+      setErrorMessage('Erro ao atualizar imóvel. Tente novamente.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const resetForm = () => {
-    setCategory('venda');
-    setName('');
-    setImages([]);
-    setPrice('');
-    setDescription('');
-    setLatitude(0);
-    setLongitude(0);
-    setMapPosition({ lat: 0, lng: 0 });
-    setSelectedMarker(null);
-  };
+  if (!propertyData) {
+    return <p>Carregando dados do imóvel...</p>;
+  }
 
   return (
-    <AddPropertyContainer>
-      <h1>Adicionar Imóvel</h1>
+    <EditPropertyContainer>
+      <h1>Editar Imóvel</h1>
       {errorMessage && <p style={{ color: 'red', fontWeight: 'bold', margin: '10px 0' }}>{errorMessage}</p>}
       {successMessage && <p style={{ color: 'green', fontWeight: 'bold', margin: '10px 0' }}>{successMessage}</p>}
 
@@ -175,29 +193,30 @@ const AddProperty = () => {
       <FormInput
         type="text"
         placeholder="Título"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
       />
       <FormInput
         type="text"
         placeholder="Preço"
         value={price}
-        onChange={handlePriceChange}
+        onChange={(e) => setPrice(e.target.value)}
       />
       <FormInput
         as="textarea"
         placeholder="Descrição"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
-        rows={4} 
+        rows={4}
       />
       <FormInput
         as="textarea"
-        placeholder="Detalhes ocultos, somente você verá no seu perfil."
+        placeholder="Detalhes ocultos"
         value={description1}
         onChange={(e) => setDescription1(e.target.value)}
-        rows={4} 
+        rows={4}
       />
+
       <ImageUploadButton>
         <label htmlFor="image-upload">Adicionar imagens</label>
         <input
@@ -211,14 +230,24 @@ const AddProperty = () => {
       </ImageUploadButton>
 
       <ImagePreviewContainer>
-        {images.map((image, index) => (
-          <ImagePreview key={index}>
-            <img src={URL.createObjectURL(image)} alt={`preview-${index}`} />
-            <button onClick={() => removeImage(index)}>X</button>
-          </ImagePreview>
-        ))}
-      </ImagePreviewContainer>
-        <p>Agora abaixo, arraste a tela e com um clique marque o local do imóvel no mapa.</p>      
+  {existingImages.map((image, index) => {
+    return (
+      <ImagePreview key={index}>
+        <img src={`https://server-2-production.up.railway.app${image.url}`} alt={`preview-${index}`} />
+        <button onClick={() => removeExistingImage(index)}>X</button>
+      </ImagePreview>
+    );
+  })}
+  {images.map((image, index) => {
+    return (
+      <ImagePreview key={index}>
+        <img src={URL.createObjectURL(image)} alt={`preview-${index}`} />
+        <button onClick={() => setImages((prev) => prev.filter((_, i) => i !== index))}>X</button>
+      </ImagePreview>
+    );
+  })}
+</ImagePreviewContainer>
+  <p>Agora abaixo, arraste a tela e com um clique marque o local do imóvel no mapa.</p>
       <MapWrapper>
         <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
           <GoogleMap
@@ -270,20 +299,19 @@ const AddProperty = () => {
                     },
                   ],
                 },
-              ],
+              ],           
             }}
           >
             {selectedMarker && <Marker position={selectedMarker} />}
-            <Marker position={mapPosition} icon="http://maps.google.com/mapfiles/ms/icons/blue-dot.png" />
           </GoogleMap>
         </LoadScript>
       </MapWrapper>
 
-      <Button onClick={handleAddProperty} disabled={loading}>
-        {loading ? 'Adicionando...' : 'Adicionar Imóvel'}
+      <Button onClick={handleUpdateProperty} disabled={loading}>
+        {loading ? 'Atualizando...' : 'Atualizar Imóvel'}
       </Button>
-    </AddPropertyContainer>
+    </EditPropertyContainer>
   );
 };
 
-export default AddProperty;
+export default EditProperty;

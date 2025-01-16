@@ -8,9 +8,11 @@ import Layout from './layout/layout';
 import SignIn from './pages/SignIn/signIn';
 import SignUp from './pages/SignUp/signUp'
 import AddProperty from './pages/AddProperty/addProperty';
+import EditProperty from './pages/EditProperty/editProperty'
 import Contact from './pages/Contact/contact';
 import PropertyDetails from './pages/PropertyDetails/propertyDetails';
 import Profile from './pages/Profile/profile'
+
 // import PropertyDetails from './pages/PropertyDetails'
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
@@ -30,6 +32,7 @@ const App: React.FC = () => {
             <Route path="map" element={<MapScreen />} />
             <Route path="list" element={<ListScreen />} />
             <Route path="addProperty" element={<AddProperty />} />
+            <Route path="editProperty/:id" element={<EditProperty />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/property/:id" element={<PropertyDetails />} /> 
             <Route path="/profile" element={<Profile />} />
