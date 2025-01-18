@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { GoogleMap, LoadScript, InfoWindow } from "@react-google-maps/api";
-import { FaCrosshairs } from "react-icons/fa";
-import { Container, UpdateButton } from "./styles";
+import { FaCrosshairs, FaMapMarkedAlt } from "react-icons/fa";
+import { Container, InfoContent, InfoWindowContainer, NavigationIconContainer, PropertyImage, UpdateButton } from "./styles";
 import { usePropertyContext } from "../../contexts/PropertyContext";
 
 interface Property {
@@ -187,21 +187,41 @@ const MapComponent: React.FC = () => {
         >
           {selectedProperty && (
             <InfoWindow
-              position={{ lat: selectedProperty.latitude, lng: selectedProperty.longitude }}
+              position={{
+                lat: selectedProperty.latitude,
+                lng: selectedProperty.longitude,
+              }}
               onCloseClick={handleCloseInfoWindow}
             >
-              <div>
-                <h3>{selectedProperty.title}</h3>
-                <p>{formatPrice(selectedProperty.price)}</p>
-                <img
-                  src={`https://server-2-production.up.railway.app${selectedProperty.images?.[0]}`}
-                  style={{ width: "100px", height: "100px", objectFit: "cover" }}
-                  alt={selectedProperty.title}
-                  onClick={() => handleImageClick(selectedProperty.id)}
-                />
-              </div>
+              <InfoWindowContainer>
+                <NavigationIconContainer>
+                  <FaMapMarkedAlt
+                    size={20}
+                    onClick={() => {
+                      const destination = `${selectedProperty.latitude},${selectedProperty.longitude}`;
+                      const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destination}`;
+                      const wazeUrl = `https://waze.com/ul?ll=${selectedProperty.latitude}%2C${selectedProperty.longitude}&navigate=yes`;
+
+                      window.open(googleMapsUrl, "_blank");
+
+                      window.open(wazeUrl, "_blank");
+                    }}
+                  />
+                </NavigationIconContainer>
+
+                <InfoContent>
+                  <h3>{selectedProperty.title}</h3>
+                  <p>{formatPrice(selectedProperty.price)}</p>
+                  <PropertyImage
+                    src={`https://server-2-production.up.railway.app${selectedProperty.images?.[0]}`}
+                    alt={selectedProperty.title}
+                    onClick={() => handleImageClick(selectedProperty.id)}
+                  />
+                </InfoContent>
+              </InfoWindowContainer>
             </InfoWindow>
           )}
+
         </GoogleMap>
       </LoadScript>
 
