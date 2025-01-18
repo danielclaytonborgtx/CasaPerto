@@ -25,6 +25,7 @@ const MapComponent: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -150,25 +151,6 @@ const MapComponent: React.FC = () => {
     }
   };
 
-  const handleNavigation = () => {
-    if (!selectedProperty) return;
-
-    const destination = `${selectedProperty.latitude},${selectedProperty.longitude}`;
-    const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destination}`;
-    const wazeUrl = `https://waze.com/ul?ll=${selectedProperty.latitude}%2C${selectedProperty.longitude}&navigate=yes`;
-
-    // Perguntar ao usuário onde prefere abrir a navegação
-    const preferGoogle = window.confirm(
-      "Deseja abrir no Google Maps? (Cancelar para abrir no Waze)"
-    );
-
-    if (preferGoogle) {
-      window.open(googleMapsUrl, "_blank");
-    } else {
-      window.open(wazeUrl, "_blank");
-    }
-  };
-
   if (!location) {
     return <div>Carregando mapa...</div>;
   }
@@ -214,8 +196,14 @@ const MapComponent: React.FC = () => {
               <InfoWindowContainer>
                 <NavigationIconContainer>
                   <FaMapMarkedAlt
-                    size={20}
-                    onClick={handleNavigation} // Usar a nova função de navegação
+                    size={25}
+                    onClick={() => {
+                      const destination = `${selectedProperty.latitude},${selectedProperty.longitude}`;
+                      const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destination}`;
+            
+                       window.open(googleMapsUrl, "_blank");
+                     
+                    }}
                   />
                 </NavigationIconContainer>
 
@@ -231,6 +219,7 @@ const MapComponent: React.FC = () => {
               </InfoWindowContainer>
             </InfoWindow>
           )}
+
         </GoogleMap>
       </LoadScript>
 
