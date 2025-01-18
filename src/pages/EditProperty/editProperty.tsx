@@ -43,20 +43,15 @@ const EditProperty = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Fetch property data on component mount
   useEffect(() => {
     const fetchProperty = async () => {
-        console.log(id); // Verifique se o ID está correto
 
       try {
         const response = await axios.get(
           `https://server-2-production.up.railway.app/property/${id}`
         );
-        console.log("Resposta da API:", response);
 
         const data = response.data;
-
-        console.log("Fetched property data:", data);
 
         setPropertyData(data);
         setCategory(data.category);
@@ -77,12 +72,9 @@ const EditProperty = () => {
     fetchProperty();
   }, [id]);
 
-  // Handle map click event
   const handleMapClick = useCallback((event: google.maps.MapMouseEvent) => {
     const newLat = event.latLng?.lat() ?? 0;
     const newLng = event.latLng?.lng() ?? 0;
-
-    console.log("Map clicked at:", { lat: newLat, lng: newLng });
 
     setLatitude(newLat);
     setLongitude(newLng);
@@ -90,7 +82,6 @@ const EditProperty = () => {
     setSelectedMarker({ lat: newLat, lng: newLng });
   }, []);
 
-  // Handle image upload
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files) {
@@ -98,12 +89,10 @@ const EditProperty = () => {
     }
   };
 
-  // Remove existing image
   const removeExistingImage = (index: number) => {
     setExistingImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Handle property update
   const handleUpdateProperty = async () => {
     console.log("Preparing to update property with data:", {
       category,
@@ -117,14 +106,14 @@ const EditProperty = () => {
       newImages: images,
     });
 
-    const parsedPrice = parseFloat(price); // Converte price para um número
+    const parsedPrice = parseFloat(price); 
   
     if (
       !category ||
       !title.trim() ||
       (!images.length && !existingImages.length) ||
-      isNaN(parsedPrice) || // Verifica se parsedPrice não é um número válido
-      parsedPrice <= 0 || // Verifica se o preço é maior que 0
+      isNaN(parsedPrice) || 
+      parsedPrice <= 0 || 
       !description.trim()
     ) {
       console.warn("Validation failed. Check input values.");
@@ -149,18 +138,15 @@ const EditProperty = () => {
     images.forEach((image) => formData.append('images[]', image));
 
     try {
-      console.log("Sending update request to API...");
       const response = await axios.put(
         `https://server-2-production.up.railway.app/property/${id}`,
         formData
       );
 
       if (response.status === 200) {
-        console.log("Property updated successfully:", response.data);
         setSuccessMessage('Imóvel atualizado com sucesso!');
         navigate('/profile');
       } else {
-        console.error("Unexpected API response:", response);
         setErrorMessage('Erro ao atualizar imóvel. Tente novamente.');
       }
     } catch (error) {
@@ -261,7 +247,18 @@ const EditProperty = () => {
               streetViewControl: false,
               mapTypeControl: false,
               fullscreenControl: false,
-              gestureHandling: "greedy",        
+              gestureHandling: "greedy", 
+              styles: [
+                {
+                  featureType: "poi",
+                  elementType: "all",
+                  stylers: [
+                    {
+                      visibility: "off",
+                    },
+                  ],
+                },
+              ],       
             }}
           >
             {selectedMarker && <Marker position={selectedMarker} />}

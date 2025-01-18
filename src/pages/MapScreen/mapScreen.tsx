@@ -171,6 +171,17 @@ const MapComponent: React.FC = () => {
             mapTypeControl: false,
             fullscreenControl: false,
             gestureHandling: "greedy",
+            styles: [
+              {
+                featureType: "poi",
+                elementType: "all",
+                stylers: [
+                  {
+                    visibility: "off",
+                  },
+                ],
+              },
+            ],
           }}
           onLoad={(mapInstance) => setMap(mapInstance)}
         >
