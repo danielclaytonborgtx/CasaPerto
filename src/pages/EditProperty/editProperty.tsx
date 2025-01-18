@@ -261,45 +261,7 @@ const EditProperty = () => {
               streetViewControl: false,
               mapTypeControl: false,
               fullscreenControl: false,
-              gestureHandling: "greedy",
-              styles: [
-                {
-                  featureType: "poi", 
-                  elementType: "all",
-                  stylers: [
-                    {
-                      visibility: "off",
-                    },
-                  ],
-                },
-                {
-                  featureType: "poi.business", 
-                  elementType: "all",
-                  stylers: [
-                    {
-                      visibility: "off",
-                    },
-                  ],
-                },
-                {
-                  featureType: "poi.park", 
-                  elementType: "all",
-                  stylers: [
-                    {
-                      visibility: "off",
-                    },
-                  ],
-                },
-                {
-                  featureType: "poi.school", 
-                  elementType: "all",
-                  stylers: [
-                    {
-                      visibility: "off",
-                    },
-                  ],
-                },
-              ],           
+              gestureHandling: "greedy",        
             }}
           >
             {selectedMarker && <Marker position={selectedMarker} />}

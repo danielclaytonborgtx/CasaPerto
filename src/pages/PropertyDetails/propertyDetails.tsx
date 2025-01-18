@@ -36,18 +36,15 @@ const PropertyDetails: React.FC = () => {
 
   useEffect(() => {
     const fetchProperty = async () => {
-      console.log("Fetching property with ID:", id);
       if (!location.state) {
         try {
           const response = await fetch(
             `https://server-2-production.up.railway.app/property/${id}`
           );
-          console.log("API Response:", response);
           if (!response.ok) {
             throw new Error("Erro ao buscar imóvel");
           }
           const data = await response.json();
-          console.log("Property Data:", data);
           setProperty(data);
         } catch (error) {
           console.error("Erro ao carregar imóvel:", error);
@@ -55,7 +52,6 @@ const PropertyDetails: React.FC = () => {
           setLoading(false);
         }
       } else {
-        console.log("Using location.state for property data:", location.state);
         setProperty(location.state as PropertyDetailsProps);
         setLoading(false);
       }
@@ -123,7 +119,7 @@ const PropertyDetails: React.FC = () => {
                   src={resolveImageUrl(img)}
                   alt={`Imagem do imóvel ${index + 1}`}
                   onError={(e) => {
-                    e.currentTarget.src = "/fallback-image.jpg"; // Imagem padrão em caso de erro
+                    e.currentTarget.src = "/fallback-image.jpg"; 
                   }}
                 />
               </ImageWrapper>

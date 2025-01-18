@@ -233,44 +233,6 @@ const AddProperty = () => {
               mapTypeControl: false,
               fullscreenControl: false,
               gestureHandling: "greedy",
-              styles: [
-                {
-                  featureType: "poi", 
-                  elementType: "all",
-                  stylers: [
-                    {
-                      visibility: "off",
-                    },
-                  ],
-                },
-                {
-                  featureType: "poi.business", 
-                  elementType: "all",
-                  stylers: [
-                    {
-                      visibility: "off",
-                    },
-                  ],
-                },
-                {
-                  featureType: "poi.park", 
-                  elementType: "all",
-                  stylers: [
-                    {
-                      visibility: "off",
-                    },
-                  ],
-                },
-                {
-                  featureType: "poi.school", 
-                  elementType: "all",
-                  stylers: [
-                    {
-                      visibility: "off",
-                    },
-                  ],
-                },
-              ],
             }}
           >
             {selectedMarker && <Marker position={selectedMarker} />}
