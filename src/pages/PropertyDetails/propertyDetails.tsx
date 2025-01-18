@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import Slider from "react-slick";
 import { parseISO, format } from "date-fns";
@@ -15,33 +15,39 @@ import {
   FooterText,
 } from "./styles";
 
+interface PropertyImage {
+  url: string;
+}
+
 interface PropertyDetailsProps {
   title: string;
   price: number;
   description: string;
-  images: { url: string }[]; 
-  user?: { username: string }; 
-  createdAt: string; 
+  images: PropertyImage[] | string[];
+  user?: { username: string };
+  createdAt: string;
 }
 
 const PropertyDetails: React.FC = () => {
   const location = useLocation();
-  const { id } = useParams<{ id: string }>(); // Pega o ID da URL
+  const { id } = useParams<{ id: string }>();
   const [property, setProperty] = useState<PropertyDetailsProps | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Busca dados do imóvel pela API caso o estado não esteja disponível
   useEffect(() => {
     const fetchProperty = async () => {
+      console.log("Fetching property with ID:", id);
       if (!location.state) {
         try {
           const response = await fetch(
-            `https://server-2-production.up.railway.app/properties/${id}`
+            `https://server-2-production.up.railway.app/property/${id}`
           );
+          console.log("API Response:", response);
           if (!response.ok) {
             throw new Error("Erro ao buscar imóvel");
           }
           const data = await response.json();
+          console.log("Property Data:", data);
           setProperty(data);
         } catch (error) {
           console.error("Erro ao carregar imóvel:", error);
@@ -49,6 +55,7 @@ const PropertyDetails: React.FC = () => {
           setLoading(false);
         }
       } else {
+        console.log("Using location.state for property data:", location.state);
         setProperty(location.state as PropertyDetailsProps);
         setLoading(false);
       }
@@ -95,6 +102,15 @@ const PropertyDetails: React.FC = () => {
 
   const username = user?.username || "Usuário desconhecido";
 
+  const resolveImageUrl = (img: PropertyImage | string) => {
+    if (typeof img === "string") {
+      return `https://server-2-production.up.railway.app${img}`;
+    } else if (img.url) {
+      return `https://server-2-production.up.railway.app${img.url}`;
+    }
+    return "";
+  };
+
   return (
     <Container>
       <ContentWrapper>
@@ -104,8 +120,11 @@ const PropertyDetails: React.FC = () => {
             {images.map((img, index) => (
               <ImageWrapper key={index}>
                 <Image
-                  src={`https://server-2-production.up.railway.app${img}`}
+                  src={resolveImageUrl(img)}
                   alt={`Imagem do imóvel ${index + 1}`}
+                  onError={(e) => {
+                    e.currentTarget.src = "/fallback-image.jpg"; // Imagem padrão em caso de erro
+                  }}
                 />
               </ImageWrapper>
             ))}
