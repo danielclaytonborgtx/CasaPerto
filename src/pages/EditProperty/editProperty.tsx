@@ -133,9 +133,17 @@ const EditProperty = () => {
     formData.append('description1', description1);
     formData.append('latitude', latitude.toString());
     formData.append('longitude', longitude.toString());
-    formData.append('existingImages', JSON.stringify(existingImages));
+    
+    if (existingImages.length > 0) {
+      formData.append(
+        "existingImages",
+        JSON.stringify(existingImages.map((img) => img.url)) // Apenas URLs
+      );
+    }
 
-    images.forEach((image) => formData.append('images[]', image));
+    images.forEach((image) => {
+      formData.append('newImages[]', image);
+    });
 
     try {
       const response = await axios.put(
@@ -233,7 +241,7 @@ const EditProperty = () => {
     );
   })}
 </ImagePreviewContainer>
-  <p>Agora abaixo, arraste a tela e com um clique marque o local do imóvel no mapa.</p>
+  <p>Agora abaixo, arraste a tela, e com um clique marque o local do imóvel no mapa.</p>
       <MapWrapper>
         <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
           <GoogleMap
