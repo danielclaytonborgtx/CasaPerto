@@ -5,14 +5,14 @@ export const Container = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  min-height: 100vh; /* Garante que a página ocupe toda a altura da tela */
+  min-height: 100vh; 
   padding: 20px;
   box-sizing: border-box;
 `;
 
 export const ContactForm = styled.form`
   width: 100%;
-  max-width: 600px; /* Limita a largura do formulário para não ficar muito largo */
+  max-width: 600px;
   padding: 20px;
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -20,7 +20,7 @@ export const ContactForm = styled.form`
   background-color: #fff;
   display: flex;
   flex-direction: column;
-  gap: 15px; /* Espaçamento entre os campos */
+  gap: 15px; 
 `;
 
 export const InputField = styled.input`
@@ -44,7 +44,7 @@ export const TextArea = styled.textarea`
   border-radius: 4px;
   box-sizing: border-box;
   min-height: 150px;
-  resize: vertical; /* Permite redimensionar o campo */
+  resize: vertical; 
   margin-bottom: 10px;
 
   &:focus {
