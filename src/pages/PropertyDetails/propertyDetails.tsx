@@ -3,6 +3,7 @@ import { useLocation, useParams } from "react-router-dom";
 import Slider from "react-slick";
 import { parseISO, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import Modal from "react-modal";
 import {
   Container,
   ContentWrapper,
@@ -28,11 +29,15 @@ interface PropertyDetailsProps {
   createdAt: string;
 }
 
+Modal.setAppElement("#root");
+
 const PropertyDetails: React.FC = () => {
   const location = useLocation();
   const { id } = useParams<{ id: string }>();
   const [property, setProperty] = useState<PropertyDetailsProps | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -107,6 +112,29 @@ const PropertyDetails: React.FC = () => {
     return "";
   };
 
+  const handleImageClick = (index: number) => {
+    setCurrentImageIndex(index);
+    setIsModalOpen(true);
+
+    document.body.classList.add("modal-open");
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+
+    document.body.classList.remove("modal-open");
+  };
+
+  const nextImage = () => {
+    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === 0 ? images.length - 1 : prevIndex - 1
+    );
+  };
+
   return (
     <Container>
       <ContentWrapper>
@@ -118,8 +146,9 @@ const PropertyDetails: React.FC = () => {
                 <Image
                   src={resolveImageUrl(img)}
                   alt={`Imagem do imóvel ${index + 1}`}
+                  onClick={() => handleImageClick(index)}
                   onError={(e) => {
-                    e.currentTarget.src = "/fallback-image.jpg"; 
+                    e.currentTarget.src = "/fallback-image.jpg";
                   }}
                 />
               </ImageWrapper>
@@ -132,6 +161,88 @@ const PropertyDetails: React.FC = () => {
           Postado por <strong>{username}</strong> em {formatDate(createdAt)}
         </FooterText>
       </ContentWrapper>
+
+      <Modal
+        isOpen={isModalOpen}
+        onRequestClose={closeModal}
+        contentLabel="Imagem em tela cheia"
+        style={{
+          content: {
+            inset: "0",
+            background: "black",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            border: "none", 
+            padding: "0",
+            margin: "0",
+          },
+          overlay: {
+            backgroundColor: "rgba(0, 0, 0, 0.9)",
+            zIndex: 9999,
+          },
+        }}
+      >
+        <button
+          onClick={closeModal}
+          style={{
+            position: "absolute",
+            top: "10px",
+            right: "10px",
+            background: "transparent",
+            border: "none",
+            fontSize: "24px",
+            color: "white",
+            cursor: "pointer",
+            zIndex: 10000,
+          }}
+        >
+          ✕
+        </button>
+        <button
+          onClick={prevImage}
+          style={{
+            position: "absolute",
+            left: "10px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            background: "transparent",
+            border: "none",
+            fontSize: "32px",
+            color: "white",
+            cursor: "pointer",
+            zIndex: 10000,
+          }}
+        >
+          ‹
+        </button>
+        <img
+          src={resolveImageUrl(images[currentImageIndex])}
+          alt={`Imagem ${currentImageIndex + 1}`}
+          style={{
+            maxWidth: "100%",
+            maxHeight: "100%",
+            objectFit: "contain",
+          }}
+        />
+        <button
+          onClick={nextImage}
+          style={{
+            position: "absolute",
+            right: "10px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            background: "transparent",
+            border: "none",
+            fontSize: "32px",
+            color: "white",
+            cursor: "pointer",
+            zIndex: 10000,
+          }}
+        >
+          ›
+        </button>
+      </Modal>
     </Container>
   );
 };
