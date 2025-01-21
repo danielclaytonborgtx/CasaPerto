@@ -8,6 +8,7 @@ export const Container = styled.div`
   min-height: 100vh; 
   padding: 20px;
   box-sizing: border-box;
+  margin-top: 80px;
 `;
 
 export const ContactForm = styled.form`
@@ -74,7 +75,7 @@ export const SubmitButton = styled.button`
 `;
 
 export const Title = styled.h1`
-  font-size: 32px;
+  font-size: 30px;
   margin-bottom: 20px;
   text-align: center;
   color: #333;

@@ -56,7 +56,7 @@ const Contato: React.FC = () => {
           required
         />
         <TextArea 
-          placeholder="Sua mensagem" 
+          placeholder="Aqui deixe sua mensagem e seu contato!" 
           value={message} 
           onChange={(e) => setMessage(e.target.value)} 
           required
