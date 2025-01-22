@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams, useNavigate } from "react-router-dom"; 
 import Slider from "react-slick";
 import { parseISO, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -14,6 +14,7 @@ import {
   Price,
   Description,
   FooterText,
+  MapLink, 
 } from "./styles";
 
 interface PropertyImage {
@@ -27,6 +28,8 @@ interface PropertyDetailsProps {
   images: PropertyImage[] | string[];
   user?: { username: string };
   createdAt: string;
+  latitude: number;
+  longitude: number;
 }
 
 Modal.setAppElement("#root");
@@ -38,6 +41,7 @@ const PropertyDetails: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const navigate = useNavigate(); 
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -135,6 +139,10 @@ const PropertyDetails: React.FC = () => {
     );
   };
 
+  const handleNavigateToMap = () => {
+    navigate("/map", { state: { property } }); 
+  };
+
   return (
     <Container>
       <ContentWrapper>
@@ -157,6 +165,9 @@ const PropertyDetails: React.FC = () => {
         </SliderContainer>
         <Price>{formatPrice(price)}</Price>
         <Description>{description}</Description>
+        
+        <MapLink onClick={handleNavigateToMap}>Ver no mapa</MapLink>
+
         <FooterText>
           Postado por <strong>{username}</strong> em {formatDate(createdAt)}
         </FooterText>
