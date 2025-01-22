@@ -32,6 +32,8 @@ const AddProperty = () => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  
+  const [isLoaded, setIsLoaded] = useState(false);  // Controla o carregamento do mapa
 
   useEffect(() => {
     if (user) {
@@ -47,15 +49,18 @@ const AddProperty = () => {
           setLatitude(latitude);
           setLongitude(longitude);
           setMapPosition({ lat: latitude, lng: longitude });
+          setIsLoaded(true);  // Define o mapa como carregado quando as coordenadas são obtidas
         },
         () => {
           alert('Falha ao obter localização. Usando localização padrão.');
           setMapPosition({ lat: -23.55052, lng: -46.633308 });
+          setIsLoaded(true);  // Define o mapa como carregado mesmo com erro de localização
         }
       );
     } else {
       alert('Localização não disponível');
       setMapPosition({ lat: -23.55052, lng: -46.633308 });
+      setIsLoaded(true);  // Define o mapa como carregado se geolocalização não for suportada
     }
   }, []); 
 
@@ -95,10 +100,6 @@ const AddProperty = () => {
     formData.append('longitude', longitude.toString());
 
     images.forEach((image) => formData.append('images[]', image));
-
-    for (const [key, value] of formData.entries()) {
-      console.log(`${key}:`, value);
-    }
 
     try {
       const response = await axios.post(
@@ -218,37 +219,42 @@ const AddProperty = () => {
           </ImagePreview>
         ))}
       </ImagePreviewContainer>
-        <p>Agora abaixo, arraste a tela, e com um clique marque o local do imóvel no mapa.</p>      
+      
+      <p>Agora abaixo, arraste a tela, e com um clique marque o local do imóvel no mapa.</p>
       <MapWrapper>
         <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
-          <GoogleMap
-            mapContainerStyle={{ width: '100%', height: '400px' }}
-            center={mapPosition}
-            zoom={15}
-            onClick={handleMapClick}
-            options={{
-              disableDefaultUI: true,
-              zoomControl: false,
-              streetViewControl: false,
-              mapTypeControl: false,
-              fullscreenControl: false,
-              gestureHandling: "greedy",
-              styles: [
-                {
-                  featureType: "poi",
-                  elementType: "all",
-                  stylers: [
-                    {
-                      visibility: "off",
-                    },
-                  ],
-                },
-              ],
-            }}
-          >
-            {selectedMarker && <Marker position={selectedMarker} />}
-            <Marker position={mapPosition} icon="http://maps.google.com/mapfiles/ms/icons/blue-dot.png" />
-          </GoogleMap>
+          {isLoaded ? (
+            <GoogleMap
+              mapContainerStyle={{ width: '100%', height: '400px' }}
+              center={mapPosition}
+              zoom={15}
+              onClick={handleMapClick}
+              options={{
+                disableDefaultUI: true,
+                zoomControl: false,
+                streetViewControl: false,
+                mapTypeControl: false,
+                fullscreenControl: false,
+                gestureHandling: "greedy",
+                styles: [
+                  {
+                    featureType: "poi",
+                    elementType: "all",
+                    stylers: [
+                      {
+                        visibility: "off",
+                      },
+                    ],
+                  },
+                ],
+              }}
+            >
+              {selectedMarker && <Marker position={selectedMarker} />}
+              <Marker position={mapPosition} icon="http://maps.google.com/mapfiles/ms/icons/blue-dot.png" />
+            </GoogleMap>
+          ) : (
+            <div>Carregando mapa...</div>
+          )}
         </LoadScript>
       </MapWrapper>
 

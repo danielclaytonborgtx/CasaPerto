@@ -43,6 +43,8 @@ const EditProperty = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
+  const [isLoaded, setIsLoaded] = useState(false);
+
   useEffect(() => {
     const fetchProperty = async () => {
 
@@ -63,6 +65,7 @@ const EditProperty = () => {
         setLongitude(data.longitude);
         setMapPosition({ lat: data.latitude, lng: data.longitude });
         setExistingImages(data.images || []);
+        setIsLoaded(true);
       } catch (error) {
         console.error(error);
         setErrorMessage('Erro ao carregar os dados do imóvel.');
@@ -244,6 +247,7 @@ const EditProperty = () => {
   <p>Agora abaixo, arraste a tela, e com um clique marque o local do imóvel no mapa.</p>
       <MapWrapper>
         <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
+        {isLoaded ? (
           <GoogleMap
             mapContainerStyle={{ width: '100%', height: '400px' }}
             center={mapPosition}
@@ -271,6 +275,9 @@ const EditProperty = () => {
           >
             {selectedMarker && <Marker position={selectedMarker} />}
           </GoogleMap>
+          ) : (
+            <div>Carregando mapa...</div>
+          )}
         </LoadScript>
       </MapWrapper>
 

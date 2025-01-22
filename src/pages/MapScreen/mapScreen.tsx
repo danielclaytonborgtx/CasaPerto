@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { GoogleMap, LoadScript, InfoWindow } from "@react-google-maps/api";
 import { FaCrosshairs, FaMapMarkedAlt } from "react-icons/fa";
@@ -15,7 +15,7 @@ interface Property {
   images: { url: string }[];
 }
 
-const MapComponent: React.FC = () => {
+const MapScreen: React.FC = () => {
   const { isRent } = usePropertyContext();
   const [location, setLocation] = useState<google.maps.LatLngLiteral | null>(null);
   const [properties, setProperties] = useState<Property[]>([]);
@@ -25,7 +25,6 @@ const MapComponent: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -34,7 +33,7 @@ const MapComponent: React.FC = () => {
         },
         (error) => {
           console.error("Erro ao obter localização: ", error);
-          setLocation({ lat: -22.9068, lng: -43.1729 }); 
+          setLocation({ lat: -22.9068, lng: -43.1729 }); // Default to Rio de Janeiro
         }
       );
     }
@@ -58,6 +57,14 @@ const MapComponent: React.FC = () => {
     const category = isRent ? "venda" : "aluguel";
     return property.category.toLowerCase() === category.toLowerCase();
   });
+
+  // Memorize mapCenter to avoid recalculating it on every render
+  const mapCenter = useMemo(() => {
+    if (location) {
+      return location;
+    }
+    return { lat: -22.9068, lng: -43.1729 }; // Default fallback
+  }, [location]);
 
   useEffect(() => {
     if (map && location) {
@@ -83,7 +90,7 @@ const MapComponent: React.FC = () => {
         newMarkers.push(propertyMarker);
 
         propertyMarker.addListener("click", () => {
-          setSelectedProperty(property); 
+          setSelectedProperty(property);
         });
       });
 
@@ -101,7 +108,7 @@ const MapComponent: React.FC = () => {
           strokeWeight: 2,
           scale: 8,
         },
-        clickable: false, 
+        clickable: false,
       });
 
       return () => {
@@ -163,7 +170,7 @@ const MapComponent: React.FC = () => {
             width: "100%",
             height: "100%",
           }}
-          center={location}
+          center={mapCenter} // Use the memorized mapCenter
           zoom={13}
           options={{
             disableDefaultUI: true,
@@ -200,9 +207,7 @@ const MapComponent: React.FC = () => {
                     onClick={() => {
                       const destination = `${selectedProperty.latitude},${selectedProperty.longitude}`;
                       const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destination}`;
-            
-                       window.open(googleMapsUrl, "_blank");
-                     
+                      window.open(googleMapsUrl, "_blank");
                     }}
                   />
                 </NavigationIconContainer>
@@ -219,7 +224,6 @@ const MapComponent: React.FC = () => {
               </InfoWindowContainer>
             </InfoWindow>
           )}
-
         </GoogleMap>
       </LoadScript>
 
@@ -230,4 +234,4 @@ const MapComponent: React.FC = () => {
   );
 };
 
-export default MapComponent;
+export default MapScreen;
