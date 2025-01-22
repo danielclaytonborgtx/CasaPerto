@@ -22,6 +22,7 @@ interface PropertyImage {
 }
 
 interface PropertyDetailsProps {
+  id: number;
   title: string;
   price: number;
   description: string;
@@ -140,7 +141,7 @@ const PropertyDetails: React.FC = () => {
   };
 
   const handleNavigateToMap = () => {
-    navigate("/map", { state: { property } }); 
+    navigate("/map", { state: { id: property.id, fromDetails: true } });
   };
 
   return (

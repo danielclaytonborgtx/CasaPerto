@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { GoogleMap, LoadScript, InfoWindow } from "@react-google-maps/api";
 import { FaCrosshairs, FaMapMarkedAlt } from "react-icons/fa";
 import { Container, InfoContent, InfoWindowContainer, NavigationIconContainer, PropertyImage, UpdateButton } from "./styles";
@@ -23,6 +23,7 @@ const MapScreen: React.FC = () => {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.Marker[]>([]);
   const navigate = useNavigate();
+  const { state } = useLocation();
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -33,7 +34,7 @@ const MapScreen: React.FC = () => {
         },
         (error) => {
           console.error("Erro ao obter localização: ", error);
-          setLocation({ lat: -22.9068, lng: -43.1729 }); // Default to Rio de Janeiro
+          setLocation({ lat: -22.9068, lng: -43.1729 }); 
         }
       );
     }
@@ -58,12 +59,11 @@ const MapScreen: React.FC = () => {
     return property.category.toLowerCase() === category.toLowerCase();
   });
 
-  // Memorize mapCenter to avoid recalculating it on every render
   const mapCenter = useMemo(() => {
     if (location) {
       return location;
     }
-    return { lat: -22.9068, lng: -43.1729 }; // Default fallback
+    return { lat: -22.9068, lng: -43.1729 }; 
   }, [location]);
 
   useEffect(() => {
@@ -91,6 +91,12 @@ const MapScreen: React.FC = () => {
 
         propertyMarker.addListener("click", () => {
           setSelectedProperty(property);
+          
+          map.panTo({
+            lat: property.latitude,
+            lng: property.longitude,
+          });
+          map.setZoom(15);
         });
       });
 
@@ -116,6 +122,22 @@ const MapScreen: React.FC = () => {
       };
     }
   }, [map, location, filteredProperties]);
+
+  useEffect(() => {
+    if (state && state.id) {
+      const propertyToSelect = properties.find((property) => property.id === state.id);
+      if (propertyToSelect) {
+        setSelectedProperty(propertyToSelect);
+        if (map) {
+          map.panTo({
+            lat: propertyToSelect.latitude,
+            lng: propertyToSelect.longitude,
+          });
+          map.setZoom(15);
+        }
+      }
+    }
+  }, [state, properties, map]);
 
   const handleCloseInfoWindow = () => {
     setSelectedProperty(null);
@@ -170,7 +192,7 @@ const MapScreen: React.FC = () => {
             width: "100%",
             height: "100%",
           }}
-          center={mapCenter} // Use the memorized mapCenter
+          center={mapCenter} 
           zoom={13}
           options={{
             disableDefaultUI: true,
