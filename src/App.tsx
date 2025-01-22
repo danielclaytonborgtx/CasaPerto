@@ -13,7 +13,6 @@ import Contact from './pages/Contact/contact';
 import PropertyDetails from './pages/PropertyDetails/propertyDetails';
 import Profile from './pages/Profile/profile'
 
-// import PropertyDetails from './pages/PropertyDetails'
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
