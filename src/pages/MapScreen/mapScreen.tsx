@@ -24,6 +24,7 @@ const MapScreen: React.FC = () => {
   const markersRef = useRef<google.maps.Marker[]>([]);
   const navigate = useNavigate();
   const { state } = useLocation();
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -48,9 +49,11 @@ const MapScreen: React.FC = () => {
       })
       .then((data) => {
         setProperties(data);
+        setIsLoaded(true);
       })
       .catch((error) => {
         console.error("Erro ao carregar propriedades:", error);
+        setIsLoaded(true);
       });
   }, []);
 
@@ -186,7 +189,8 @@ const MapScreen: React.FC = () => {
 
   return (
     <Container>
-      <LoadScript googleMapsApiKey="AIzaSyDYVtKwXhjWQyyxOgp7qfUHf3sH9fNTins">
+      <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
+      {isLoaded ? (
         <GoogleMap
           mapContainerStyle={{
             width: "100%",
@@ -247,6 +251,9 @@ const MapScreen: React.FC = () => {
             </InfoWindow>
           )}
         </GoogleMap>
+        ) : (
+          <div>Carregando mapa...</div>
+        )}
       </LoadScript>
 
       <UpdateButton onClick={handleUpdateLocation}>
