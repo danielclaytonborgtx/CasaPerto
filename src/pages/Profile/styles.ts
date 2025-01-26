@@ -1,6 +1,5 @@
 import styled from "styled-components";
 
-// Contêiner principal do perfil
 export const ProfileContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -12,7 +11,6 @@ export const ProfileContainer = styled.div`
   box-sizing: border-box;
 `;
 
-// Nome do usuário (Título)
 export const UserName = styled.h1`
   font-size: 2em;
   color: #333;
@@ -20,14 +18,12 @@ export const UserName = styled.h1`
   margin-top: 20px;
 `;
 
-// Informações do usuário (email, ID, etc.)
 export const UserInfo = styled.p`
   font-size: 1.2em;
   color: #555;
   margin-bottom: 10px;
 `;
 
-// Lista de imóveis postados
 export const UserList = styled.ul`
   list-style-type: none;
   padding: 0;
@@ -35,7 +31,6 @@ export const UserList = styled.ul`
   color: #333;
 `;
 
-// Estilo para cada imóvel na lista
 export const PropertyItem = styled.li`
   width: 100%; 
   display: flex;
@@ -46,11 +41,10 @@ export const PropertyItem = styled.li`
   border: 1px solid #ddd;
   border-radius: 5px;
   background-color: #fff;
-  position: relative; /* Necessário para o posicionamento do ícone dentro deste contêiner */
+  position: relative; 
   min-width: 400px;
 `;
 
-// Estilo para a imagem do imóvel
 export const PropertyImage = styled.img`
   width: 100px;
   height: 100px;
@@ -59,7 +53,6 @@ export const PropertyImage = styled.img`
   margin-right: 15px;
 `;
 
-// Detalhes do imóvel (título, descrição, preço)
 export const PropertyDetails = styled.div`
   flex-grow: 1;
   text-align: left;
@@ -73,14 +66,12 @@ export const PropertyDetails = styled.div`
   }
 `;
 
-// Estilo para o carregamento (em caso de loading)
 export const Loading = styled.div`
   font-size: 1.5em;
   color: #888;
   padding: 20px;
 `;
 
-// Ícone de logout
 export const LogoutIcon = styled.div`
   margin-left: 330px;
   top: 10px;
@@ -92,7 +83,6 @@ export const LogoutIcon = styled.div`
   }
 `;
 
-// Mensagem de erro
 export const ErrorMessage = styled.div`
   color: red;
   font-size: 18px;
@@ -105,12 +95,12 @@ export const ErrorMessage = styled.div`
 
 export const TrashIcon = styled.div`
   position: absolute;
- top: 10px; /* Ajusta a distância da parte inferior */
-  right: 10px; /* Ajusta a distância da parte direita */
+ top: 10px;
+  right: 10px; 
   cursor: pointer;
   transition: color 0.3s ease;
-  font-size: 18px; /* Tamanho reduzido para o ícone */
-  color: black; /* Cor preta para o ícone */
+  font-size: 18px; 
+  color: black; 
 
   &:hover {
     transform: scale(1.2);
@@ -119,12 +109,12 @@ export const TrashIcon = styled.div`
 
 export const EditIcon = styled.div`
   position: absolute;
-  top: 10px; /* Ajusta a distância da parte inferior */
-  right: 35px; /* Ajusta a distância da parte direita */
+  top: 10px; 
+  right: 35px; 
   cursor: pointer;
   transition: color 0.3s ease;
-  font-size: 18px; /* Tamanho reduzido para o ícone */
-  color: black; /* Cor preta para o ícone */
+  font-size: 18px; 
+  color: black;
 
   &:hover {
     transform: scale(1.2);

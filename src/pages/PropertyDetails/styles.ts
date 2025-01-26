@@ -49,7 +49,7 @@ export const Title = styled.h1`
   font-size: 24px;
   font-weight: bold;
   text-align: center;
-  margin: 10px 0 30px ;
+  margin: 10px 0 5px ;
   word-wrap: break-word; 
 `;
 
