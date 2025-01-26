@@ -26,7 +26,7 @@ export const ContentWrapper = styled.div`
 export const SliderContainer = styled.div`
   width: 100%;
   height: 500px; 
-  margin-bottom: 0;
+  margin-bottom: 0; 
 `;
 
 export const ImageWrapper = styled.div`
@@ -34,6 +34,8 @@ export const ImageWrapper = styled.div`
   height: 350px;
   overflow: hidden;
   border-radius: 10px;
+  margin: 0; 
+  padding: 0; 
 `;
 
 export const Image = styled.img`
@@ -47,7 +49,7 @@ export const Title = styled.h1`
   font-size: 24px;
   font-weight: bold;
   text-align: center;
-  margin: 0px 0 10px 0;
+  margin: 10px 0 30px ;
   word-wrap: break-word; 
 `;
 
@@ -55,8 +57,9 @@ export const Price = styled.p`
   font-size: 20px;
   color: green;
   font-weight: bold;
-  margin-bottom: 10px;
-  word-wrap: break-word; 
+  margin: 0; 
+  padding: 0; 
+  word-wrap: break-word;
 `;
 
 export const Description = styled.p`
