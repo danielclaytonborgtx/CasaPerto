@@ -25,8 +25,8 @@ export const ContentWrapper = styled.div`
 
 export const SliderContainer = styled.div`
   width: 100%;
-  height: 500px; 
-  margin-bottom: 0; 
+  height: auto; /* Ajuste automático */
+  margin-bottom: 40px; /* Ajuste o espaçamento inferior */
 `;
 
 export const ImageWrapper = styled.div`
@@ -60,6 +60,7 @@ export const Price = styled.p`
   margin: 0; 
   padding: 0; 
   word-wrap: break-word;
+  margin-bottom: 30px;
 `;
 
 export const Description = styled.p`

@@ -168,7 +168,7 @@ const Profile: React.FC = () => {
                 <PropertyDetails>
                   <strong>{property.title}</strong>
                   <p>{property.description}</p>
-                  <p>Preço: {formatPrice(Number(property.price))}</p>
+                  <p>Valor: {formatPrice(Number(property.price))}</p>
                   {property.description1 && <p>{property.description1}</p>} 
                 </PropertyDetails>
                 <div>

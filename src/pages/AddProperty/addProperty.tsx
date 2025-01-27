@@ -181,7 +181,7 @@ const AddProperty = () => {
       />
       <FormInput
         type="text"
-        placeholder="Preço"
+        placeholder="Valor"
         value={price}
         onChange={handlePriceChange}
       />

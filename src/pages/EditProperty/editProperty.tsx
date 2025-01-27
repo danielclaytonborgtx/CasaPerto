@@ -195,7 +195,7 @@ const EditProperty = () => {
       />
       <FormInput
         type="text"
-        placeholder="Preço"
+        placeholder="Valor"
         value={price}
         onChange={(e) => setPrice(e.target.value)}
       />
