@@ -32,23 +32,23 @@ export const UserList = styled.ul`
 `;
 
 export const PropertyItem = styled.li`
-  width: 100%; 
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  margin: 5px 0;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  background-color: #fff;
-  position: relative; 
-  min-width: 400px;
+width: 100%;
+display: flex;
+justify-content: space-between;
+align-items: flex-start; 
+flex-direction: row; 
+padding: 10px;
+margin: 5px 0;
+border: 1px solid #ddd;
+border-radius: 5px;
+background-color: #fff;
+position: relative;
 `;
 
 export const PropertyImage = styled.img`
   width: 100px;
   height: 100px;
-  object-fit: cover;
+  object-fit: scale-down;
   border-radius: 5px;
   margin-right: 15px;
 `;

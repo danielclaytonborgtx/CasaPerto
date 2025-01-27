@@ -28,7 +28,7 @@ interface Property {
   title: string;
   description: string;
   description1: string;
-  images: string;  
+  images: string[];  
   price: string;  
   createdAt: string;
 }
@@ -122,6 +122,10 @@ const Profile: React.FC = () => {
     }
   };
 
+  const handleImageClick = (propertyId: number) => {
+    navigate(`/property/${propertyId}`);
+  };
+
   if (loading) {
     return <Loading>Carregando...</Loading>;
   }
@@ -164,6 +168,7 @@ const Profile: React.FC = () => {
                 <PropertyImage 
                   src={imageUrl} 
                   alt={property.title} 
+                  onClick={() => handleImageClick(property.id)} // Navega para os detalhes ao clicar na imagem
                 />
                 <PropertyDetails>
                   <strong>{property.title}</strong>
