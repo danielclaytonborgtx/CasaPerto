@@ -194,11 +194,12 @@ const AddProperty = () => {
       />
       <FormInput
         as="textarea"
-        placeholder="Detalhes ocultos, somente você verá no seu perfil."
+        placeholder="Detalhes ocultos, somente você verá no seu perfil. ex: contato do proprietario, valor de avalição..."
         value={description1}
         onChange={(e) => setDescription1(e.target.value)}
         rows={4} 
       />
+      <p>E possivel carregar até 10 imagens, com o limite de 10 MB totais.</p>
       <ImageUploadButton>
         <label htmlFor="image-upload">Adicionar imagens</label>
         <input
