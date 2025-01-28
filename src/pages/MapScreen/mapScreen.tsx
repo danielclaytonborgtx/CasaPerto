@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { GoogleMap, LoadScript, InfoWindow } from "@react-google-maps/api";
 import { FaCrosshairs, FaMapMarkedAlt } from "react-icons/fa";
@@ -57,20 +57,18 @@ const MapScreen: React.FC = () => {
       });
   }, []);
 
-  const filteredProperties = properties.filter((property) => {
+  const filteredProperties = useMemo(() => {
     const category = isRent ? "venda" : "aluguel";
-    return property.category.toLowerCase() === category.toLowerCase();
-  });
+    return properties.filter((property) => property.category.toLowerCase() === category.toLowerCase());
+  }, [properties, isRent]);
 
   const mapCenter = useMemo(() => {
-    if (location) {
-      return location;
-    }
-    return { lat: -22.9068, lng: -43.1729 }; 
+    return location || { lat: -22.9068, lng: -43.1729 };
   }, [location]);
 
   useEffect(() => {
     if (map && location) {
+      
       markersRef.current.forEach((marker) => marker.setMap(null));
       markersRef.current = [];
 
@@ -94,11 +92,7 @@ const MapScreen: React.FC = () => {
 
         propertyMarker.addListener("click", () => {
           setSelectedProperty(property);
-          
-          map.panTo({
-            lat: property.latitude,
-            lng: property.longitude,
-          });
+          map.panTo({ lat: property.latitude, lng: property.longitude });
           map.setZoom(15);
         });
       });
@@ -132,10 +126,7 @@ const MapScreen: React.FC = () => {
       if (propertyToSelect) {
         setSelectedProperty(propertyToSelect);
         if (map) {
-          map.panTo({
-            lat: propertyToSelect.latitude,
-            lng: propertyToSelect.longitude,
-          });
+          map.panTo({ lat: propertyToSelect.latitude, lng: propertyToSelect.longitude });
           map.setZoom(15);
         }
       }
@@ -146,13 +137,12 @@ const MapScreen: React.FC = () => {
     setSelectedProperty(null);
   };
 
-  const handleUpdateLocation = () => {
+  const handleUpdateLocation = useCallback(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
           setLocation({ lat: latitude, lng: longitude });
-
           if (map) {
             map.panTo({ lat: latitude, lng: longitude });
             map.setZoom(14);
@@ -163,13 +153,11 @@ const MapScreen: React.FC = () => {
         }
       );
     }
-  };
+  }, [map]);
 
   const formatPrice = (price: string | number) => {
     const priceString = typeof price === "string" ? price : String(price);
-    const priceNumber = parseFloat(
-      priceString.replace("R$ ", "").replace(".", "").replace(",", ".")
-    );
+    const priceNumber = parseFloat(priceString.replace("R$ ", "").replace(".", "").replace(",", "."));
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
@@ -190,67 +178,67 @@ const MapScreen: React.FC = () => {
   return (
     <Container>
       <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
-      {isLoaded ? (
-        <GoogleMap
-          mapContainerStyle={{
-            width: "100%",
-            height: "100%",
-          }}
-          center={mapCenter} 
-          zoom={13}
-          options={{
-            disableDefaultUI: true,
-            streetViewControl: false,
-            mapTypeControl: false,
-            fullscreenControl: false,
-            gestureHandling: "greedy",
-            styles: [
-              {
-                featureType: "poi",
-                elementType: "all",
-                stylers: [
-                  {
-                    visibility: "off",
-                  },
-                ],
-              },
-            ],
-          }}
-          onLoad={(mapInstance) => setMap(mapInstance)}
-        >
-          {selectedProperty && (
-            <InfoWindow
-              position={{
-                lat: selectedProperty.latitude,
-                lng: selectedProperty.longitude,
-              }}
-              onCloseClick={handleCloseInfoWindow}
-            >
-              <InfoWindowContainer>
-                <NavigationIconContainer>
-                  <FaMapMarkedAlt
-                    size={25}
-                    onClick={() => {
-                      const destination = `${selectedProperty.latitude},${selectedProperty.longitude}`;
-                      const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destination}`;
-                      window.open(googleMapsUrl, "_blank");
-                    }}
-                  />
-                </NavigationIconContainer>
+        {isLoaded ? (
+          <GoogleMap
+            mapContainerStyle={{
+              width: "100%",
+              height: "100%",
+            }}
+            center={mapCenter}
+            zoom={13}
+            options={{
+              disableDefaultUI: true,
+              streetViewControl: false,
+              mapTypeControl: false,
+              fullscreenControl: false,
+              gestureHandling: "greedy",
+              styles: [
+                {
+                  featureType: "poi",
+                  elementType: "all",
+                  stylers: [
+                    {
+                      visibility: "off",
+                    },
+                  ],
+                },
+              ],
+            }}
+            onLoad={(mapInstance) => setMap(mapInstance)}
+          >
+            {selectedProperty && (
+              <InfoWindow
+                position={{
+                  lat: selectedProperty.latitude,
+                  lng: selectedProperty.longitude,
+                }}
+                onCloseClick={handleCloseInfoWindow}
+              >
+                <InfoWindowContainer>
+                  <NavigationIconContainer>
+                    <FaMapMarkedAlt
+                      size={25}
+                      onClick={() => {
+                        const destination = `${selectedProperty.latitude},${selectedProperty.longitude}`;
+                        const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destination}`;
+                        window.open(googleMapsUrl, "_blank");
+                      }}
+                    />
+                  </NavigationIconContainer>
 
-                <InfoContent>
-                  <h3>{selectedProperty.title}</h3>
-                  <p>{formatPrice(selectedProperty.price)}</p>
-                  <PropertyImage
-                    src={`https://server-2-production.up.railway.app${selectedProperty.images?.[0]}`}
-                    alt={selectedProperty.title}
-                    onClick={() => handleImageClick(selectedProperty.id)}
-                  />
-                </InfoContent>
-              </InfoWindowContainer>
-            </InfoWindow>
-          )}
-        </GoogleMap>
+                  <InfoContent>
+                    <h3>{selectedProperty.title}</h3>
+                    <p>{formatPrice(selectedProperty.price)}</p>
+                    <PropertyImage
+                      src={`https://server-2-production.up.railway.app${selectedProperty.images?.[0]}`}
+                      alt={selectedProperty.title}
+                      onClick={() => handleImageClick(selectedProperty.id)}
+                    />
+                  </InfoContent>
+                </InfoWindowContainer>
+              </InfoWindow>
+            )}
+          </GoogleMap>
         ) : (
           <div>Carregando mapa...</div>
         )}
