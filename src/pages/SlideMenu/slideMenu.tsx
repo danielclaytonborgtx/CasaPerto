@@ -13,23 +13,15 @@ const SlideMenu: React.FC<{ onClose: () => void; isVisible: boolean }> = ({ onCl
     if (isVisible) {
       setSlide(0);
     } else {
-      setSlide(-100); 
+      setSlide(-100);
     }
   }, [isVisible]);
-
-  useEffect(() => {
-    if (slide === -100 && !isVisible) {
-      const timeout = setTimeout(() => {
-        onClose(); 
-      }, 300); 
-      return () => clearTimeout(timeout);
-    }
-  }, [slide, isVisible, onClose]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setSlide(-100);
+        onClose(); 
       }
     };
 
@@ -38,7 +30,7 @@ const SlideMenu: React.FC<{ onClose: () => void; isVisible: boolean }> = ({ onCl
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [onClose]);
 
   const handleLinkClick = () => {
     setSlide(-100); 

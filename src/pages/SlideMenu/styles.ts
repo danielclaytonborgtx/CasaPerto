@@ -36,10 +36,9 @@ export const MenuItem = styled.div`
     }
   }
 
-  /* Para garantir que o nome de usuário tenha o mesmo estilo */
   &.user {
     font-weight: bold;
-    color: #333; /* ou outra cor que combine */
+    color: #333; 
   }
 `;
 
