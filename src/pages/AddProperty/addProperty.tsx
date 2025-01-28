@@ -199,7 +199,7 @@ const AddProperty = () => {
         onChange={(e) => setDescription1(e.target.value)}
         rows={4} 
       />
-      <p>E possivel carregar até 10 imagens, com o limite de 10 MB totais.</p>
+      <p>É possivel carregar até 10 imagens, com o limite de 10 MB totais.</p>
       <ImageUploadButton>
         <label htmlFor="image-upload">Adicionar imagens</label>
         <input
