@@ -21,7 +21,7 @@ const SlideMenu: React.FC<{ onClose: () => void; isVisible: boolean }> = ({ onCl
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setSlide(-100);
-        onClose(); 
+        setTimeout(() => onClose(), 300);
       }
     };
 
