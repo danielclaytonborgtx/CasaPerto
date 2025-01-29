@@ -9,7 +9,6 @@ interface User {
   email: string;
 }
 
-// Tipagem do contexto
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
@@ -22,11 +21,9 @@ interface AuthProviderProps {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Componente AuthProvider (somente componente sendo exportado)
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
 
-  // Efeito para recuperar o usuário do localStorage
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
@@ -38,7 +35,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const userData = await loginService(email, password);
   
     if (userData) {
-      setUser(userData); // Atualiza o estado imediatamente com os dados do usuário
+      setUser(userData); 
       localStorage.setItem('user', JSON.stringify(userData));
     }
   };

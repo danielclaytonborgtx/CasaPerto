@@ -36,10 +36,10 @@ const SignIn: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      // Agora utilize a função login do AuthContext
+     
       await login(formData.username, formData.password);
       alert("Login bem-sucedido!");
-      navigate("/profile");  // Redireciona após o login bem-sucedido
+      navigate("/profile");  
     } catch {
       console.error("Erro no login:");
       setError("Erro ao fazer login.");
