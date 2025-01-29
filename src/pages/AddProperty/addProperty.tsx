@@ -33,7 +33,7 @@ const AddProperty = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   
-  const [isLoaded, setIsLoaded] = useState(false);  // Controla o carregamento do mapa
+  const [isLoaded, setIsLoaded] = useState(false); 
 
   useEffect(() => {
     if (user) {
@@ -49,18 +49,18 @@ const AddProperty = () => {
           setLatitude(latitude);
           setLongitude(longitude);
           setMapPosition({ lat: latitude, lng: longitude });
-          setIsLoaded(true);  // Define o mapa como carregado quando as coordenadas são obtidas
+          setIsLoaded(true);  
         },
         () => {
           alert('Falha ao obter localização. Usando localização padrão.');
           setMapPosition({ lat: -23.55052, lng: -46.633308 });
-          setIsLoaded(true);  // Define o mapa como carregado mesmo com erro de localização
+          setIsLoaded(true);  
         }
       );
     } else {
       alert('Localização não disponível');
       setMapPosition({ lat: -23.55052, lng: -46.633308 });
-      setIsLoaded(true);  // Define o mapa como carregado se geolocalização não for suportada
+      setIsLoaded(true); 
     }
   }, []); 
 

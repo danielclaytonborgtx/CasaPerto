@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../services/authContext";
 import { 
   Container, 
   Title, 
@@ -17,6 +18,7 @@ const SignIn: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
  
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,28 +36,13 @@ const SignIn: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("https://server-2-production.up.railway.app/session", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: formData.username, 
-          password: formData.password,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem("user", JSON.stringify(data.user));
-        alert("Login bem-sucedido!");
-        navigate("/profile"); 
-      } else {
-        const data = await response.json();
-        setError(data.error || "Erro ao fazer login."); 
-      }
+      // Agora utilize a função login do AuthContext
+      await login(formData.username, formData.password);
+      alert("Login bem-sucedido!");
+      navigate("/profile");  // Redireciona após o login bem-sucedido
     } catch {
-      setError("Erro ao conectar com o servidor."); 
+      console.error("Erro no login:");
+      setError("Erro ao fazer login.");
     } finally {
       setIsSubmitting(false);
     }

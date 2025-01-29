@@ -36,8 +36,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (email: string, password: string) => {
     const userData = await loginService(email, password);
-    setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
+  
+    if (userData) {
+      setUser(userData); // Atualiza o estado imediatamente com os dados do usuário
+      localStorage.setItem('user', JSON.stringify(userData));
+    }
   };
 
   const logout = () => {
