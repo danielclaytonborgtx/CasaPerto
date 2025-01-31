@@ -12,7 +12,8 @@ import {
   PropertyImage, 
   PropertyDetails, 
   TrashIcon,
-  EditIcon } from "./styles";
+  EditIcon, 
+  PropertyImageContainer} from "./styles";
 
 import { FiLogOut } from "react-icons/fi";
 import { FaTrashAlt, FaPen } from "react-icons/fa"; 
@@ -165,11 +166,13 @@ const Profile: React.FC = () => {
 
             return (
               <PropertyItem key={property.id}>
+                <PropertyImageContainer>
                 <PropertyImage 
                   src={imageUrl} 
                   alt={property.title} 
                   onClick={() => handleImageClick(property.id)} // Navega para os detalhes ao clicar na imagem
                 />
+                </PropertyImageContainer>
                 <PropertyDetails>
                   <strong>{property.title}</strong>
                   <p>{property.description}</p>

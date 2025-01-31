@@ -32,39 +32,60 @@ export const UserList = styled.ul`
 `;
 
 export const PropertyItem = styled.li`
-width: 100%;
-display: flex;
-justify-content: space-between;
-align-items: flex-start; 
-flex-direction: row; 
-padding: 10px;
-margin: 5px 0;
-border: 1px solid #ddd;
-border-radius: 5px;
-background-color: #fff;
-position: relative;
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  padding: 10px;
+  margin: 5px 0;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #fff;
+  position: relative;
+  min-height: 130px;
+`;
+
+export const PropertyImageContainer = styled.div`
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  border-radius: 5px;
+  background-color: #f0f0f0;
+  margin-right: 15px;
 `;
 
 export const PropertyImage = styled.img`
-  width: 100px;
-  height: 100px;
-  object-fit: scale-down;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   border-radius: 5px;
-  margin-right: 15px;
 `;
 
 export const PropertyDetails = styled.div`
   flex-grow: 1;
-  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 120px; /* Garante que o conteúdo cresça */
+  flex-wrap: wrap; /* Permite que o texto ocupe o espaço abaixo da imagem */
+  word-break: break-word;
+  
   strong {
     font-size: 1.1em;
     color: #333;
   }
+
   p {
-    margin: 5px 0;
+    margin: 3px 0;
     color: #555;
+    max-width: 100%;
+    flex-grow: 1; /* Faz o texto expandir para ocupar a área */
   }
 `;
+
 
 export const Loading = styled.div`
   font-size: 1.5em;
