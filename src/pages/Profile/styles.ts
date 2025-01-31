@@ -33,7 +33,7 @@ export const UserList = styled.ul`
 
 export const PropertyItem = styled.li`
   width: 100%;
-  display: flex;
+  display: grid;
   align-items: flex-start;
   padding: 10px;
   margin: 5px 0;
@@ -55,6 +55,7 @@ export const PropertyImageContainer = styled.div`
   border-radius: 5px;
   background-color: #f0f0f0;
   margin-right: 15px;
+  margin-bottom: 10px;
 `;
 
 export const PropertyImage = styled.img`
