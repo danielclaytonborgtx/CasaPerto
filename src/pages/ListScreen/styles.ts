@@ -46,6 +46,7 @@ export const Price = styled.p`
   color: green; 
   font-size: 1.2em;
   margin-top: 5px;
+  font-weight: bold;
 `;
 
 export const Button = styled.button`

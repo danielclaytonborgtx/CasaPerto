@@ -41,7 +41,6 @@ export const PropertyItem = styled.li`
   border-radius: 5px;
   background-color: #fff;
   position: relative;
-  min-height: 130px;
 `;
 
 export const PropertyItemLayout = styled.div`
@@ -92,6 +91,7 @@ export const TitlePriceContainer = styled.div`
     margin-bottom: 0;
     color: green;
     font-size: 1.2em;
+    font-weight: bold;
   }
 `;
 
@@ -103,6 +103,7 @@ export const PropertyDetails = styled.div`
   min-height: 120px; 
   flex-wrap: wrap; 
   word-break: break-word;
+  padding: 0 15px;
   
   strong {
     font-size: 1.1em;
