@@ -161,7 +161,7 @@ export const TrashIcon = styled.div`
 export const EditIcon = styled.div`
   position: absolute;
   top: 10px; 
-  right: 35px; 
+  right: 40px; 
   cursor: pointer;
   transition: color 0.3s ease;
   font-size: 18px; 
