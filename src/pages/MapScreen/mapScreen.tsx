@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { GoogleMap, LoadScript, InfoWindow } from "@react-google-maps/api";
+import { GoogleMap, InfoWindow } from "@react-google-maps/api";
 import { FaCrosshairs, FaMapMarkedAlt } from "react-icons/fa";
 import { Container, InfoContent, InfoWindowContainer, NavigationIconContainer, PropertyImage, UpdateButton } from "./styles";
 import { usePropertyContext } from "../../contexts/PropertyContext";
@@ -177,7 +177,7 @@ const MapScreen: React.FC = () => {
 
   return (
     <Container>
-      <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
+      
         {isLoaded ? (
           <GoogleMap
             mapContainerStyle={{
@@ -242,7 +242,6 @@ const MapScreen: React.FC = () => {
         ) : (
           <div>Carregando mapa...</div>
         )}
-      </LoadScript>
 
       <UpdateButton onClick={handleUpdateLocation}>
         <FaCrosshairs size={20} />

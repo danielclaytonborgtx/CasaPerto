@@ -66,6 +66,11 @@ export const InfoContent = styled.div`
   align-items: center;
   justify-content: center;
   margin-top: 30px;
+
+  p {
+    color: green; 
+    font-weight: bold;
+  }
 `;
 
 export const PropertyImage = styled.img`

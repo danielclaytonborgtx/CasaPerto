@@ -17,6 +17,7 @@ import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
 import GlobalStyles from './styles';
+import GoogleMapsApiLoader from './components/GoogleMapsApiLoader';
 
 const App: React.FC = () => {
   return (
@@ -28,10 +29,13 @@ const App: React.FC = () => {
             <Route path="signIn" element={<SignIn />} />
             <Route path="signUp" element={<SignUp />} />
             <Route index element={<Home />} />
-            <Route path="map" element={<MapScreen />} />
+
+            <Route path="map" element={<GoogleMapsApiLoader><MapScreen /></GoogleMapsApiLoader>} />
+            <Route path="addProperty" element={<GoogleMapsApiLoader><AddProperty /></GoogleMapsApiLoader>} />
+            <Route path="editProperty/:id" element={<GoogleMapsApiLoader><EditProperty /></GoogleMapsApiLoader>} />
+
+
             <Route path="list" element={<ListScreen />} />
-            <Route path="addProperty" element={<AddProperty />} />
-            <Route path="editProperty/:id" element={<EditProperty />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/property/:id" element={<PropertyDetails />} /> 
             <Route path="/profile" element={<Profile />} />

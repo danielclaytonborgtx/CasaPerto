@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../services/authContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+import { GoogleMap, Marker } from '@react-google-maps/api';
 import {
   AddPropertyContainer,
   FormInput,
@@ -223,7 +223,7 @@ const AddProperty = () => {
       
       <p>Agora abaixo, arraste a tela, e com um clique marque o local do imóvel no mapa.</p>
       <MapWrapper>
-        <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
+        
           {isLoaded ? (
             <GoogleMap
               mapContainerStyle={{ width: '100%', height: '400px' }}
@@ -256,7 +256,7 @@ const AddProperty = () => {
           ) : (
             <div>Carregando mapa...</div>
           )}
-        </LoadScript>
+       
       </MapWrapper>
 
       <Button onClick={handleAddProperty} disabled={loading}>
