@@ -49,7 +49,7 @@ export const Icon = styled.span`
 export const SwitchContainer = styled.div`
   display: flex;
   align-items: center;
-  justify-content: center; // Garante que o Switch fique centralizado
+  justify-content: center; 
 `;
 
 

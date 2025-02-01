@@ -40,12 +40,34 @@ const Header: React.FC = () => {
         <Switch
           checked={isRent}
           onChange={handleSwitchChange}
-          offColor="#ffffff"
-          onColor="#ffffff"
+          offColor="#E0FFFF"
+          onColor="#E0FFFF"
           height={40}
           width={160}
-          uncheckedIcon={<span style={{ fontSize: '20px', color: 'black', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%', paddingRight: '100px' }}>Aluguel</span>}   
-          checkedIcon={<span style={{ fontSize: '20px', color: 'black', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%', paddingLeft: '60px' }}>Venda</span>}  
+          uncheckedIcon={
+            <span style={{ 
+              fontSize: '20px', 
+              color: 'black', 
+              fontWeight: 'bold',
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center', 
+              height: '100%', 
+              width: '100%', 
+              paddingRight: '100px' 
+            }}>Aluguel</span>}   
+          checkedIcon={
+            <span style={{ 
+              fontSize: '20px', 
+              color: 'black', 
+              fontWeight: 'bold',
+              display: 'flex', 
+              justifyContent: 'center',
+              alignItems: 'center', 
+              height: '100%', 
+              width: '100%', 
+              paddingLeft: '60px' 
+            }}>Venda</span>}  
           handleDiameter={35}
           onHandleColor="#00BFFF"
           offHandleColor="#00BFFF"
