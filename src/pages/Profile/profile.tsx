@@ -13,7 +13,9 @@ import {
   PropertyDetails, 
   TrashIcon,
   EditIcon, 
-  PropertyImageContainer} from "./styles";
+  PropertyImageContainer,
+  TitlePriceContainer,
+  PropertyItemLayout} from "./styles";
 
 import { FiLogOut } from "react-icons/fi";
 import { FaTrashAlt, FaPen } from "react-icons/fa"; 
@@ -166,18 +168,22 @@ const Profile: React.FC = () => {
 
             return (
               <PropertyItem key={property.id}>
-                <PropertyImageContainer>
-                <PropertyImage 
-                  src={imageUrl} 
-                  alt={property.title} 
-                  onClick={() => handleImageClick(property.id)} // Navega para os detalhes ao clicar na imagem
-                />
-                </PropertyImageContainer>
+                <PropertyItemLayout>
+                  <PropertyImageContainer>
+                    <PropertyImage 
+                      src={imageUrl} 
+                      alt={property.title} 
+                      onClick={() => handleImageClick(property.id)} 
+                    />
+                  </PropertyImageContainer>
+                  <TitlePriceContainer>
+                    <strong>{property.title}</strong>
+                    <p>Valor: {formatPrice(Number(property.price))}</p>
+                  </TitlePriceContainer>
+                </PropertyItemLayout>
                 <PropertyDetails>
-                  <strong>{property.title}</strong>
-                  <p>{property.description}</p>
-                  <p>Valor: {formatPrice(Number(property.price))}</p>
-                  {property.description1 && <p>{property.description1}</p>} 
+                  <p>{property.description}</p>                 
+                  {property.description1 && <strong>{property.description1}</strong>} 
                 </PropertyDetails>
                 <div>
                   <TrashIcon onClick={() => handleDeleteProperty(property.id)}>

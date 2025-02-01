@@ -44,6 +44,17 @@ export const PropertyItem = styled.li`
   min-height: 130px;
 `;
 
+export const PropertyItemLayout = styled.div`
+  display: flex;
+  align-items: center; 
+  justify-content: flex-start;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 5px;
+  background-color: #fff;
+  width: 100%;
+`;
+
 export const PropertyImageContainer = styled.div`
   width: 120px;
   height: 120px;
@@ -65,13 +76,32 @@ export const PropertyImage = styled.img`
   border-radius: 5px;
 `;
 
+export const TitlePriceContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  
+  strong {
+    font-size: 1.5em;
+    color: #333;
+  }
+
+  p {
+    margin-top: 25px;
+    margin-bottom: 0;
+    color: #00BFFF;
+    font-size: 1.2em;
+  }
+`;
+
 export const PropertyDetails = styled.div`
   flex-grow: 1;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  min-height: 120px; /* Garante que o conteúdo cresça */
-  flex-wrap: wrap; /* Permite que o texto ocupe o espaço abaixo da imagem */
+  min-height: 120px; 
+  flex-wrap: wrap; 
   word-break: break-word;
   
   strong {
@@ -83,10 +113,9 @@ export const PropertyDetails = styled.div`
     margin: 3px 0;
     color: #555;
     max-width: 100%;
-    flex-grow: 1; /* Faz o texto expandir para ocupar a área */
+    flex-grow: 1;
   }
 `;
-
 
 export const Loading = styled.div`
   font-size: 1.5em;
