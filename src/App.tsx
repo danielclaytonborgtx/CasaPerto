@@ -6,12 +6,12 @@ import MapScreen from './pages/MapScreen/mapScreen';
 import ListScreen from './pages/ListScreen/listScreen';
 import Layout from './layout/layout'; 
 import SignIn from './pages/SignIn/signIn';
-import SignUp from './pages/SignUp/signUp'
+import SignUp from './pages/SignUp/signUp';
 import AddProperty from './pages/AddProperty/addProperty';
-import EditProperty from './pages/EditProperty/editProperty'
+import EditProperty from './pages/EditProperty/editProperty';
 import Contact from './pages/Contact/contact';
 import PropertyDetails from './pages/PropertyDetails/propertyDetails';
-import Profile from './pages/Profile/profile'
+import Profile from './pages/Profile/profile';
 
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
@@ -24,24 +24,23 @@ const App: React.FC = () => {
     <>
       <GlobalStyles /> 
       <Router>
-        <Routes>
+        <GoogleMapsApiLoader> 
+          <Routes>
             <Route path="/" element={<Layout />}>
-            <Route path="signIn" element={<SignIn />} />
-            <Route path="signUp" element={<SignUp />} />
-            <Route index element={<Home />} />
-
-            <Route path="map" element={<GoogleMapsApiLoader><MapScreen /></GoogleMapsApiLoader>} />
-            <Route path="addProperty" element={<GoogleMapsApiLoader><AddProperty /></GoogleMapsApiLoader>} />
-            <Route path="editProperty/:id" element={<GoogleMapsApiLoader><EditProperty /></GoogleMapsApiLoader>} />
-
-
-            <Route path="list" element={<ListScreen />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/property/:id" element={<PropertyDetails />} /> 
-            <Route path="/profile" element={<Profile />} />
-          </Route>
+              <Route index element={<Home />} />
+              <Route path="signIn" element={<SignIn />} />
+              <Route path="signUp" element={<SignUp />} />
+              <Route path="map" element={<MapScreen />} />
+              <Route path="addProperty" element={<AddProperty />} />
+              <Route path="editProperty/:id" element={<EditProperty />} />
+              <Route path="list" element={<ListScreen />} />
+              <Route path="contact" element={<Contact />} />
+              <Route path="property/:id" element={<PropertyDetails />} />
+              <Route path="profile" element={<Profile />} />
+            </Route>
             <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
+          </Routes>
+        </GoogleMapsApiLoader> 
       </Router>
     </>
   );
