@@ -42,8 +42,8 @@ export const UpdateButton = styled.button`
 export const InfoWindowContainer = styled.div`
   display: flex;
   flex-direction: column;
-  width: 250px; 
-  height: 200px; 
+  width: 190px; 
+  height: 280px; 
   padding: 10px;
   position: relative;
   background-color: white;
@@ -75,7 +75,7 @@ export const InfoContent = styled.div`
 
 export const PropertyImage = styled.img`
   width: 100%; 
-  height: auto; 
+  height: 100%; 
   object-fit: cover;
   cursor: pointer;
 `;
