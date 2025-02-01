@@ -118,7 +118,6 @@ const Profile: React.FC = () => {
   };
 
   const handleEditProperty = (propertyId: number) => {
-    console.log("Navigating to editProperty with ID:", propertyId);
     const property = properties.find((p) => p.id === propertyId);
     if (property) {
       navigate(`/editProperty/${propertyId}`, { state: property });
