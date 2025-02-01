@@ -178,7 +178,7 @@ const Profile: React.FC = () => {
                   </PropertyImageContainer>
                   <TitlePriceContainer>
                     <strong>{property.title}</strong>
-                    <p>Valor: {formatPrice(Number(property.price))}</p>
+                    <p>{formatPrice(Number(property.price))}</p>
                   </TitlePriceContainer>
                 </PropertyItemLayout>
                 <PropertyDetails>

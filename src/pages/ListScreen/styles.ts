@@ -29,9 +29,9 @@ export const Item = styled.div`
 `;
 
 export const Image = styled.img`
-  width: 100%; /* Imagem ocupa 100% da largura do item */
-  height: 250px; /* Ajuste a altura para que a imagem ocupe mais espaço vertical */
-  object-fit: cover; /* Garante que a imagem ocupe o espaço sem distorcer */
+  width: 100%; 
+  height: 250px; 
+  object-fit: cover; 
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
 `;
@@ -40,6 +40,12 @@ export const Title = styled.h3`
   font-size: 18px;
   margin: 10px;
   text-align: center;
+`;
+
+export const Price = styled.p`
+  color: green; 
+  font-size: 1.2em;
+  margin-top: 5px;
 `;
 
 export const Button = styled.button`
@@ -51,7 +57,7 @@ export const Button = styled.button`
   text-align: center;
   cursor: pointer;
   border-radius: 0 0 8px 8px;
-  font-size: 14px; /* Texto menor para o botão */
+  font-size: 14px; 
   transition: background-color 0.3s;
 
   &:hover {

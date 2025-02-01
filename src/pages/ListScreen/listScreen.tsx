@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Item, Image, Title, Button } from './styles';
+import { Container, Item, Image, Title, Button, Price } from './styles';
 import { usePropertyContext } from "../../contexts/PropertyContext";
 
 interface Property {
@@ -113,7 +113,7 @@ const ListScreen: React.FC = () => {
             <Item key={property.id}>
               <Image src={imageUrl} alt={property.title} />
               <Title>{property.title}</Title>
-              <p>{formatPrice(property.price)}</p>
+              <Price>{formatPrice(property.price)}</Price>
               <Button onClick={() => navigate(`/property/${property.id}`, { state: property })}>
                 Ver Detalhes
               </Button>

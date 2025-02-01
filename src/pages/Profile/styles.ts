@@ -90,7 +90,7 @@ export const TitlePriceContainer = styled.div`
   p {
     margin-top: 25px;
     margin-bottom: 0;
-    color: #00BFFF;
+    color: green;
     font-size: 1.2em;
   }
 `;
