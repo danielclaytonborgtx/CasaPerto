@@ -4,7 +4,7 @@ export const Container = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 20px;
+  padding: 10px 10px;
   background-color: #87CEEB;
   border-bottom: 1px solid #000000;
   position: fixed;
@@ -12,7 +12,7 @@ export const Container = styled.div`
   left: 0;
   right: 0;
   z-index: 10;
-  height: 60px;
+  height: 50px;
 `;
 
 export const MenuButton = styled.button`

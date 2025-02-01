@@ -4,20 +4,21 @@ export const Container = styled.div`
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding: 10px 20px;
+  padding: 5px 20px;
   background-color: #87CEEB;
   border-top: 1px solid #000000;
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
+  height: 50px;
 `;
 
 export const Button = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 55px;
+  padding: 10px 60px;
   border-radius: 10px;
   background-color: transparent;
   border: none;
