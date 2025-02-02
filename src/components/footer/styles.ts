@@ -13,6 +13,11 @@ export const Container = styled.div`
   right: 0;
   height: 50px;
   width: 100%;
+  box-sizing: border-box;
+  body {
+  margin: 0;
+  padding: 0;
+}
 `;
 
 export const Button = styled.button`

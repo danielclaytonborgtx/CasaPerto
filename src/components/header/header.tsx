@@ -37,41 +37,51 @@ const Header: React.FC = () => {
       </MenuButton>
 
       <SwitchContainer>
-        <Switch
-          checked={isRent}
-          onChange={handleSwitchChange}
-          offColor="#E0FFFF"
-          onColor="#E0FFFF"
-          height={40}
-          width={160}
-          uncheckedIcon={
-            <span style={{ 
-              fontSize: '20px', 
-              color: 'black', 
-              fontWeight: 'bold',
-              display: 'flex', 
-              justifyContent: 'center', 
-              alignItems: 'center', 
-              height: '100%', 
-              width: '100%', 
-              paddingRight: '100px' 
-            }}>Aluguel</span>}   
-          checkedIcon={
-            <span style={{ 
-              fontSize: '20px', 
-              color: 'black', 
-              fontWeight: 'bold',
-              display: 'flex', 
-              justifyContent: 'center',
-              alignItems: 'center', 
-              height: '100%', 
-              width: '100%', 
-              paddingLeft: '60px' 
-            }}>Venda</span>}  
-          handleDiameter={35}
-          onHandleColor="#00BFFF"
-          offHandleColor="#00BFFF"
-        />
+          <Switch
+            checked={isRent}
+            onChange={handleSwitchChange}
+            offColor="#E0FFFF"
+            onColor="#E0FFFF"
+            height={40}
+            width={160}
+            uncheckedIcon={
+              <span style={{
+                fontSize: '20px',
+                color: 'black',
+                fontWeight: 'bold',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '110%',
+                width: '100%',
+                position: 'absolute',
+                left: -48,
+                textAlign: 'center', 
+              }}>
+                Aluguel
+              </span>
+            }
+            checkedIcon={
+              <span style={{
+                fontSize: '20px',
+                color: 'black',
+                fontWeight: 'bold',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '110%',
+                width: '100%',
+                position: 'absolute',
+                right: -45,
+                textAlign: 'center',
+              }}>
+                Venda
+              </span>
+            }
+            handleDiameter={35}
+            onHandleColor="#00BFFF"
+            offHandleColor="#00BFFF"
+          />
       </SwitchContainer>
 
       <AddButton onClick={handleAddPropertyClick}>
