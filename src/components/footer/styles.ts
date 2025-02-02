@@ -12,6 +12,7 @@ export const Container = styled.div`
   left: 0;
   right: 0;
   height: 50px;
+  width: 100%;
 `;
 
 export const Button = styled.button`
