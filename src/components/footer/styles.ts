@@ -14,10 +14,15 @@ export const Container = styled.div`
   height: 50px;
   width: 100%;
   box-sizing: border-box;
+  
+  @media (max-width: 768px) {
+    padding: 5px 10px; 
+  }
+  
   body {
-  margin: 0;
-  padding: 0;
-}
+    margin: 0;
+    padding: 0;
+  }
 `;
 
 export const Button = styled.button`
