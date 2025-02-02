@@ -87,7 +87,7 @@ export const TitlePriceContainer = styled.div`
   }
 
   p {
-    margin-top: 25px;
+    margin-top: 15px;
     margin-bottom: 0;
     color: green;
     font-size: 1.2em;
@@ -111,7 +111,7 @@ export const PropertyDetails = styled.div`
   }
 
   p {
-    margin: 3px 0;
+    margin: 0 0 10px 0;
     color: #555;
     max-width: 100%;
     flex-grow: 1;

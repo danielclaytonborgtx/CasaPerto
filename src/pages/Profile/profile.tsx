@@ -15,7 +15,8 @@ import {
   EditIcon, 
   PropertyImageContainer,
   TitlePriceContainer,
-  PropertyItemLayout} from "./styles";
+  PropertyItemLayout
+} from "./styles";
 
 import { FiLogOut } from "react-icons/fi";
 import { FaTrashAlt, FaPen } from "react-icons/fa"; 
@@ -45,14 +46,15 @@ const Profile: React.FC = () => {
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      setUser(parsedUser); 
-      fetchProperties(parsedUser.id); 
-      setLoading(false);
-    } else {
-      navigate("/login"); 
+    if (!storedUser) {
+      navigate("/login");
+      return;
     }
+
+    const parsedUser = JSON.parse(storedUser);
+    setUser(parsedUser);
+    fetchProperties(parsedUser.id);
+    setLoading(false);
   }, [navigate]);
 
   const fetchProperties = async (userId: number) => {
@@ -62,20 +64,19 @@ const Profile: React.FC = () => {
       );
       if (response.ok) {
         const data = await response.json();
-   
         if (data.message) {
-          setProperties([]); 
-          setError(data.message); 
+          setProperties([]);
+          setError(data.message);
         } else {
           const sortedProperties = data.sort((a: Property, b: Property) => {
             const dateA = new Date(a.createdAt);
             const dateB = new Date(b.createdAt);
-            return dateB.getTime() - dateA.getTime(); // Ordem decrescente
+            return dateB.getTime() - dateA.getTime();
           });
           setProperties(sortedProperties);
         }
       } else if (response.status === 404) {
-        setProperties([]); 
+        setProperties([]);
         setError(null);
       } else {
         setError("Erro ao carregar imóveis.");
@@ -87,21 +88,14 @@ const Profile: React.FC = () => {
 
   const handleLogout = () => {
     const confirmLogout = window.confirm("Tem certeza que deseja sair?");
-
-    if (!confirmLogout) {
-      return; 
-    }
-
-    localStorage.removeItem("user"); 
-    navigate("/login"); 
+    if (!confirmLogout) return;
+    localStorage.removeItem("user");
+    navigate("/login");
   };
 
   const handleDeleteProperty = async (propertyId: number) => {
     const confirmDelete = window.confirm("Deseja excluir este imóvel?");
-
-    if (!confirmDelete) {
-      return; 
-    }
+    if (!confirmDelete) return;
 
     try {
       const response = await fetch(`https://server-2-production.up.railway.app/property/${propertyId}`, {
@@ -128,24 +122,18 @@ const Profile: React.FC = () => {
     navigate(`/property/${propertyId}`);
   };
 
-  if (loading) {
-    return <Loading>Carregando...</Loading>;
-  }
-
-  if (error) {
-    return <ErrorMessage>{error}</ErrorMessage>;
-  }
-
-  if (!user) {
-    return <div>Usuário não encontrado</div>;
-  }
-
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
     }).format(price);
   };
+
+  if (loading) return <Loading>Carregando...</Loading>;
+
+  if (error) return <ErrorMessage>{error}</ErrorMessage>;
+
+  if (!user) return <div>Usuário não encontrado</div>;
 
   return (
     <ProfileContainer>
@@ -157,13 +145,13 @@ const Profile: React.FC = () => {
 
       <h2>Meus imóveis</h2>
       {properties.length === 0 ? (
-        <div>{error || "Você ainda não tem imóveis postados."}</div> 
+        <div>{error || "Você ainda não tem imóveis postados."}</div>
       ) : (
         <UserList>
           {properties.map((property) => {
             const imageUrl = property.images && property.images[0]
               ? property.images[0]
-              : '/path/to/default-image.jpg'; 
+              : '/path/to/default-image.jpg';
 
             return (
               <PropertyItem key={property.id}>
@@ -181,8 +169,8 @@ const Profile: React.FC = () => {
                   </TitlePriceContainer>
                 </PropertyItemLayout>
                 <PropertyDetails>
-                  <p>{property.description}</p>                 
-                  {property.description1 && <strong>{property.description1}</strong>} 
+                  <p>{property.description}</p>
+                  {property.description1 && <strong>{property.description1}</strong>}
                 </PropertyDetails>
                 <div>
                   <TrashIcon onClick={() => handleDeleteProperty(property.id)}>

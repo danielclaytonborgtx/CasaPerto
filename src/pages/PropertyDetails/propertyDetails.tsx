@@ -78,7 +78,7 @@ const PropertyDetails: React.FC = () => {
     return <p>Erro: Nenhuma propriedade foi encontrada.</p>;
   }
 
-  const { title, price, description, images, user, createdAt } = property;
+  const { title, price, description, images = [], user, createdAt } = property;
 
   const settings = {
     dots: true,
@@ -141,7 +141,9 @@ const PropertyDetails: React.FC = () => {
   };
 
   const handleNavigateToMap = () => {
-    navigate("/map", { state: { id: property.id, fromDetails: true } });
+    if (property) {
+      navigate("/map", { state: { id: property.id, fromDetails: true } });
+    }
   };
 
   return (
