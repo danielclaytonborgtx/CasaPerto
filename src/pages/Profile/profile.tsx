@@ -152,7 +152,7 @@ const Profile: React.FC = () => {
       <LogoutIcon onClick={handleLogout}>
         <FiLogOut size={24} />
       </LogoutIcon>
-      <UserName>Bem-vindo, {user.username}</UserName>
+      <UserName>{user.username}</UserName>
       <UserInfo>Email: {user.email}</UserInfo>
 
       <h2>Meus imóveis</h2>

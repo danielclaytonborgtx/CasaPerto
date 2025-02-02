@@ -27,6 +27,7 @@ const MapScreen: React.FC = () => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
+    
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -40,21 +41,22 @@ const MapScreen: React.FC = () => {
       );
     }
 
-    fetch("https://server-2-production.up.railway.app/property")
-      .then((response) => {
+    const loadProperties = async () => {
+      try {
+        const response = await fetch("https://server-2-production.up.railway.app/property");
         if (!response.ok) {
           throw new Error("Erro ao buscar as propriedades");
         }
-        return response.json();
-      })
-      .then((data) => {
+        const data = await response.json();
         setProperties(data);
         setIsLoaded(true);
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error("Erro ao carregar propriedades:", error);
         setIsLoaded(true);
-      });
+      }
+    };
+
+    loadProperties();
   }, []);
 
   const filteredProperties = useMemo(() => {
@@ -68,7 +70,6 @@ const MapScreen: React.FC = () => {
 
   useEffect(() => {
     if (map && location) {
-      
       markersRef.current.forEach((marker) => marker.setMap(null));
       markersRef.current = [];
 
@@ -109,7 +110,7 @@ const MapScreen: React.FC = () => {
           fillOpacity: 1,
           strokeColor: "#E0FFFF",
           strokeWeight: 2,
-          scale: 8,
+          scale: 7,
         },
         clickable: false,
       });
@@ -133,9 +134,9 @@ const MapScreen: React.FC = () => {
     }
   }, [state, properties, map]);
 
-  const handleCloseInfoWindow = () => {
+  const handleCloseInfoWindow = useCallback(() => {
     setSelectedProperty(null);
-  };
+  }, []);
 
   const handleUpdateLocation = useCallback(() => {
     if (navigator.geolocation) {
@@ -164,12 +165,12 @@ const MapScreen: React.FC = () => {
     }).format(priceNumber);
   };
 
-  const handleImageClick = (propertyId: number) => {
+  const handleImageClick = useCallback((propertyId: number) => {
     const property = properties.find((p) => p.id === propertyId);
     if (property) {
       navigate(`/property/${propertyId}`, { state: property });
     }
-  };
+  }, [properties, navigate]);
 
   if (!location) {
     return <div>Carregando mapa...</div>;
@@ -177,71 +178,70 @@ const MapScreen: React.FC = () => {
 
   return (
     <Container>
-      
-        {isLoaded ? (
-          <GoogleMap
-            mapContainerStyle={{
-              width: "100%",
-              height: "100%",
-            }}
-            center={mapCenter}
-            zoom={13}
-            options={{
-              disableDefaultUI: true,
-              streetViewControl: false,
-              mapTypeControl: false,
-              fullscreenControl: false,
-              gestureHandling: "greedy",
-              styles: [
-                {
-                  featureType: "poi",
-                  elementType: "all",
-                  stylers: [
-                    {
-                      visibility: "off",
-                    },
-                  ],
-                },
-              ],
-            }}
-            onLoad={(mapInstance) => setMap(mapInstance)}
-          >
-            {selectedProperty && (
-              <InfoWindow
-                position={{
-                  lat: selectedProperty.latitude,
-                  lng: selectedProperty.longitude,
-                }}
-                onCloseClick={handleCloseInfoWindow}
-              >
-                <InfoWindowContainer>
-                  <NavigationIconContainer>
-                    <FaMapMarkedAlt
-                      size={25}
-                      onClick={() => {
-                        const destination = `${selectedProperty.latitude},${selectedProperty.longitude}`;
-                        const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destination}`;
-                        window.open(googleMapsUrl, "_blank");
-                      }}
-                    />
-                  </NavigationIconContainer>
+      {isLoaded ? (
+        <GoogleMap
+          mapContainerStyle={{
+            width: "100%",
+            height: "100%",
+          }}
+          center={mapCenter}
+          zoom={13}
+          options={{
+            disableDefaultUI: true,
+            streetViewControl: false,
+            mapTypeControl: false,
+            fullscreenControl: false,
+            gestureHandling: "greedy",
+            styles: [
+              {
+                featureType: "poi",
+                elementType: "all",
+                stylers: [
+                  {
+                    visibility: "off",
+                  },
+                ],
+              },
+            ],
+          }}
+          onLoad={(mapInstance) => setMap(mapInstance)}
+        >
+          {selectedProperty && (
+            <InfoWindow
+              position={{
+                lat: selectedProperty.latitude,
+                lng: selectedProperty.longitude,
+              }}
+              onCloseClick={handleCloseInfoWindow}
+            >
+              <InfoWindowContainer>
+                <NavigationIconContainer>
+                  <FaMapMarkedAlt
+                    size={25}
+                    onClick={() => {
+                      const destination = `${selectedProperty.latitude},${selectedProperty.longitude}`;
+                      const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destination}`;
+                      window.open(googleMapsUrl, "_blank");
+                    }}
+                  />
+                </NavigationIconContainer>
 
-                  <InfoContent>
-                    <h3>{selectedProperty.title}</h3>
-                    <p>{formatPrice(selectedProperty.price)}</p>
-                    <PropertyImage
-                      src={`https://server-2-production.up.railway.app${selectedProperty.images?.[0]}`}
-                      alt={selectedProperty.title}
-                      onClick={() => handleImageClick(selectedProperty.id)}
-                    />
-                  </InfoContent>
-                </InfoWindowContainer>
-              </InfoWindow>
-            )}
-          </GoogleMap>
-        ) : (
-          <div>Carregando mapa...</div>
-        )}
+                <InfoContent>
+                  <h3>{selectedProperty.title}</h3>
+                  <p>{formatPrice(selectedProperty.price)}</p>
+                  <PropertyImage
+                    src={`https://server-2-production.up.railway.app${selectedProperty.images?.[0]}`}
+                    alt={selectedProperty.title}
+                    onClick={() => handleImageClick(selectedProperty.id)}
+                  />
+                </InfoContent>
+              </InfoWindowContainer>
+            </InfoWindow>
+          )}
+        </GoogleMap>
+      ) : (
+        <div>Carregando mapa...</div>
+      )}
 
       <UpdateButton onClick={handleUpdateLocation}>
         <FaCrosshairs size={20} />

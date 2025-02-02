@@ -74,8 +74,8 @@ export const InfoContent = styled.div`
 `;
 
 export const PropertyImage = styled.img`
-  width: 100%; 
-  height: 100%; 
+  width: 180px; 
+  height: 200px; 
   object-fit: cover;
   cursor: pointer;
 `;
