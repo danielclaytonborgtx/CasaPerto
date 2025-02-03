@@ -5,7 +5,7 @@ export const ProfileContainer = styled.div`
   flex-direction: column;
   align-items: center;
   padding: 0;
-  margin-top: 80px;
+  margin-top: 35px;
   margin-bottom: 80px;
   width: 100%;
   box-sizing: border-box;
@@ -125,11 +125,13 @@ export const Loading = styled.div`
 `;
 
 export const LogoutIcon = styled.div`
-  margin-left: 330px;
-  top: 10px;
+  position: relative; 
+  top: 30px; 
+  left: 180px; 
   cursor: pointer;
   color: #000;
   transition: transform 0.2s ease-in-out;
+
   &:hover {
     transform: scale(1.2);
   }
@@ -147,7 +149,7 @@ export const ErrorMessage = styled.div`
 
 export const TrashIcon = styled.div`
   position: absolute;
- top: 10px;
+  top: 10px;
   right: 10px; 
   cursor: pointer;
   transition: color 0.3s ease;

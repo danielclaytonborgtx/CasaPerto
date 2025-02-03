@@ -5,10 +5,20 @@ export const Container = styled.div`
   flex-direction: column;
   align-items: center;
   padding: 0;
-  margin-top: 80px;
+  margin-top: 60px;
   margin-bottom: 80px;
   width: 100%;
   box-sizing: border-box;
+`;
+
+export const SearchInput = styled.input`
+  width: 90%;
+  max-width: 400px;
+  padding: 10px;
+  margin-bottom: 20px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 `;
 
 export const Item = styled.div`

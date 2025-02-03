@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Item, Image, Title, Button, Price } from './styles';
+import { Container, Item, Image, Title, Button, Price, SearchInput } from './styles';
 import { usePropertyContext } from "../../contexts/PropertyContext";
 
 interface Property {
@@ -15,11 +15,12 @@ interface Property {
 }
 
 const ListScreen: React.FC = () => {
-  const { isRent } = usePropertyContext(); 
+  const { isRent } = usePropertyContext();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null); 
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -31,7 +32,7 @@ const ListScreen: React.FC = () => {
       Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
       Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c; 
+    return R * c;
   };
 
   useEffect(() => {
@@ -69,16 +70,22 @@ const ListScreen: React.FC = () => {
     getUserLocation();
   }, []);
 
-  const filteredProperties = properties.filter((property) => {
-    const category = isRent ? "venda" : "aluguel"; 
-    return property.category.toLowerCase() === category.toLowerCase();
-  });
+  const filteredProperties = properties
+    .filter((property) => {
+      const category = isRent ? "venda" : "aluguel";
+      return property.category.toLowerCase() === category.toLowerCase();
+    })
+    .filter((property) => {
+      const normalizedTitle = property.title.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+      const normalizedSearch = searchTerm.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+      return normalizedTitle.includes(normalizedSearch);
+    });
 
   const sortedProperties = userLocation
-    ? filteredProperties.sort((a, b) => {
+    ? [...filteredProperties].sort((a, b) => {
         const distanceA = calculateDistance(userLocation.latitude, userLocation.longitude, a.latitude, a.longitude);
         const distanceB = calculateDistance(userLocation.latitude, userLocation.longitude, b.latitude, b.longitude);
-        return distanceA - distanceB; 
+        return distanceA - distanceB;
       })
     : filteredProperties;
 
@@ -101,12 +108,18 @@ const ListScreen: React.FC = () => {
 
   return (
     <Container>
+      <SearchInput
+        type="text"
+        placeholder="Buscar imóveis..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
       {sortedProperties.length === 0 ? (
         <div>Nenhum imóvel disponível para esta categoria.</div>
       ) : (
         sortedProperties.map((property) => {
           const imageUrl = property.images && property.images.length > 0
-            ? `https://server-2-production.up.railway.app${property.images[0]}` 
+            ? `https://server-2-production.up.railway.app${property.images[0]}`
             : '/images/default-image.jpg';
 
           return (

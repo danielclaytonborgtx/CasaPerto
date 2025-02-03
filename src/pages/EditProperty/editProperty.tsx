@@ -97,17 +97,6 @@ const EditProperty = () => {
   };
 
   const handleUpdateProperty = async () => {
-    console.log("Preparing to update property with data:", {
-      category,
-      title,
-      price,
-      description,
-      description1,
-      latitude,
-      longitude,
-      existingImages,
-      newImages: images,
-    });
 
     const parsedPrice = parseFloat(price); 
   
