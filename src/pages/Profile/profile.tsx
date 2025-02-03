@@ -54,10 +54,10 @@ const Profile: React.FC = () => {
     const parsedUser = JSON.parse(storedUser);
     setUser(parsedUser);
     fetchProperties(parsedUser.id);
-    setLoading(false);
   }, [navigate]);
 
   const fetchProperties = async (userId: number) => {
+    setLoading(true);
     try {
       const response = await fetch(
         `https://server-2-production.up.railway.app/property/user?userId=${userId}`
@@ -83,6 +83,9 @@ const Profile: React.FC = () => {
       }
     } catch {
       setError("Erro ao conectar com o servidor.");
+    }
+    finally {
+      setLoading(false); 
     }
   };
 
