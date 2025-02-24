@@ -68,12 +68,12 @@ const Profile: React.FC = () => {
 
   const fetchProfileImage = async (userId: number) => {
     try {
-      const response = await fetch(`http://localhost:3333/users/${userId}/profile-picture`);
+      const response = await fetch(`https://server-2-production.up.railway.app/users/${userId}/profile-picture`);
       if (response.ok) {
         const data = await response.json();
 
         if (data.user?.picture) {
-          setProfileImage(`http://localhost:3333${data.user.picture}`);
+          setProfileImage(`https://server-2-production.up.railway.app${data.user.picture}`);
         } else {
           setProfileImage(null); 
         }
@@ -87,7 +87,7 @@ const Profile: React.FC = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:3333/property/user?userId=${userId}`
+        `https://server-2-production.up.railway.app/property/user?userId=${userId}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -121,7 +121,7 @@ const Profile: React.FC = () => {
     if (!confirmDelete) return;
 
     try {
-      const response = await fetch(`http://localhost:3333/property/${propertyId}`, {
+      const response = await fetch(`https://server-2-production.up.railway.app/property/${propertyId}`, {
         method: "DELETE",
       });
       if (response.ok) {

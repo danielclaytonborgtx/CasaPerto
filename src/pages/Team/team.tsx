@@ -34,7 +34,7 @@ const Team = () => {
 
     const fetchTeams = async () => {
       try {
-        const response = await axios.get(`http://localhost:3333/teams`);
+        const response = await axios.get(`https://server-2-production.up.railway.app/teams`);
         setTeams(response.data);
       } catch (error) {
         console.error('Erro ao buscar equipes:', error);
@@ -56,7 +56,7 @@ const Team = () => {
 
   const getMemberName = async (userId: number) => {
     try {
-      const response = await axios.get(`http://localhost:3333/users/${userId}`);
+      const response = await axios.get(`https://server-2-production.up.railway.app/users/${userId}`);
       return response.data.name;
     } catch (error) {
       console.error('Erro ao buscar nome do membro:', error);
@@ -95,7 +95,7 @@ const Team = () => {
         }
   
         const response = await axios.post(
-          `http://localhost:3333/teams/${teamId}/leave`,
+          `https://server-2-production.up.railway.app/teams/${teamId}/leave`,
           { userId }, // Envia o userId diretamente no corpo da requisição
         );
         
@@ -132,7 +132,7 @@ const Team = () => {
             return (
               <TeamCard key={team.id}>
                 {team.imageUrl && (
-                  <TeamImage src={`http://localhost:3333${team.imageUrl}`} alt={`Imagem da equipe ${team.name}`} />
+                  <TeamImage src={`https://server-2-production.up.railway.app${team.imageUrl}`} alt={`Imagem da equipe ${team.name}`} />
                 )}
                 <TeamDetails>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

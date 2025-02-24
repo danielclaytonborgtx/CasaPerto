@@ -84,7 +84,7 @@ const MapScreen: React.FC = () => {
         console.log("User:", user);
 
         const response = await fetch(
-          `http://localhost:3333/properties/filter?userId=${user.id}&teamId=${team.id}`
+          `https://server-2-production.up.railway.app/properties/filter?userId=${user.id}&teamId=${team.id}`
         );
 
         if (!response.ok) {
@@ -306,7 +306,7 @@ const MapScreen: React.FC = () => {
                       .join(", ")}
                   </p>
                   <PropertyImage
-                    src={`http://localhost:3333${selectedProperty.images?.[0]}`}
+                    src={`https://server-2-production.up.railway.app${selectedProperty.images?.[0]}`}
                     alt={selectedProperty.title}
                     onClick={() => handleImageClick(selectedProperty.id)}
                   />

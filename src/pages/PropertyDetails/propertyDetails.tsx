@@ -49,7 +49,7 @@ const PropertyDetails: React.FC = () => {
       if (!location.state) {
         try {
           const response = await fetch(
-            `http://localhost:3333/property/${id}`
+            `https://server-2-production.up.railway.app/property/${id}`
           );
           if (!response.ok) {
             throw new Error("Erro ao buscar imóvel");
@@ -110,9 +110,9 @@ const PropertyDetails: React.FC = () => {
 
   const resolveImageUrl = (img: PropertyImage | string) => {
     if (typeof img === "string") {
-      return `http://localhost:3333${img}`;
+      return `https://server-2-production.up.railway.app${img}`;
     } else if (img.url) {
-      return `http://localhost:3333${img.url}`;
+      return `https://server-2-production.up.railway.app${img.url}`;
     }
     return "";
   };

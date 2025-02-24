@@ -103,7 +103,7 @@ const AddProperty = () => {
 
     try {
       const response = await axios.post(
-        'http://localhost:3333/property',
+        'https://server-2-production.up.railway.app/property',
         formData
       );
 
