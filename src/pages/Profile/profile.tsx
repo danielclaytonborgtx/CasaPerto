@@ -3,11 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { 
   ProfileContainer, 
   UserName, 
-  UserInfo, 
   UserList, 
   Loading, 
-  LogoutIcon, 
-  ErrorMessage, 
   PropertyItem, 
   PropertyImage, 
   PropertyDetails, 
@@ -15,14 +12,20 @@ import {
   EditIcon, 
   PropertyImageContainer,
   TitlePriceContainer,
-  PropertyItemLayout
+  PropertyItemLayout,
+  SectionTitle,
+  ProfileImage,
+  ProfileImageContainer,
+  ButtonContainer,
+  DefaultIcon,
+  StyledButton
 } from "./styles";
 
-import { FiLogOut } from "react-icons/fi";
-import { FaTrashAlt, FaPen } from "react-icons/fa"; 
+import { FaTrashAlt, FaPen, FaUsers, FaUserTie, FaEnvelope, FaCog } from "react-icons/fa"; 
 
 interface User {
   id: number;
+  name: string;
   username: string;
   email: string;
 }
@@ -42,6 +45,7 @@ const Profile: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [properties, setProperties] = useState<Property[]>([]); 
   const [error, setError] = useState<string | null>(null); 
+  const [profileImage, setProfileImage] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -53,14 +57,37 @@ const Profile: React.FC = () => {
 
     const parsedUser = JSON.parse(storedUser);
     setUser(parsedUser);
-    fetchProperties(parsedUser.id);
+
+    if (parsedUser?.id) { 
+      fetchProperties(parsedUser.id);
+      fetchProfileImage(parsedUser.id);
+    } else {
+      setError("Usuário inválido");
+    }
   }, [navigate]);
+
+  const fetchProfileImage = async (userId: number) => {
+    try {
+      const response = await fetch(`http://localhost:3333/users/${userId}/profile-picture`);
+      if (response.ok) {
+        const data = await response.json();
+
+        if (data.user?.picture) {
+          setProfileImage(`http://localhost:3333${data.user.picture}`);
+        } else {
+          setProfileImage(null); 
+        }
+      } 
+    } catch {
+      setError("Erro ao conectar com o servidor para carregar a imagem.");
+    }
+  };
 
   const fetchProperties = async (userId: number) => {
     setLoading(true);
     try {
       const response = await fetch(
-        `https://server-2-production.up.railway.app/property/user?userId=${userId}`
+        `http://localhost:3333/property/user?userId=${userId}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -89,19 +116,12 @@ const Profile: React.FC = () => {
     }
   };
 
-  const handleLogout = () => {
-    const confirmLogout = window.confirm("Tem certeza que deseja sair?");
-    if (!confirmLogout) return;
-    localStorage.removeItem("user");
-    navigate("/login");
-  };
-
   const handleDeleteProperty = async (propertyId: number) => {
     const confirmDelete = window.confirm("Deseja excluir este imóvel?");
     if (!confirmDelete) return;
 
     try {
-      const response = await fetch(`https://server-2-production.up.railway.app/property/${propertyId}`, {
+      const response = await fetch(`http://localhost:3333/property/${propertyId}`, {
         method: "DELETE",
       });
       if (response.ok) {
@@ -133,20 +153,45 @@ const Profile: React.FC = () => {
   };
 
   if (loading) return <Loading>Carregando...</Loading>;
-
-  if (error) return <ErrorMessage>{error}</ErrorMessage>;
-
   if (!user) return <div>Usuário não encontrado</div>;
 
   return (
     <ProfileContainer>
-      <LogoutIcon onClick={handleLogout}>
-        <FiLogOut size={24} />
-      </LogoutIcon>
-      <UserName>{user.username}</UserName>
-      <UserInfo>Email: {user.email}</UserInfo>
 
-      <h2>Meus imóveis</h2>
+      <ProfileImageContainer>
+        {profileImage ? (
+          <ProfileImage 
+          src={profileImage} 
+          alt="Foto de perfil" 
+        />
+        ) : (
+          <DefaultIcon>👤</DefaultIcon>
+        )}
+         </ProfileImageContainer>
+        <UserName>{user.name}</UserName>
+        <UserName>Creci-{user.username}</UserName>
+
+        <ButtonContainer>
+          <StyledButton onClick={() => navigate("/brokers")}>
+            <FaUserTie size={20} />
+            <span>Corretores</span>
+          </StyledButton>
+          <StyledButton onClick={() => navigate("/team")}>
+            <FaUsers size={20} />
+            <span>Equipes</span>
+          </StyledButton>
+          <StyledButton onClick={() => navigate("/messages")}>
+            <FaEnvelope size={20} /> 
+            <span>Mensagens</span>
+          </StyledButton>
+          <StyledButton onClick={() => navigate("/settings")}>
+            <FaCog size={20} /> 
+            <span>Configurações</span>
+          </StyledButton>
+        </ButtonContainer>
+
+      <SectionTitle>Meus imóveis</SectionTitle>
+
       {properties.length === 0 ? (
         <div>{error || "Você ainda não tem imóveis postados."}</div>
       ) : (

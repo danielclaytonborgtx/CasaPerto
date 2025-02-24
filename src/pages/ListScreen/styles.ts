@@ -61,7 +61,7 @@ export const Price = styled.p`
 
 export const Button = styled.button`
   background-color: #00BFFF;
-  color: white;
+  color: black;
   border: none;
   padding: 10px;
   width: 100%;

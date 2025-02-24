@@ -41,7 +41,7 @@ export const Button = styled.button`
   width: 100%;
   padding: 12px;
   background-color: #00BFFF;
-  color: white;
+  color: black;
   border: none;
   border-radius: 4px;
   font-size: 16px;
@@ -64,7 +64,7 @@ export const ImageUploadButton = styled.div`
   label {
     padding: 12px;
     background-color: #00BFFF;
-    color: white;
+    color: black;
     border-radius: 4px;
     font-size: 16px;
     cursor: pointer;

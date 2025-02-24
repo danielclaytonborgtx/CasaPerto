@@ -2,8 +2,30 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from "react"
 import { useNavigate, useLocation } from "react-router-dom";
 import { GoogleMap, InfoWindow } from "@react-google-maps/api";
 import { FaCrosshairs, FaMapMarkedAlt } from "react-icons/fa";
-import { Container, InfoContent, InfoWindowContainer, NavigationIconContainer, PropertyImage, UpdateButton } from "./styles";
+import {
+  Container,
+  InfoContent,
+  InfoWindowContainer,
+  NavigationIconContainer,
+  PropertyImage,
+  UpdateButton,
+  ErrorMessage,
+} from "./styles";
 import { usePropertyContext } from "../../contexts/PropertyContext";
+import { useAuth } from "../../services/authContext";
+
+// Defina as interfaces corretamente
+interface Team {
+  id: number;
+  name: string;
+}
+
+interface User {
+  id: number;
+  name: string;
+  team?: Team; // Adicione a propriedade team
+  teamMemberships?: { teamId: number; team: Team }[]; // Adicione a propriedade teamMemberships
+}
 
 interface Property {
   id: number;
@@ -13,9 +35,12 @@ interface Property {
   longitude: number;
   category: string;
   images: { url: string }[];
+  userId: number;
+  user: User; // Adicione a propriedade user
 }
 
 const MapScreen: React.FC = () => {
+  const { user } = useAuth() as { user: User }; // Forçar o tipo User
   const { isRent } = usePropertyContext();
   const [location, setLocation] = useState<google.maps.LatLngLiteral | null>(null);
   const [properties, setProperties] = useState<Property[]>([]);
@@ -25,9 +50,13 @@ const MapScreen: React.FC = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
   const [isLoaded, setIsLoaded] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  // Acessa o team dentro do user
+  const team = user?.team;
+
+  // Carrega a localização do usuário
   useEffect(() => {
-    
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -36,43 +65,75 @@ const MapScreen: React.FC = () => {
         },
         (error) => {
           console.error("Erro ao obter localização: ", error);
-          setLocation({ lat: -22.9068, lng: -43.1729 }); 
+          setLocation({ lat: -22.9068, lng: -43.1729 }); // Fallback para uma localização padrão
         }
       );
     }
+  }, []);
 
+  // Carrega as propriedades do backend
+  useEffect(() => {
     const loadProperties = async () => {
       try {
-        const response = await fetch("https://server-2-production.up.railway.app/property");
+        if (!user || !team) {
+          console.log("Usuário ou time não encontrado.");
+          setError("Usuário ou time não encontrado.");
+          setIsLoaded(true);
+          return;
+        }
+        console.log("User:", user);
+
+        const response = await fetch(
+          `http://localhost:3333/properties/filter?userId=${user.id}&teamId=${team.id}`
+        );
+
         if (!response.ok) {
           throw new Error("Erro ao buscar as propriedades");
         }
+
         const data = await response.json();
+        console.log("Propriedades retornadas pelo backend:", data); // Depuração
         setProperties(data);
         setIsLoaded(true);
       } catch (error) {
         console.error("Erro ao carregar propriedades:", error);
+        setError("Falha ao carregar propriedades.");
         setIsLoaded(true);
       }
     };
 
     loadProperties();
-  }, []);
+  }, [user, team]);
 
+  // Filtra as propriedades com base na categoria (venda ou aluguel)
   const filteredProperties = useMemo(() => {
     const category = isRent ? "venda" : "aluguel";
-    return properties.filter((property) => property.category.toLowerCase() === category.toLowerCase());
-  }, [properties, isRent]);
+  
+    if (!user || !team) return [];
+  
+    return properties.filter(
+      (property) =>
+        (property.userId === user.id || // Propriedades do usuário
+          property.user?.teamMemberships?.some(
+            (membership: { teamId: number; team: Team }) => membership.teamId === team.id
+          )) && // Propriedades da equipe
+        property.category.toLowerCase() === category.toLowerCase()
+    );
+  }, [properties, isRent, user, team]);
 
+  // Define o centro do mapa
   const mapCenter = useMemo(() => {
     return location || { lat: -22.9068, lng: -43.1729 };
   }, [location]);
 
+  // Adiciona marcadores ao mapa
   useEffect(() => {
     if (map && location) {
+      // Limpa marcadores anteriores
       markersRef.current.forEach((marker) => marker.setMap(null));
       markersRef.current = [];
 
+      // Adiciona novos marcadores para as propriedades filtradas
       const newMarkers: google.maps.Marker[] = [];
       filteredProperties.forEach((property) => {
         const propertyMarker = new google.maps.Marker({
@@ -100,6 +161,7 @@ const MapScreen: React.FC = () => {
 
       markersRef.current = newMarkers;
 
+      // Adiciona um marcador para a localização do usuário
       new google.maps.Marker({
         position: location,
         map,
@@ -115,12 +177,14 @@ const MapScreen: React.FC = () => {
         clickable: false,
       });
 
+      // Limpa os marcadores ao desmontar o componente
       return () => {
         newMarkers.forEach((marker) => marker.setMap(null));
       };
     }
   }, [map, location, filteredProperties]);
 
+  // Seleciona uma propriedade com base no estado da rota
   useEffect(() => {
     if (state && state.id) {
       const propertyToSelect = properties.find((property) => property.id === state.id);
@@ -134,10 +198,12 @@ const MapScreen: React.FC = () => {
     }
   }, [state, properties, map]);
 
+  // Fecha a janela de informações
   const handleCloseInfoWindow = useCallback(() => {
     setSelectedProperty(null);
   }, []);
 
+  // Atualiza a localização do usuário
   const handleUpdateLocation = useCallback(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -156,6 +222,7 @@ const MapScreen: React.FC = () => {
     }
   }, [map]);
 
+  // Formata o preço para o formato BRL
   const formatPrice = (price: string | number) => {
     const priceString = typeof price === "string" ? price : String(price);
     const priceNumber = parseFloat(priceString.replace("R$ ", "").replace(".", "").replace(",", "."));
@@ -165,6 +232,7 @@ const MapScreen: React.FC = () => {
     }).format(priceNumber);
   };
 
+  // Navega para a página de detalhes da propriedade
   const handleImageClick = useCallback((propertyId: number) => {
     const property = properties.find((p) => p.id === propertyId);
     if (property) {
@@ -178,6 +246,7 @@ const MapScreen: React.FC = () => {
 
   return (
     <Container>
+      {error && <ErrorMessage>{error}</ErrorMessage>}
       {isLoaded ? (
         <GoogleMap
           mapContainerStyle={{
@@ -229,8 +298,15 @@ const MapScreen: React.FC = () => {
                 <InfoContent>
                   <h3>{selectedProperty.title}</h3>
                   <p>{formatPrice(selectedProperty.price)}</p>
+                  <p>Proprietário: {selectedProperty.user?.name}</p>
+                  <p>
+                    Equipe:{" "}
+                    {selectedProperty.user?.teamMemberships
+                      ?.map((membership: { teamId: number; team: Team }) => membership.team.name)
+                      .join(", ")}
+                  </p>
                   <PropertyImage
-                    src={`https://server-2-production.up.railway.app${selectedProperty.images?.[0]}`}
+                    src={`http://localhost:3333${selectedProperty.images?.[0]}`}
                     alt={selectedProperty.title}
                     onClick={() => handleImageClick(selectedProperty.id)}
                   />

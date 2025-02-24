@@ -5,10 +5,38 @@ export const ProfileContainer = styled.div`
   flex-direction: column;
   align-items: center;
   padding: 0;
-  margin-top: 70px;
+  margin-top: 90px;
   margin-bottom: 80px;
   width: 100%;
   box-sizing: border-box;
+`;
+
+export const ProfileIcon = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100px;
+  height: 100px;
+  background-color: #ddd;
+  border-radius: 50%;
+  position: relative;
+  cursor: pointer;
+
+  button {
+    background: none;
+    border: none;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  span {
+    font-size: 36px;
+    color: #fff;
+  }
 `;
 
 export const ProfileImageContainer = styled.div`
@@ -19,6 +47,17 @@ export const ProfileImageContainer = styled.div`
   margin-bottom: 10px;      
 `;
 
+export const DefaultIcon = styled.span`
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: #007bff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 50px;
+`;
 
 export const ProfileImage = styled.img`
   border-radius: 50%;
@@ -36,7 +75,6 @@ export const UserName = styled.h1`
 export const UserInfo = styled.p`
   font-size: 1em;
   color: #555;
-  margin-bottom: 10px;
 `;
 
 export const ButtonContainer = styled.div`
@@ -44,42 +82,6 @@ export const ButtonContainer = styled.div`
   justify-content: space-between;  
   width: 90%;                    
   margin-top: 20px;               
-`;
-
-export const Button = styled.button`
-  flex: 1;
-  padding: 10px;
-  margin: 0 5px;
-  background-color: #00BFFF;
-  color: black;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1em;
-  display: flex;                 
-  justify-content: center;    
-  align-items: center;           
-  
-  &:hover {
-    background-color: #87CEEB;
-  }
-
-  svg {
-    font-size: 20px; 
-  }
-`;
-
-export const StyledButton = styled(Button)`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 5px; 
-
-  & span {
-    margin-top: 2px;
-    font-size: 10px; 
-    color: #000; 
-  }
 `;
 
 export const LogoutIcon = styled.div`
@@ -98,7 +100,7 @@ export const LogoutIcon = styled.div`
 export const SectionTitle = styled.h2`
   font-size: 1.1em;
   font-weight: bold;
-  margin-top: 40px; 
+  margin-top: 20px; 
   color: #333; 
 `;
 
@@ -202,6 +204,16 @@ export const Loading = styled.div`
   padding: 20px;
 `;
 
+export const ErrorMessage = styled.div`
+  color: red;
+  font-size: 18px;
+  text-align: center;
+  padding: 20px;
+  background-color: #ffe6e6;
+  border-radius: 5px;
+  margin-top: 20px;
+`;
+
 export const TrashIcon = styled.div`
   position: absolute;
   top: 10px;
@@ -229,17 +241,3 @@ export const EditIcon = styled.div`
     transform: scale(1.2);
   }
 `;
-
-export const DefaultIcon = styled.span`
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background-color: #007bff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 50px;
-`;
-
-

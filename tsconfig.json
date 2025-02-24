@@ -13,7 +13,8 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "types": ["node"] // Adicione isso
+    "typeRoots": ["./node_modules/@types", "src/types"], // Adicione isso
+    "types": ["node"] // Mantenha isso
   },
   "include": ["src"]
 }

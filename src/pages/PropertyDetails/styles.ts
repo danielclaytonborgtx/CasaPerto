@@ -25,8 +25,8 @@ export const ContentWrapper = styled.div`
 
 export const SliderContainer = styled.div`
   width: 100%;
-  height: auto; /* Ajuste automático */
-  margin-bottom: 40px; /* Ajuste o espaçamento inferior */
+  height: auto; 
+  margin-bottom: 40px; 
 `;
 
 export const ImageWrapper = styled.div`
@@ -77,13 +77,14 @@ export const FooterText = styled.p`
   color: #555;
   margin-top: 20px;
   text-align: center;
+  cursor: pointer;
 `;
 
 export const MapLink = styled.button`
   margin-top: 20px;
   padding: 10px 20px;
   background-color: #00BFFF;
-  color: white;
+  color: black;
   border: none;
   border-radius: 5px;
   cursor: pointer;

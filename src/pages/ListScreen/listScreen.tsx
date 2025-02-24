@@ -38,7 +38,7 @@ const ListScreen: React.FC = () => {
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        const response = await fetch('https://server-2-production.up.railway.app/property');
+        const response = await fetch('http://localhost:3333/property');
         if (response.ok) {
           const data = await response.json();
           setProperties(data);
@@ -119,7 +119,7 @@ const ListScreen: React.FC = () => {
       ) : (
         sortedProperties.map((property) => {
           const imageUrl = property.images && property.images.length > 0
-            ? `https://server-2-production.up.railway.app${property.images[0]}`
+            ? `http://localhost:3333${property.images[0]}`
             : '/images/default-image.jpg';
 
           return (

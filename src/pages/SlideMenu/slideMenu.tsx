@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../services/authContext'; 
-import { SlideMenuContainer, MenuItem, MenuContent } from './styles';
+import { useAuth } from '../../services/authContext';
+import { SlideMenuContainer, MenuItem, MenuContent, UserNameSpan, ProfileImage, DefaultIcon } from './styles';
 
 const SlideMenu: React.FC<{ onClose: () => void; isVisible: boolean }> = ({ onClose, isVisible }) => {
-  const { user } = useAuth(); 
-  const [slide, setSlide] = useState(-100); 
+  const { user } = useAuth();
+  const [slide, setSlide] = useState(-100);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -32,44 +33,70 @@ const SlideMenu: React.FC<{ onClose: () => void; isVisible: boolean }> = ({ onCl
     };
   }, [onClose]);
 
+  useEffect(() => {
+    if (user?.id) {
+      fetchProfileImage(user.id); 
+    }
+  }, [user]);
+
+  const fetchProfileImage = async (userId: number) => {
+    try {
+      const response = await fetch(`http://localhost:3333/users/${userId}/profile-picture`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.user?.picture) {
+          setProfileImage(`http://localhost:3333${data.user.picture}`);
+        } else {
+          setProfileImage(null); 
+        }
+      } else {
+        setProfileImage(null);
+      }
+    } catch {
+      setProfileImage(null); 
+    }
+  };
+
   const handleLinkClick = () => {
-    setSlide(-100); 
+    setSlide(-100);
   };
 
   const handleUserClick = () => {
     navigate('/profile');
-    handleLinkClick(); 
+    handleLinkClick();
   };
 
   return (
     <SlideMenuContainer ref={menuRef} $slide={slide}>
       <MenuContent>
         {user ? (
-          <MenuItem>
-            <span 
-              onClick={handleUserClick} 
-              style={{ cursor: 'pointer', fontSize: '18px', fontWeight: 'bold' }} 
-            >
-              {user.username}
-            </span>
+          <MenuItem className="user" onClick={handleUserClick}>
+            <UserNameSpan>
+              {profileImage ? (
+                <ProfileImage src={profileImage} alt="Foto de perfil" />
+              ) : (
+                <DefaultIcon>👤</DefaultIcon>
+              )}
+              {user.name}
+            </UserNameSpan>
           </MenuItem>
         ) : (
-          <MenuItem>
-            <Link to="/signIn" onClick={handleLinkClick}>Entrar</Link>
+          <MenuItem onClick={handleLinkClick}>
+            <Link to="/signIn">Entrar</Link>
           </MenuItem>
         )}
 
-        <MenuItem>
-          <Link to="/" onClick={handleLinkClick}>Home</Link>
+        <MenuItem onClick={handleLinkClick}>
+          <Link to="/">Home</Link>
         </MenuItem>
-        <MenuItem>
-          <Link to="/map" onClick={handleLinkClick}>Mapa</Link>
+        <MenuItem onClick={handleLinkClick}>
+          <Link to="/map">Mapa</Link>
         </MenuItem>
-        <MenuItem>
-          <Link to="/list" onClick={handleLinkClick}>Lista</Link>
+        <MenuItem onClick={handleLinkClick}>
+          <Link to="/list">Lista</Link>
         </MenuItem>
-        <MenuItem>
-          <Link to="/contact" onClick={handleLinkClick}>Fale conosco</Link>
+        <MenuItem onClick={handleLinkClick}>
+          <Link to="/contact">Fale conosco</Link>
         </MenuItem>
       </MenuContent>
     </SlideMenuContainer>

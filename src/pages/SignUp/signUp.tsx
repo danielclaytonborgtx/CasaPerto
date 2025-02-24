@@ -56,7 +56,7 @@ const SignUp: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("https://server-2-production.up.railway.app/users", {
+      const response = await fetch("http://localhost:3333/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -116,7 +116,7 @@ const SignUp: React.FC = () => {
         <Input
           type="text"
           name="username"
-          placeholder="Nome de usuário"
+          placeholder="Creci"
           value={formData.username}
           onChange={handleInputChange}
           onKeyPress={(e) => handleKeyPress(e, "password")}

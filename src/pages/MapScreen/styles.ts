@@ -79,3 +79,10 @@ export const PropertyImage = styled.img`
   object-fit: cover;
   cursor: pointer;
 `;
+
+export const ErrorMessage = styled.div`
+  color: red;
+  font-size: 14px;
+  text-align: center;
+  margin-top: 10px;
+`;
