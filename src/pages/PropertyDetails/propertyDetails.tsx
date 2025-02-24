@@ -111,11 +111,12 @@ const PropertyDetails: React.FC = () => {
   const resolveImageUrl = (img: PropertyImage | string) => {
     if (typeof img === "string") {
       return `https://server-2-production.up.railway.app${img}`;
-    } else if (img.url) {
+    } else if (img && typeof img === "object" && "url" in img) {
       return `https://server-2-production.up.railway.app${img.url}`;
     }
-    return "";
+    return "/fallback-image.jpg"; // Imagem padrão em caso de erro
   };
+  
 
   const handleImageClick = (index: number) => {
     setCurrentImageIndex(index);
