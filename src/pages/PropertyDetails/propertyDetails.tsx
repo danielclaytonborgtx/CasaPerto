@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useParams, useNavigate } from "react-router-dom"; 
+import { useLocation, useParams } from "react-router-dom"; 
 import Slider from "react-slick";
 import { parseISO, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -14,7 +14,6 @@ import {
   Price,
   Description,
   FooterText,
-  MapLink, 
 } from "./styles";
 
 interface PropertyImage {
@@ -42,14 +41,13 @@ const PropertyDetails: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const navigate = useNavigate(); 
 
   useEffect(() => {
     const fetchProperty = async () => {
       if (!location.state) {
         try {
           const response = await fetch(
-            `https://server-2-production.up.railway.app/property/${id}`
+            `https://servercasaperto.onrender.com/property/${id}`
           );
           if (!response.ok) {
             throw new Error("Erro ao buscar imóvel");
@@ -110,9 +108,9 @@ const PropertyDetails: React.FC = () => {
 
   const resolveImageUrl = (img: PropertyImage | string) => {
     if (typeof img === "string") {
-      return `https://server-2-production.up.railway.app${img}`;
+      return `https://servercasaperto.onrender.com${img}`;
     } else if (img && typeof img === "object" && "url" in img) {
-      return `https://server-2-production.up.railway.app${img.url}`;
+      return `https://servercasaperto.onrender.com${img.url}`;
     }
     return "/fallback-image.jpg"; // Imagem padrão em caso de erro
   };
@@ -141,20 +139,6 @@ const PropertyDetails: React.FC = () => {
     );
   };
 
-  const handleNavigateToMap = () => {
-    if (property) {
-      navigate("/map", { state: { id: property.id, fromDetails: true } });
-    }
-  };
-
-  const handleNavigateToProfile = () => {
-    if (user && user.username) {
-      navigate(`/profiles/${user.username}`);
-    } else {
-      console.error("ID do usuário não encontrado.");
-    }
-  };
-
   return (
     <Container>
       <ContentWrapper>
@@ -177,12 +161,10 @@ const PropertyDetails: React.FC = () => {
         </SliderContainer>
         <Price>{formatPrice(price)}</Price>
         <Description>{description}</Description>
-        
-        <MapLink onClick={handleNavigateToMap}>Ver no mapa</MapLink>
 
         <FooterText>
           Responsável Creci{" "}
-          <strong onClick={handleNavigateToProfile}>{username}</strong> em {formatDate(createdAt)}
+          <strong>{username}</strong> em {formatDate(createdAt)}
         </FooterText>
       </ContentWrapper>
 

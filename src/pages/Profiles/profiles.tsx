@@ -57,14 +57,14 @@ const Profiles: React.FC = () => {
         let userData: User;
 
         if (isNaN(Number(userId))) {
-          const response = await fetch(`https://server-2-production.up.railway.app/users/${userId}`);
+          const response = await fetch(`https://servercasaperto.onrender.com/users/${userId}`);
           if (!response.ok) {
             throw new Error("Usuário não encontrado");
           }
           userData = await response.json();
         } else {
           
-          const response = await fetch(`https://server-2-production.up.railway.app/users/${userId}`);
+          const response = await fetch(`https://servercasaperto.onrender.com/users/${userId}`);
           if (!response.ok) {
             throw new Error("Usuário não encontrado");
           }
@@ -84,7 +84,7 @@ const Profiles: React.FC = () => {
 
   const fetchProperties = async (userId: number) => {
     try {
-      const response = await fetch(`https://server-2-production.up.railway.app/property/user?userId=${userId}`);
+      const response = await fetch(`https://servercasaperto.onrender.com/property/user?userId=${userId}`);
       if (response.ok) {
         const data = await response.json();
         setProperties(data.sort((a: Property, b: Property) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
@@ -100,10 +100,10 @@ const Profiles: React.FC = () => {
 
   const fetchProfileImage = async (userId: number) => {
     try {
-      const response = await fetch(`https://server-2-production.up.railway.app/users/${userId}/profile-picture`);
+      const response = await fetch(`https://servercasaperto.onrender.com/users/${userId}/profile-picture`);
       if (response.ok) {
         const data = await response.json();
-        setProfileImage(data.user?.picture ? `https://server-2-production.up.railway.app${data.user.picture}` : null);
+        setProfileImage(data.user?.picture ? `https://servercasaperto.onrender.com${data.user.picture}` : null);
       }
     } catch {
       setError("Erro ao carregar a imagem do perfil.");

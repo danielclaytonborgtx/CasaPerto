@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { TeamContainer, CreateTeamButton, TeamImage, TeamCard, TeamDetails, TeamMembers, TeamName, UserTag, EditIcon } from './styles';
-import { useAuth } from '../../services/authContext';
+import { useAuth } from '../../services/authContext'; // Importe o useAuth
+
 import { FaSignOutAlt, FaEdit } from 'react-icons/fa';
 
 interface Member {
@@ -20,7 +21,7 @@ interface Team {
 }
 
 const Team = () => {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth(); // Adicione setUser para atualizar o contexto do usuário
   const [teams, setTeams] = useState<Team[]>([]);
   const [membersNames, setMembersNames] = useState<{ [key: number]: string }>({});
   const [loading, setLoading] = useState<boolean>(true);
@@ -34,7 +35,7 @@ const Team = () => {
 
     const fetchTeams = async () => {
       try {
-        const response = await axios.get(`https://server-2-production.up.railway.app/teams`);
+        const response = await axios.get(`https://servercasaperto.onrender.com/teams`);
         setTeams(response.data);
       } catch (error) {
         console.error('Erro ao buscar equipes:', error);
@@ -56,7 +57,7 @@ const Team = () => {
 
   const getMemberName = async (userId: number) => {
     try {
-      const response = await axios.get(`https://server-2-production.up.railway.app/users/${userId}`);
+      const response = await axios.get(`https://servercasaperto.onrender.com/users/${userId}`);
       return response.data.name;
     } catch (error) {
       console.error('Erro ao buscar nome do membro:', error);
@@ -84,7 +85,7 @@ const Team = () => {
 
   const handleLeaveTeam = async (teamId: number) => {
     const confirmLeave = window.confirm("Você tem certeza que deseja sair da equipe?");
-    
+  
     if (confirmLeave) {
       try {
         const userId = user?.id; // Obtém o ID do usuário do contexto
@@ -94,12 +95,39 @@ const Team = () => {
           return;
         }
   
+        // Chama a API para sair da equipe
         const response = await axios.post(
-          `https://server-2-production.up.railway.app/teams/${teamId}/leave`,
-          { userId }, // Envia o userId diretamente no corpo da requisição
+          `https://servercasaperto.onrender.com/teams/${teamId}/leave`,
+          { userId } // Envia o userId no corpo da requisição
         );
-        
-        setTeams(prevTeams => prevTeams.filter(team => team.id !== teamId));
+  
+        // Atualiza o estado das equipes, removendo o usuário da equipe
+        setTeams(prevTeams =>
+          prevTeams.map(team =>
+            team.id === teamId
+              ? {
+                  ...team,
+                  members: team.members.filter(member => member.userId !== userId),
+                }
+              : team
+          )
+        );
+  
+        // Atualiza o contexto do usuário (remove a equipe do usuário)
+        if (setUser && user) {
+          const updatedUser = {
+            ...user,
+            teamId: undefined,
+            team: undefined,
+          };
+          setUser(updatedUser);
+  
+          // Persiste o estado atualizado no localStorage
+          localStorage.setItem("user", JSON.stringify(updatedUser));
+  
+          console.log("Usuário atualizado após sair da equipe:", updatedUser); // Depuração
+        }
+  
         console.log(response.data.message); // Mensagem de sucesso
       } catch (error) {
         console.error('Erro ao deixar a equipe:', error);
@@ -108,7 +136,6 @@ const Team = () => {
       console.log("Ação cancelada");
     }
   };
-  
 
   return (
     <TeamContainer>
@@ -132,7 +159,7 @@ const Team = () => {
             return (
               <TeamCard key={team.id}>
                 {team.imageUrl && (
-                  <TeamImage src={`https://server-2-production.up.railway.app${team.imageUrl}`} alt={`Imagem da equipe ${team.name}`} />
+                  <TeamImage src={`https://servercasaperto.onrender.com${team.imageUrl}`} alt={`Imagem da equipe ${team.name}`} />
                 )}
                 <TeamDetails>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -143,10 +170,18 @@ const Team = () => {
                       </EditIcon>
                     )}
                     {isUserInTeam && !isTeamOwner && (
-                      <FaSignOutAlt
-                        onClick={() => handleLeaveTeam(team.id)}
-                        style={{ cursor: 'pointer', fontSize: '20px', color: 'red' }}
-                      />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span
+                          style={{ cursor: 'pointer', color: 'red' }}
+                          onClick={() => handleLeaveTeam(team.id)}
+                        >
+                          Sair
+                        </span>
+                        <FaSignOutAlt
+                          onClick={() => handleLeaveTeam(team.id)}
+                          style={{ cursor: 'pointer', fontSize: '20px', color: 'red' }}
+                        />
+                      </div>
                     )}
                   </div>
                   {isUserInTeam && <UserTag>Sua equipe!</UserTag>}

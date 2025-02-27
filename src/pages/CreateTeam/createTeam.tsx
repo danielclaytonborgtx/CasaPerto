@@ -32,7 +32,7 @@ const CreateTeam: React.FC = () => {
   const fetchBrokers = async () => {
     try {
       // Alterando a URL para a nova rota '/users/no-team'
-      const response = await axios.get('https://server-2-production.up.railway.app/users/no-team');
+      const response = await axios.get('https://servercasaperto.onrender.com/users/no-team');
       const allBrokers = response.data;
   
       console.log("Corretores sem time recebidos da API:", allBrokers);
@@ -115,7 +115,7 @@ const CreateTeam: React.FC = () => {
       }
   
       try {
-        await axios.post("https://server-2-production.up.railway.app/team", formData, {
+        await axios.post("https://servercasaperto.onrender.com/team", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         navigate("/team");

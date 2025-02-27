@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { loginService, logoutService } from './authService'; 
+import { loginService, logoutService } from './authService';
 
 export interface User {
   id: number;
@@ -8,9 +8,10 @@ export interface User {
   username: string;
   password: string;
   picture?: string;
-  createdAt: string;  
+  createdAt: string;
   updatedAt: string;
-  teamId?: number;
+  teamId?: number; // Adicionado teamId ao usuário
+  team?: Team;
 }
 
 export interface Team {
@@ -25,6 +26,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   createTeam: (teamData: Team) => void;
+  setUser: (user: User | null) => void; // Adicionado setUser
 }
 
 interface AuthProviderProps {
@@ -115,7 +117,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, team, login, logout, createTeam }}>
+    <AuthContext.Provider value={{ user, team, login, logout, createTeam, setUser }}>
       {children}
     </AuthContext.Provider>
   );

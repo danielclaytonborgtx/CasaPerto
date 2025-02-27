@@ -52,9 +52,6 @@ const MapScreen: React.FC = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Acessa o team dentro do user
-  const team = user?.team;
-
   // Carrega a localização do usuário
   useEffect(() => {
     if (navigator.geolocation) {
@@ -72,54 +69,74 @@ const MapScreen: React.FC = () => {
   }, []);
 
   // Carrega as propriedades do backend
-  useEffect(() => {
-    const loadProperties = async () => {
-      try {
-        if (!user || !team) {
-          console.log("Usuário ou time não encontrado.");
-          setError("Usuário ou time não encontrado.");
-          setIsLoaded(true);
-          return;
-        }
-        console.log("User:", user);
-
-        const response = await fetch(
-          `https://server-2-production.up.railway.app/properties/filter?userId=${user.id}&teamId=${team.id}`
-        );
-
-        if (!response.ok) {
-          throw new Error("Erro ao buscar as propriedades");
-        }
-
-        const data = await response.json();
-        console.log("Propriedades retornadas pelo backend:", data); // Depuração
-        setProperties(data);
+  const loadProperties = useCallback(async () => {
+    try {
+      if (!user) {
+        console.log("Usuário não encontrado.");
+        setError("Usuário não encontrado.");
         setIsLoaded(true);
-      } catch (error) {
-        console.error("Erro ao carregar propriedades:", error);
-        setError("Falha ao carregar propriedades.");
-        setIsLoaded(true);
+        return;
       }
-    };
 
-    loadProperties();
-  }, [user, team]);
+      // Verifica se o usuário tem um teamId
+      const teamId = user?.team?.id;
+
+      // Monta os parâmetros da requisição
+      const queryParams = new URLSearchParams({
+        userId: user.id.toString(),
+        ...(teamId && { teamId: teamId.toString() }), // Adiciona teamId apenas se estiver definido
+      });
+      console.log("Parâmetros da requisição:", queryParams.toString());
+
+      const response = await fetch(
+        `https://servercasaperto.onrender.com/properties/filter?${queryParams.toString()}`
+      );
+
+      if (!response.ok) {
+        throw new Error("Erro ao buscar as propriedades");
+      }
+
+      const data = await response.json();
+      console.log("Propriedades retornadas pelo backend:", data); // Depuração
+      setProperties(data);
+      setIsLoaded(true);
+    } catch (error) {
+      console.error("Erro ao carregar propriedades:", error);
+      setError("Falha ao carregar propriedades.");
+      setIsLoaded(true);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      console.log("Usuário atualizado:", user); // Depuração
+      loadProperties();
+    }
+  }, [user, loadProperties]); // Agora `user` está incluído corretamente
+  
 
   // Filtra as propriedades com base na categoria (venda ou aluguel)
   const filteredProperties = useMemo(() => {
     const category = isRent ? "venda" : "aluguel";
   
-    if (!user || !team) return [];
+    if (!user) return [];
   
-    return properties.filter(
+    // Aplica o filtro e armazena o resultado em uma variável temporária
+    const filtered = properties.filter(
       (property) =>
         (property.userId === user.id || // Propriedades do usuário
-          property.user?.teamMemberships?.some(
-            (membership: { teamId: number; team: Team }) => membership.teamId === team.id
-          )) && // Propriedades da equipe
+          (user.team && property.user?.teamMemberships?.some(
+            (membership: { teamId: number; team: Team }) => membership.teamId === user.team?.id
+          ))) && // Propriedades da equipe (se o usuário tiver uma equipe)
         property.category.toLowerCase() === category.toLowerCase()
     );
-  }, [properties, isRent, user, team]);
+  
+    // Exibe as propriedades filtradas no console
+    console.log("Propriedades filtradas:", filtered);
+  
+    // Retorna as propriedades filtradas
+    return filtered;
+  }, [properties, isRent, user]);
 
   // Define o centro do mapa
   const mapCenter = useMemo(() => {
@@ -298,19 +315,12 @@ const MapScreen: React.FC = () => {
                 <InfoContent>
                   <h3>{selectedProperty.title}</h3>
                   <p>{formatPrice(selectedProperty.price)}</p>
-                  <p>Proprietário: {selectedProperty.user?.name}</p>
-                  <p>
-                    Equipe:{" "}
-                    {selectedProperty.user?.teamMemberships
-                      ?.map((membership: { teamId: number; team: Team }) => membership.team.name)
-                      .join(", ")}
-                  </p>
                   <PropertyImage
-                    src={`https://server-2-production.up.railway.app${selectedProperty.images?.[0]}`}
-                    alt={selectedProperty.title}
+                    src={selectedProperty.images?.[0]?.url ? `https://servercasaperto.onrender.com${selectedProperty.images[0].url}` : "caminho/para/imagem/padrao.jpg"}      
                     onClick={() => handleImageClick(selectedProperty.id)}
                   />
                 </InfoContent>
+
               </InfoWindowContainer>
             </InfoWindow>
           )}

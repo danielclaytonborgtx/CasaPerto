@@ -71,6 +71,14 @@ export const InfoContent = styled.div`
     color: green; 
     font-weight: bold;
   }
+
+  p:nth-of-type(2) {
+    color: black; 
+  }
+
+  p:nth-of-type(3) {
+    color: black;
+  }
 `;
 
 export const PropertyImage = styled.img`

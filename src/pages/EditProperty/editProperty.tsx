@@ -50,7 +50,7 @@ const EditProperty = () => {
 
       try {
         const response = await axios.get(
-          `https://server-2-production.up.railway.app/property/${id}`
+          `https://servercasaperto.onrender.com/property/${id}`
         );
 
         const data = response.data;
@@ -139,7 +139,7 @@ const EditProperty = () => {
 
     try {
       const response = await axios.put(
-        `https://server-2-production.up.railway.app/property/${id}`,
+        `https://servercasaperto.onrender.com/property/${id}`,
         formData
       );
 
@@ -219,7 +219,7 @@ const EditProperty = () => {
   {existingImages.map((image, index) => {
     return (
       <ImagePreview key={index}>
-        <img src={`https://server-2-production.up.railway.app${image.url}`} alt={`preview-${index}`} />
+        <img src={`https://servercasaperto.onrender.com${image.url}`} alt={`preview-${index}`} />
         <button onClick={() => removeExistingImage(index)}>X</button>
       </ImagePreview>
     );

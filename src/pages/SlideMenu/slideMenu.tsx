@@ -41,11 +41,11 @@ const SlideMenu: React.FC<{ onClose: () => void; isVisible: boolean }> = ({ onCl
 
   const fetchProfileImage = async (userId: number) => {
     try {
-      const response = await fetch(`https://server-2-production.up.railway.app/users/${userId}/profile-picture`);
+      const response = await fetch(`https://servercasaperto.onrender.com/users/${userId}/profile-picture`);
       if (response.ok) {
         const data = await response.json();
         if (data.user?.picture) {
-          setProfileImage(`https://server-2-production.up.railway.app${data.user.picture}`);
+          setProfileImage(`https://servercasaperto.onrender.com${data.user.picture}`);
         } else {
           setProfileImage(null); 
         }

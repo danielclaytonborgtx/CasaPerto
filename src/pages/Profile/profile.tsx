@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { 
-  ProfileContainer, 
-  UserName, 
-  UserList, 
-  Loading, 
-  PropertyItem, 
-  PropertyImage, 
-  PropertyDetails, 
+import {
+  ProfileContainer,
+  UserName,
+  UserList,
+  Loading,
+  PropertyItem,
+  PropertyImage,
+  PropertyDetails,
   TrashIcon,
-  EditIcon, 
+  EditIcon,
   PropertyImageContainer,
   TitlePriceContainer,
   PropertyItemLayout,
@@ -18,10 +18,17 @@ import {
   ProfileImageContainer,
   ButtonContainer,
   DefaultIcon,
-  StyledButton
+  StyledButton,
 } from "./styles";
 
-import { FaTrashAlt, FaPen, FaUsers, FaUserTie, FaEnvelope, FaCog } from "react-icons/fa"; 
+import {
+  FaTrashAlt,
+  FaPen,
+  FaUsers,
+  FaUserTie,
+  FaEnvelope,
+  FaCog,
+} from "react-icons/fa";
 
 interface User {
   id: number;
@@ -35,62 +42,50 @@ interface Property {
   title: string;
   description: string;
   description1: string;
-  images: string[];  
-  price: string;  
+  images: string [];
+  price: string;
   createdAt: string;
 }
 
 const Profile: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [properties, setProperties] = useState<Property[]>([]); 
-  const [error, setError] = useState<string | null>(null); 
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (!storedUser) {
-      navigate("/login");
-      return;
-    }
-
-    const parsedUser = JSON.parse(storedUser);
-    setUser(parsedUser);
-
-    if (parsedUser?.id) { 
-      fetchProperties(parsedUser.id);
-      fetchProfileImage(parsedUser.id);
-    } else {
-      setError("Usuário inválido");
-    }
-  }, [navigate]);
-
-  const fetchProfileImage = async (userId: number) => {
+  // Função utilitária para fazer chamadas fetch
+  const fetchData = useCallback(async (url: string, options?: RequestInit) => {
     try {
-      const response = await fetch(`https://server-2-production.up.railway.app/users/${userId}/profile-picture`);
-      if (response.ok) {
-        const data = await response.json();
-
-        if (data.user?.picture) {
-          setProfileImage(`https://server-2-production.up.railway.app${data.user.picture}`);
-        } else {
-          setProfileImage(null); 
-        }
-      } 
+      const response = await fetch(url, options);
+      if (!response.ok) throw new Error(`Erro: ${response.status}`);
+      return await response.json();
     } catch {
-      setError("Erro ao conectar com o servidor para carregar a imagem.");
+      setError("Erro ao conectar com o servidor.");
+      return null;
     }
-  };
+  }, []);
 
-  const fetchProperties = async (userId: number) => {
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `https://server-2-production.up.railway.app/property/user?userId=${userId}`
-      );
-      if (response.ok) {
-        const data = await response.json();
+  // Busca a imagem do perfil do usuário
+  const fetchProfileImage = useCallback(
+    async (userId: number) => {
+      const data = await fetchData(`https://servercasaperto.onrender.com/users/${userId}/profile-picture`);
+      if (data?.user?.picture) {
+        setProfileImage(`https://servercasaperto.onrender.com${data.user.picture}`);
+      } else {
+        setProfileImage(null);
+      }
+    },
+    [fetchData]
+  );
+
+  // Busca as propriedades do usuário
+  const fetchProperties = useCallback(
+    async (userId: number) => {
+      setLoading(true);
+      const data = await fetchData(`https://servercasaperto.onrender.com/property/user?userId=${userId}`);
+      if (data) {
         if (data.message) {
           setProperties([]);
           setError(data.message);
@@ -102,38 +97,26 @@ const Profile: React.FC = () => {
           });
           setProperties(sortedProperties);
         }
-      } else if (response.status === 404) {
-        setProperties([]);
-        setError(null);
-      } else {
-        setError("Erro ao carregar imóveis.");
       }
-    } catch {
-      setError("Erro ao conectar com o servidor.");
-    }
-    finally {
-      setLoading(false); 
-    }
-  };
+      setLoading(false);
+    },
+    [fetchData]
+  );
 
+  // Exclui uma propriedade
   const handleDeleteProperty = async (propertyId: number) => {
     const confirmDelete = window.confirm("Deseja excluir este imóvel?");
     if (!confirmDelete) return;
 
-    try {
-      const response = await fetch(`https://server-2-production.up.railway.app/property/${propertyId}`, {
-        method: "DELETE",
-      });
-      if (response.ok) {
-        setProperties(properties.filter(property => property.id !== propertyId));
-      } else {
-        setError("Erro ao deletar o imóvel.");
-      }
-    } catch {
-      setError("Erro ao conectar com o servidor.");
+    const data = await fetchData(`https://servercasaperto.onrender.com/property/${propertyId}`, {
+      method: "DELETE",
+    });
+    if (data) {
+      setProperties(properties.filter((property) => property.id !== propertyId));
     }
   };
 
+  // Redireciona para a página de edição da propriedade
   const handleEditProperty = (propertyId: number) => {
     const property = properties.find((p) => p.id === propertyId);
     if (property) {
@@ -141,54 +124,74 @@ const Profile: React.FC = () => {
     }
   };
 
+  // Redireciona para a página de detalhes da propriedade
   const handleImageClick = (propertyId: number) => {
     navigate(`/property/${propertyId}`);
   };
 
+  // Formata o preço para o padrão brasileiro (BRL)
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
     }).format(price);
   };
 
+  // Verifica se o usuário está logado ao carregar o componente
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+      navigate("/login");
+      return;
+    }
+
+    const parsedUser = JSON.parse(storedUser);
+    setUser(parsedUser);
+
+    if (parsedUser?.id) {
+      fetchProperties(parsedUser.id);
+      fetchProfileImage(parsedUser.id);
+    } else {
+      setError("Usuário inválido");
+    }
+  }, [navigate, fetchProperties, fetchProfileImage]);
+
+  // Exibe um loading enquanto os dados são carregados
   if (loading) return <Loading>Carregando...</Loading>;
+
+  // Exibe uma mensagem se o usuário não for encontrado
   if (!user) return <div>Usuário não encontrado</div>;
 
   return (
     <ProfileContainer>
-
       <ProfileImageContainer>
         {profileImage ? (
-          <ProfileImage 
-          src={profileImage} 
-          alt="Foto de perfil" 
-        />
+          <ProfileImage src={profileImage} alt="Foto de perfil" />
         ) : (
           <DefaultIcon>👤</DefaultIcon>
         )}
-         </ProfileImageContainer>
-        <UserName>{user.name}</UserName>
-        <UserName>Creci-{user.username}</UserName>
+      </ProfileImageContainer>
+      <UserName>{user.name}</UserName>
+      <UserName>Creci-{user.username}</UserName>
 
-        <ButtonContainer>
-          <StyledButton onClick={() => navigate("/brokers")}>
-            <FaUserTie size={20} />
-            <span>Corretores</span>
-          </StyledButton>
-          <StyledButton onClick={() => navigate("/team")}>
-            <FaUsers size={20} />
-            <span>Equipes</span>
-          </StyledButton>
-          <StyledButton onClick={() => navigate("/messages")}>
-            <FaEnvelope size={20} /> 
-            <span>Mensagens</span>
-          </StyledButton>
-          <StyledButton onClick={() => navigate("/settings")}>
-            <FaCog size={20} /> 
-            <span>Configurações</span>
-          </StyledButton>
-        </ButtonContainer>
+      <ButtonContainer>
+        <StyledButton onClick={() => navigate("/brokers")}>
+          <FaUserTie size={20} />
+          <span>Corretores</span>
+        </StyledButton>
+        <StyledButton onClick={() => navigate("/team")}>
+          <FaUsers size={20} />
+          <span>Equipes</span>
+        </StyledButton>
+        <StyledButton onClick={() => navigate("/messages")}>
+          <FaEnvelope size={20} />
+          <span>Mensagens</span>
+        </StyledButton>
+        <StyledButton onClick={() => navigate("/settings")}>
+          <FaCog size={20} />
+          <span>Configurações</span>
+        </StyledButton>
+      </ButtonContainer>
 
       <SectionTitle>Meus imóveis</SectionTitle>
 
@@ -198,17 +201,19 @@ const Profile: React.FC = () => {
         <UserList>
           {properties.map((property) => {
             const imageUrl = property.images && property.images[0]
-              ? property.images[0]
-              : '/path/to/default-image.jpg';
+            ? property.images[0] // Já é a URL completa da imagem
+            : 'https://via.placeholder.com/150'; // Imagem padrão de exemplo
+
+              console.log("Image URL:", imageUrl);
 
             return (
               <PropertyItem key={property.id}>
                 <PropertyItemLayout>
                   <PropertyImageContainer>
-                    <PropertyImage 
-                      src={imageUrl} 
-                      alt={property.title} 
-                      onClick={() => handleImageClick(property.id)} 
+                    <PropertyImage
+                      src={imageUrl}
+                      alt={property.title}
+                      onClick={() => handleImageClick(property.id)}
                     />
                   </PropertyImageContainer>
                   <TitlePriceContainer>
