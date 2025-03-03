@@ -134,6 +134,7 @@ const Team = () => {
       }
     } else {
       console.log("Ação cancelada");
+      alert('Ocorreu um erro ao tentar sair da equipe. Tente novamente mais tarde.');
     }
   };
 
@@ -154,7 +155,7 @@ const Team = () => {
               (member) => member.userId === user?.id
             );
 
-            const isTeamOwner = team.creatorId === user?.id;
+            const isTeamOwner = team.members[0]?.userId === user?.id;
 
             return (
               <TeamCard key={team.id}>

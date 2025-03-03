@@ -206,7 +206,7 @@ const Messages: React.FC = () => {
                     .find((conv) => conv.userId === activeBrokerId)
                     ?.messages.map((message, index) => {
                       const messageKey = `${activeBrokerId}-${message.id}-${index}`; 
-                   
+                  
                       return (
                         <MessageItem key={messageKey}>
                           <strong>{message.sender}</strong>

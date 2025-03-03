@@ -9,6 +9,7 @@ export const MessageContainer = styled.div`
   max-width: 800px;
   margin: 0 auto;
   margin-top: 60px;
+  padding-bottom: 100px;
 `;
 
 export const HeaderContainer = styled.div`
@@ -36,7 +37,7 @@ export const ContactItem = styled.div`
 export const MessageList = styled.ul`
   list-style: none;
   padding: 0;
-  margin-bottom: 250px;
+  margin-bottom: 100px;
   height: 300px;
   overflow-y: auto;
 `;
@@ -47,6 +48,7 @@ export const MessageItem = styled.li`
   margin: 5px 0;
   border-radius: 8px;
   box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1);
+  width: calc(100% - 22px);
   
   & strong {
     display: block;
