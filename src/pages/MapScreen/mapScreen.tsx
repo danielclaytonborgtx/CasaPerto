@@ -89,7 +89,7 @@ const MapScreen: React.FC = () => {
       console.log("Parâmetros da requisição:", queryParams.toString());
 
       const response = await fetch(
-        `http://localhost:3333/properties/filter?${queryParams.toString()}`
+        `https://servercasaperto.onrender.com/properties/filter?${queryParams.toString()}`
       );
 
       if (!response.ok) {
@@ -316,7 +316,7 @@ const MapScreen: React.FC = () => {
                   <h3>{selectedProperty.title}</h3>
                   <p>{formatPrice(selectedProperty.price)}</p>
                   <PropertyImage
-                    src={selectedProperty.images?.[0]?.url ? `http://localhost:3333${selectedProperty.images[0].url}` : "caminho/para/imagem/padrao.jpg"}      
+                    src={selectedProperty.images?.[0]?.url ? `https://servercasaperto.onrender.com${selectedProperty.images[0].url}` : "caminho/para/imagem/padrao.jpg"}      
                     onClick={() => handleImageClick(selectedProperty.id)}
                   />
                 </InfoContent>
