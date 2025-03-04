@@ -20,7 +20,7 @@ import { useAuth, User } from '../../services/authContext'; // Ajustado para peg
 import { FaPlus, FaMinus } from 'react-icons/fa';
 
 const CreateTeam: React.FC = () => {
-  const { user } = useAuth(); // Pegando o usuário logado do contexto
+  const { user, setUser } = useAuth(); // Pegando o usuário logado do contexto
   const [teamName, setTeamName] = useState('');
   const [brokers, setBrokers] = useState<User[]>([]);
   const [brokerName, setBrokerName] = useState('');
@@ -115,9 +115,27 @@ const CreateTeam: React.FC = () => {
       }
   
       try {
-        await axios.post("https://servercasaperto.onrender.com/team", formData, {
+        // Cria a equipe no backend
+        const response = await axios.post("https://servercasaperto.onrender.com/team", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
+  
+        // Atualiza o estado do usuário logado
+        if (setUser && user) {
+          const updatedUser = {
+            ...user,
+            teamId: response.data.teamId, // Supondo que o backend retorne o ID da nova equipe
+            team: response.data.team, // Supondo que o backend retorne os dados da nova equipe
+          };
+  
+          setUser(updatedUser); // Atualiza o contexto do usuário
+  
+          // Persiste o estado atualizado no localStorage
+          localStorage.setItem("user", JSON.stringify(updatedUser));
+  
+          console.log("Usuário atualizado após criar a equipe:", updatedUser); // Depuração
+        }
+  
         navigate("/team");
       } catch (error) {
         console.error("Erro ao criar equipe:", error);
