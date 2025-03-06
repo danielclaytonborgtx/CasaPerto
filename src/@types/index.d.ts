@@ -3,13 +3,19 @@ export interface User {
   id: number;
   name: string;
   email: string;
-  team?: Team; // A propriedade team é opcional, pois nem todo usuário pode ter um time
+  teamMembers: TeamMember[]
 }
 
 export interface Team {
   id: number;
   name: string;
-  members: User[];
+  teamMembers: TeamMember[]
+}
+
+export interface TeamMember {
+  id: number;
+  userId: number;
+  teamId: number;
 }
 
 export interface Property {

@@ -36,7 +36,7 @@ const EditTeam: React.FC = () => {
   const fetchTeam = useCallback(async () => {
     try {
       // console.log("Fetching team data...");
-      const response = await axios.get(`https://servercasaperto.onrender.com/team/${id}`);
+      const response = await axios.get(`http://localhost:3333/team/${id}`);
       const teamData = response.data;
       // console.log("Team data received:", teamData); // Log da resposta
       setTeamName(teamData.name);
@@ -52,7 +52,7 @@ const EditTeam: React.FC = () => {
   const fetchBrokers = async () => {
     try {
       // Alterando a URL para a nova rota '/users/no-team'
-      const response = await axios.get('https://servercasaperto.onrender.com/users/no-team');
+      const response = await axios.get('http://localhost:3333/users/no-team');
       const allBrokers = response.data;
   
       console.log("Corretores sem time recebidos da API:", allBrokers);
@@ -74,7 +74,7 @@ const EditTeam: React.FC = () => {
 
   const handleAddBroker = (broker: User) => {
       // Verifica se o corretor já tem um teamId
-      if (broker.teamId) {
+      if (broker.teamMembers.length) {
         alert('Este corretor já está em um time.');
         return; // Impede a adição do corretor se já tiver um teamId
       }
@@ -114,7 +114,7 @@ const EditTeam: React.FC = () => {
       }
   
       try {
-        await axios.put(`https://servercasaperto.onrender.com/team/${id}`, formData, {
+        await axios.put(`http://localhost:3333/team/${id}`, formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         navigate("/team"); // Redireciona para a lista de equipes após a edição
@@ -176,7 +176,7 @@ const EditTeam: React.FC = () => {
     const confirmDelete = window.confirm("Você tem certeza que deseja excluir esta equipe?");
     if (confirmDelete) {
       try {
-        await axios.delete(`https://servercasaperto.onrender.com/team/${id}`);
+        await axios.delete(`http://localhost:3333/team/${id}`);
         navigate("/team"); // Redireciona para a lista de equipes após a exclusão
       } catch (error) {
         console.error("Erro ao excluir equipe:", error);
@@ -190,7 +190,7 @@ const EditTeam: React.FC = () => {
       {teamImage ? (
           <div style={{ position: "relative", display: "inline-block" }}>
             <TeamImage 
-              src={teamImage.startsWith("data:image") ? teamImage : `https://servercasaperto.onrender.com${teamImage}`} 
+              src={teamImage.startsWith("data:image") ? teamImage : `http://localhost:3333${teamImage}`} 
               alt="Imagem da equipe" 
             />
             <EditButton onClick={handleIconClick}>

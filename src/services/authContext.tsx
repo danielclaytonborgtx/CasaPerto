@@ -1,6 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { loginService, logoutService } from './authService';
 
+export interface TeamMember {
+  id: number;
+  userId: number;
+  teamId: number;
+}
 export interface User {
   id: number;
   name: string;
@@ -10,14 +15,13 @@ export interface User {
   picture?: string;
   createdAt: string;
   updatedAt: string;
-  teamId?: number; // Adicionado teamId ao usuário
-  team?: Team;
+  teamMembers: TeamMember[]
 }
 
 export interface Team {
   id: number;
   name: string;
-  members: User[];
+  teamMembers: TeamMember[]
 }
 
 interface AuthContextType {
@@ -26,7 +30,8 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   createTeam: (teamData: Team) => void;
-  setUser: (user: User | null) => void; // Adicionado setUser
+  setUser: (user: User | null) => void;
+  updateTeamId: (teamId: number) => void; // Função para atualizar o teamId
 }
 
 interface AuthProviderProps {
@@ -58,21 +63,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const storedTeam = localStorage.getItem('team');
 
     if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      console.log("Usuário carregado do localStorage:", parsedUser);
-      setUser(parsedUser);
+      try {
+        const parsedUser = JSON.parse(storedUser) as User;
+        if (parsedUser.id && parsedUser.email) { // Validação básica
+          console.log("Usuário carregado do localStorage:", parsedUser);
+          setUser(parsedUser);
 
-      // Se o usuário tem um teamId e a equipe não está no localStorage, busque a equipe
-      if (parsedUser.teamId && !storedTeam) {
-        fetchTeamById(parsedUser.teamId)
-          .then((teamData) => {
-            setTeam(teamData);
-            localStorage.setItem('team', JSON.stringify(teamData));
-          })
-          .catch((error) => console.error("Erro ao carregar equipe", error));
-      } else if (storedTeam) {
-        console.log("Equipe carregada do localStorage:", JSON.parse(storedTeam));
-        setTeam(JSON.parse(storedTeam));
+          // Se o usuário tem um teamId e a equipe não está no localStorage, busque a equipe
+          if (parsedUser.teamMembers.length && !storedTeam) {
+            fetchTeamById(parsedUser.teamMembers[0].teamId)
+              .then((teamData) => {
+                setTeam(teamData);
+                localStorage.setItem('team', JSON.stringify(teamData));
+              })
+              .catch((error) => console.error("Erro ao carregar equipe", error));
+          } else if (storedTeam) {
+            try {
+              const parsedTeam = JSON.parse(storedTeam) as Team;
+              if (parsedTeam.id && parsedTeam.name) { // Validação básica
+                console.log("Equipe carregada do localStorage:", parsedTeam);
+                setTeam(parsedTeam);
+              }
+            } catch (error) {
+              console.error("Erro ao analisar equipe do localStorage:", error);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Erro ao analisar usuário do localStorage:", error);
       }
     }
   }, []);
@@ -93,11 +111,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               setTeam(teamData);
               localStorage.setItem('team', JSON.stringify(teamData));
             })
-            .catch((error) => console.error("Erro ao buscar equipe após login", error));
+            .catch((error) => {
+              console.error("Erro ao buscar equipe após login", error);
+              // Continua o login mesmo se a equipe não for carregada
+            });
         }
       }
     } catch (error) {
       console.error("Erro no login:", error);
+      alert("Erro no login. Verifique suas credenciais e tente novamente.");
     }
   };
 
@@ -116,8 +138,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     console.log("Equipe criada:", teamData);
   };
 
+  // Função para atualizar o teamId e a equipe no contexto
+  const updateTeamId = async (teamId: number) => {
+    if (!user) {
+      console.error("Usuário não encontrado para atualizar o teamId");
+      return;
+    }
+
+    // Atualiza o teamId do usuário localmente
+    const updatedUser = { ...user, teamId };
+    setUser(updatedUser);
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+
+    // Atualiza a equipe correspondente ao novo teamId
+    try {
+      const teamData = await fetchTeamById(teamId);
+      setTeam(teamData);
+      localStorage.setItem('team', JSON.stringify(teamData));
+      console.log("teamId atualizado e equipe correspondente carregada:", teamData);
+    } catch (error) {
+      console.error("Erro ao atualizar o teamId e carregar a equipe", error);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, team, login, logout, createTeam, setUser }}>
+    <AuthContext.Provider value={{ user, team, login, logout, createTeam, setUser, updateTeamId }}>
       {children}
     </AuthContext.Provider>
   );

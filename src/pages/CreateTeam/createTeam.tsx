@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axios,{ AxiosError } from 'axios';
 import { 
   Container, 
   Input, 
@@ -16,136 +16,155 @@ import {
   TeamImage
 } from './styles';
 
-import { useAuth, User } from '../../services/authContext'; // Ajustado para pegar o contexto de autenticação
+import { useAuth, User } from '../../services/authContext';
 import { FaPlus, FaMinus } from 'react-icons/fa';
 
 const CreateTeam: React.FC = () => {
-  const { user, setUser } = useAuth(); // Pegando o usuário logado do contexto
+  const { user, setUser } = useAuth();
   const [teamName, setTeamName] = useState('');
   const [brokers, setBrokers] = useState<User[]>([]);
   const [brokerName, setBrokerName] = useState('');
   const [availableBrokers, setAvailableBrokers] = useState<User[]>([]);
   const [teamImage, setTeamImage] = useState<string | null>(null); 
   const [imageInputRef, setImageInputRef] = useState<HTMLInputElement | null>(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const fetchBrokers = async () => {
+  const fetchBrokers = useCallback(async () => {
     try {
-      // Alterando a URL para a nova rota '/users/no-team'
-      const response = await axios.get('https://servercasaperto.onrender.com/users/no-team');
-      const allBrokers = response.data;
-  
-      console.log("Corretores sem time recebidos da API:", allBrokers);
-  
-      // Atualiza a lista de corretores disponíveis
-      setAvailableBrokers(allBrokers);
+      const response = await axios.get('http://localhost:3333/users/no-team');
+      setAvailableBrokers(response.data);
     } catch (error) {
-      console.error('Erro ao buscar os corretores:', error);
-      alert('Houve um erro ao carregar os corretores. Tente novamente.');
+      console.error('Erro ao buscar corretores:', error);
+      alert('Erro ao carregar corretores. Tente novamente.');
     }
-  };
-  
-  useEffect(() => {
-    fetchBrokers(); 
   }, []);
 
-  // Ajuste no useEffect para garantir que o usuário logado seja o primeiro na lista de brokers
+  useEffect(() => {
+    fetchBrokers();
+  }, [fetchBrokers]);
+
   useEffect(() => {
     if (user && availableBrokers.length > 0) {
       const currentUser = availableBrokers.find(broker => broker.id === user.id);
       if (currentUser) {
-        // Adiciona o usuário logado à lista de brokers, se não estiver já nela
         setBrokers((prevBrokers) => {
           if (!prevBrokers.some(b => b.id === currentUser.id)) {
-            return [currentUser, ...prevBrokers]; // Adiciona o usuário logado à frente
+            return [currentUser, ...prevBrokers];
           }
           return prevBrokers;
         });
-  
-        // Remove o usuário logado da lista de disponíveis
-        setAvailableBrokers((prevState) => 
-          prevState.filter(broker => broker.id !== user.id)
-        );
+        setAvailableBrokers((prevState) => prevState.filter(broker => broker.id !== user.id));
       }
     }
-  }, [user, availableBrokers]); // A dependência de `availableBrokers` aqui vai garantir a reatividade correta
+  }, [user, availableBrokers]);
 
   const handleAddBroker = (broker: User) => {
-    // Verifica se o corretor já tem um teamId
-    if (broker.teamId) {
-      alert('Este corretor já está em um time.');
-      return; // Impede a adição do corretor se já tiver um teamId
+    if (broker.teamMembers) {
+      broker = { ...broker, teamMembers: []}; // Remove o teamId ao definir como undefined
     }
   
-    // Se o corretor não tem um teamId, é seguro adicioná-lo
     if (!brokers.some(b => b.id === broker.id)) {
       setBrokers([...brokers, broker]);
-      setAvailableBrokers(availableBrokers.filter(b => b.id !== broker.id)); // Remove da lista de disponíveis
+      setAvailableBrokers(availableBrokers.filter(b => b.id !== broker.id));
     }
-  };
+  };  
 
   const handleRemoveBroker = (brokerId: number) => {
     const removedBroker = brokers.find(b => b.id === brokerId);
     if (removedBroker) {
       setBrokers(brokers.filter(broker => broker.id !== brokerId));
-      setAvailableBrokers([...availableBrokers, removedBroker]); // Reinsere na lista de disponíveis
+      setAvailableBrokers([...availableBrokers, removedBroker]);
     }
   };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files ? event.target.files[0] : null;
     if (file) {
+      if (!file.type.startsWith("image/")) {
+        alert("O arquivo deve ser uma imagem.");
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) { // 5MB
+        alert("O arquivo deve ter no máximo 5MB.");
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
-        setTeamImage(reader.result as string); 
+        setTeamImage(reader.result as string);
       };
-      reader.readAsDataURL(file); 
+      reader.readAsDataURL(file);
     }
   };
 
   const handleCreateTeam = async () => {
-    if (teamName.trim() !== '' && brokers.length > 0) {
-      const formData = new FormData();
-      formData.append("name", teamName);
-      formData.append("members", JSON.stringify(brokers.map(broker => broker.id)));
+    if (loading) return;
   
-      if (teamImage) {
-        const imageBlob = dataURItoBlob(teamImage);
-        formData.append("image", imageBlob);
+    if (teamName.trim() === '') {
+      alert("O nome da equipe não pode estar vazio.");
+      return;
+    }
+  
+    if (brokers.length === 0) {
+      alert("Adicione pelo menos um corretor à equipe.");
+      return;
+    }
+  
+    setLoading(true);
+  
+    const formData = new FormData();
+    formData.append("name", teamName);
+    formData.append("members", JSON.stringify(brokers.map(broker => broker.id)));
+  
+    if (teamImage) {
+      const imageBlob = dataURItoBlob(teamImage);
+      formData.append("image", imageBlob);
+    }
+  
+    try {
+      const response = await axios.post("http://localhost:3333/team", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+  
+      // Atualizando o state global de usuário
+      if (setUser && user) {
+        const updatedUser = {
+          ...user,
+          team: response.data.team, // Se você tiver a equipe com mais dados, pode incluir aqui
+        };
+        setUser(updatedUser);
+        localStorage.setItem("user", JSON.stringify(updatedUser)); // Atualiza no localStorage
       }
   
-      try {
-        // Cria a equipe no backend
-        const response = await axios.post("https://servercasaperto.onrender.com/team", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+      // Atualizando a lista de corretores com o teamId
+      const updatedBrokers = brokers.map((broker) => ({
+        ...broker,
+      }));
   
-        // Atualiza o estado do usuário logado
-        if (setUser && user) {
-          const updatedUser = {
-            ...user,
-            teamId: response.data.teamId, // Supondo que o backend retorne o ID da nova equipe
-            team: response.data.team, // Supondo que o backend retorne os dados da nova equipe
-          };
+      setBrokers(updatedBrokers);
   
-          setUser(updatedUser); // Atualiza o contexto do usuário
+      // Limpeza dos dados
+      setTeamName('');
+      setTeamImage(null);
+      setBrokers([]);
+      setAvailableBrokers([]);
   
-          // Persiste o estado atualizado no localStorage
-          localStorage.setItem("user", JSON.stringify(updatedUser));
+      // Redirecionando para outra página, se necessário
+      navigate("/team");
   
-          console.log("Usuário atualizado após criar a equipe:", updatedUser); // Depuração
-        }
-  
-        navigate("/team");
-      } catch (error) {
-        console.error("Erro ao criar equipe:", error);
+    } catch (error) {
+      console.error("Erro ao criar equipe:", error);
+      if (error instanceof AxiosError) {
+        const errorMessage = error.response?.data?.error || "Erro ao criar equipe. Tente novamente.";
+        alert(errorMessage);
+      } else {
         alert("Erro ao criar equipe. Tente novamente.");
       }
-    } else {
-      alert("Preencha o nome da equipe e adicione pelo menos um corretor.");
+    } finally {
+      setLoading(false);
     }
   };
-  
+
   const dataURItoBlob = (dataURI: string) => {
     const byteString = atob(dataURI.split(',')[1]);
     const ab = new ArrayBuffer(byteString.length);
@@ -234,7 +253,9 @@ const CreateTeam: React.FC = () => {
         </RightColumn>
       </ListsContainer>
 
-      <Button onClick={handleCreateTeam}>Criar Equipe</Button>
+      <Button onClick={handleCreateTeam} disabled={loading}>
+        {loading ? "Criando..." : "Criar Equipe"}
+      </Button>
     </Container>
   );
 };

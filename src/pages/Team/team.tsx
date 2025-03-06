@@ -35,7 +35,7 @@ const Team = () => {
 
     const fetchTeams = async () => {
       try {
-        const response = await axios.get(`https://servercasaperto.onrender.com/teams`);
+        const response = await axios.get(`http://localhost:3333/teams`);
         setTeams(response.data);
       } catch (error) {
         console.error('Erro ao buscar equipes:', error);
@@ -57,7 +57,7 @@ const Team = () => {
 
   const getMemberName = async (userId: number) => {
     try {
-      const response = await axios.get(`https://servercasaperto.onrender.com/users/${userId}`);
+      const response = await axios.get(`http://localhost:3333/users/${userId}`);
       return response.data.name;
     } catch (error) {
       console.error('Erro ao buscar nome do membro:', error);
@@ -97,7 +97,7 @@ const Team = () => {
   
         // Chama a API para sair da equipe
         const response = await axios.post(
-          `https://servercasaperto.onrender.com/teams/${teamId}/leave`,
+          `http://localhost:3333/teams/${teamId}/leave`,
           { userId } // Envia o userId no corpo da requisição
         );
   
@@ -160,7 +160,7 @@ const Team = () => {
             return (
               <TeamCard key={team.id}>
                 {team.imageUrl && (
-                  <TeamImage src={`https://servercasaperto.onrender.com${team.imageUrl}`} alt={`Imagem da equipe ${team.name}`} />
+                  <TeamImage src={`http://localhost:3333${team.imageUrl}`} alt={`Imagem da equipe ${team.name}`} />
                 )}
                 <TeamDetails>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
