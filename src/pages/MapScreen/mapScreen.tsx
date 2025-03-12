@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { GoogleMap, InfoWindow, Marker } from "@react-google-maps/api";
 import { FaCrosshairs, FaMapMarkedAlt } from "react-icons/fa";
@@ -13,6 +19,7 @@ import {
 } from "./styles";
 import { usePropertyContext } from "../../contexts/PropertyContext";
 import { useAuth } from "../../services/authContext";
+import api from "../../services/api";
 
 // Defina as interfaces corretamente
 interface Team {
@@ -23,8 +30,7 @@ interface Team {
 interface User {
   id: number;
   name: string;
-  team?: Team; // Adicione a propriedade team
-  teamMember?: { teamId: number; team: Team }[]; // Adicione a propriedade teamMemberships
+  teamMember: { teamId: number; team: Team }[]; // Adicione a propriedade teamMemberships
 }
 
 interface Property {
@@ -41,18 +47,40 @@ interface Property {
 }
 
 const MapScreen: React.FC = () => {
-  const { user } = useAuth() as { user: User }; // Forçar o tipo User
-  const { isRent } = usePropertyContext();
-  const [location, setLocation] = useState<google.maps.LatLngLiteral | null>(null);
+  const [user, setUser] = useState<User>();
   const [properties, setProperties] = useState<Property[]>([]);
-  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const [location, setLocation] = useState<google.maps.LatLngLiteral | null>(
+    null
+  );
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.Marker[]>([]);
   const navigate = useNavigate();
   const { state } = useLocation();
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [teamMembers, setTeamMembers] = useState<number[]>([]); // IDs dos membros da equipe
+  const [teamMembers, setTeamMembers] = useState<number[]>([]);
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(
+    null
+  );
+  const { isRent } = usePropertyContext();
+  const useContext = useAuth();
+
+  useEffect(() => {
+    async function loadUser() {
+      if (!useContext.user) return;
+
+      const response = await api.get(`/users/${useContext.user?.id}`);
+
+      console.log("Usuário carregado<<<<<<<<<<<<<<<<<<<<<<<<:", response.data);
+
+      setUser({
+        id: response.data.id,
+        name: response.data.name,
+        teamMember: response.data.teamMembers,
+      });
+    }
+    loadUser();
+  }, [useContext]);
 
   // Carrega a localização do usuário
   useEffect(() => {
@@ -64,7 +92,7 @@ const MapScreen: React.FC = () => {
         },
         (error) => {
           console.error("Erro ao obter localização: ", error);
-          setLocation({ lat: -22.9068, lng: -43.1729 }); // Fallback para uma localização padrão
+          setLocation({ lat: -16.679738, lng: -49.256688 }); // Fallback para uma localização padrão
         }
       );
     }
@@ -81,7 +109,7 @@ const MapScreen: React.FC = () => {
       }
 
       // Verifica se o usuário tem um teamId
-      const teamId = user?.team?.id;
+      const teamId = user?.teamMember?.[0]?.teamId;
 
       // Monta os parâmetros da requisição
       const queryParams = new URLSearchParams({
@@ -111,34 +139,38 @@ const MapScreen: React.FC = () => {
 
   // Carrega os membros da equipe
   // Carrega os membros da equipe
-const loadTeamMembers = useCallback(async () => {
-  // Verifica se o usuário tem uma equipe
-  if (!user?.team?.id) {
-    console.log("Usuário não pertence a uma equipe. Nenhum membro para carregar.");
-    setTeamMembers([]); // Define a lista de membros como vazia
-    return;
-  }
-
-  try {
-    const teamId = user.team.id;
-    console.log("Buscando membros da equipe para o teamId:", teamId); // Depuração
-
-    const response = await fetch(`http://localhost:3333/team/${teamId}`);
-    if (!response.ok) {
-      throw new Error("Erro ao buscar membros da equipe");
+  const loadTeamMembers = useCallback(async () => {
+    // Verifica se o usuário tem uma equipe
+    if (!user?.teamMember[0].teamId) {
+      console.log(
+        "Usuário não pertence a uma equipe. Nenhum membro para carregar."
+      );
+      setTeamMembers([]); // Define a lista de membros como vazia
+      return;
     }
 
-    const data = await response.json();
-    console.log("Membros da equipe retornados pelo backend:", data); // Depuração
+    try {
+      const teamId = user.teamMember[0].teamId;
+      console.log("Buscando membros da equipe para o teamId:", teamId); // Depuração
 
-    // Extrai os IDs dos membros da equipe
-    const memberIds = data.members.map((member: { userId: number }) => member.userId);
-    setTeamMembers(memberIds);
-  } catch (error) {
-    console.error("Erro ao buscar membros da equipe:", error);
-    setError("Falha ao carregar membros da equipe.");
-  }
-}, [user]);
+      const response = await fetch(`http://localhost:3333/team/${teamId}`);
+      if (!response.ok) {
+        throw new Error("Erro ao buscar membros da equipe");
+      }
+
+      const data = await response.json();
+      console.log("Membros da equipe retornados pelo backend:", data); // Depuração
+
+      // Extrai os IDs dos membros da equipe
+      const memberIds = data.members.map(
+        (member: { userId: number }) => member.userId
+      );
+      setTeamMembers(memberIds);
+    } catch (error) {
+      console.error("Erro ao buscar membros da equipe:", error);
+      setError("Falha ao carregar membros da equipe.");
+    }
+  }, [user]);
 
   useEffect(() => {
     if (user) {
@@ -246,11 +278,16 @@ const loadTeamMembers = useCallback(async () => {
   // Seleciona uma propriedade com base no estado da rota
   useEffect(() => {
     if (state && state.id) {
-      const propertyToSelect = properties.find((property) => property.id === state.id);
+      const propertyToSelect = properties.find(
+        (property) => property.id === state.id
+      );
       if (propertyToSelect) {
         setSelectedProperty(propertyToSelect);
         if (map) {
-          map.panTo({ lat: propertyToSelect.latitude, lng: propertyToSelect.longitude });
+          map.panTo({
+            lat: propertyToSelect.latitude,
+            lng: propertyToSelect.longitude,
+          });
           map.setZoom(15);
         }
       }
@@ -284,7 +321,9 @@ const loadTeamMembers = useCallback(async () => {
   // Formata o preço para o formato BRL
   const formatPrice = (price: string | number) => {
     const priceString = typeof price === "string" ? price : String(price);
-    const priceNumber = parseFloat(priceString.replace("R$ ", "").replace(".", "").replace(",", "."));
+    const priceNumber = parseFloat(
+      priceString.replace("R$ ", "").replace(".", "").replace(",", ".")
+    );
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
@@ -292,12 +331,15 @@ const loadTeamMembers = useCallback(async () => {
   };
 
   // Navega para a página de detalhes da propriedade
-  const handleImageClick = useCallback((propertyId: number) => {
-    const property = properties.find((p) => p.id === propertyId);
-    if (property) {
-      navigate(`/property/${propertyId}`, { state: property });
-    }
-  }, [properties, navigate]);
+  const handleImageClick = useCallback(
+    (propertyId: number) => {
+      const property = properties.find((p) => p.id === propertyId);
+      if (property) {
+        navigate(`/property/${propertyId}`, { state: property });
+      }
+    },
+    [properties, navigate]
+  );
 
   if (!location) {
     return <div>Carregando mapa...</div>;
@@ -364,7 +406,11 @@ const loadTeamMembers = useCallback(async () => {
                   <h3>{selectedProperty.title}</h3>
                   <p>{formatPrice(selectedProperty.price)}</p>
                   <PropertyImage
-                    src={selectedProperty.images?.[0]?.url ? `http://localhost:3333${selectedProperty.images[0].url}` : "caminho/para/imagem/padrao.jpg"}
+                    src={
+                      selectedProperty.images?.[0]?.url
+                        ? `http://localhost:3333${selectedProperty.images[0].url}`
+                        : "caminho/para/imagem/padrao.jpg"
+                    }
                     onClick={() => handleImageClick(selectedProperty.id)}
                   />
                 </InfoContent>

@@ -1,42 +1,44 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios,{ AxiosError } from 'axios';
-import { 
-  Container, 
-  Input, 
-  Button, 
-  BrokerList, 
-  BrokerItem, 
+import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import axios, { AxiosError } from "axios";
+import {
+  Container,
+  Input,
+  Button,
+  BrokerList,
+  BrokerItem,
   AddedBrokerList,
   AddBrokerButton,
   LeftColumn,
   ListsContainer,
   RightColumn,
   TeamIcon,
-  TeamImage
-} from './styles';
+  TeamImage,
+} from "./styles";
 
-import { useAuth, User } from '../../services/authContext';
-import { FaPlus, FaMinus } from 'react-icons/fa';
+import { useAuth, User } from "../../services/authContext";
+import { FaPlus, FaMinus } from "react-icons/fa";
 
 const CreateTeam: React.FC = () => {
   const { user, setUser } = useAuth();
-  const [teamName, setTeamName] = useState('');
+  const [teamName, setTeamName] = useState("");
   const [brokers, setBrokers] = useState<User[]>([]);
-  const [brokerName, setBrokerName] = useState('');
+  const [brokerName, setBrokerName] = useState("");
   const [availableBrokers, setAvailableBrokers] = useState<User[]>([]);
-  const [teamImage, setTeamImage] = useState<string | null>(null); 
-  const [imageInputRef, setImageInputRef] = useState<HTMLInputElement | null>(null);
+  const [teamImage, setTeamImage] = useState<string | null>(null);
+  const [imageInputRef, setImageInputRef] = useState<HTMLInputElement | null>(
+    null
+  );
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const fetchBrokers = useCallback(async () => {
     try {
-      const response = await axios.get('http://localhost:3333/users/no-team');
+      const response = await axios.get("http://localhost:3333/users/no-team");
       setAvailableBrokers(response.data);
     } catch (error) {
-      console.error('Erro ao buscar corretores:', error);
-      alert('Erro ao carregar corretores. Tente novamente.');
+      console.error("Erro ao buscar corretores:", error);
+      alert("Erro ao carregar corretores. Tente novamente.");
     }
   }, []);
 
@@ -46,34 +48,38 @@ const CreateTeam: React.FC = () => {
 
   useEffect(() => {
     if (user && availableBrokers.length > 0) {
-      const currentUser = availableBrokers.find(broker => broker.id === user.id);
+      const currentUser = availableBrokers.find(
+        (broker) => broker.id === user.id
+      );
       if (currentUser) {
         setBrokers((prevBrokers) => {
-          if (!prevBrokers.some(b => b.id === currentUser.id)) {
+          if (!prevBrokers.some((b) => b.id === currentUser.id)) {
             return [currentUser, ...prevBrokers];
           }
           return prevBrokers;
         });
-        setAvailableBrokers((prevState) => prevState.filter(broker => broker.id !== user.id));
+        setAvailableBrokers((prevState) =>
+          prevState.filter((broker) => broker.id !== user.id)
+        );
       }
     }
   }, [user, availableBrokers]);
 
   const handleAddBroker = (broker: User) => {
     if (broker.teamMembers) {
-      broker = { ...broker, teamMembers: []}; // Remove o teamId ao definir como undefined
+      broker = { ...broker, teamMembers: [] }; // Remove o teamId ao definir como undefined
     }
-  
-    if (!brokers.some(b => b.id === broker.id)) {
+
+    if (!brokers.some((b) => b.id === broker.id)) {
       setBrokers([...brokers, broker]);
-      setAvailableBrokers(availableBrokers.filter(b => b.id !== broker.id));
+      setAvailableBrokers(availableBrokers.filter((b) => b.id !== broker.id));
     }
-  };  
+  };
 
   const handleRemoveBroker = (brokerId: number) => {
-    const removedBroker = brokers.find(b => b.id === brokerId);
+    const removedBroker = brokers.find((b) => b.id === brokerId);
     if (removedBroker) {
-      setBrokers(brokers.filter(broker => broker.id !== brokerId));
+      setBrokers(brokers.filter((broker) => broker.id !== brokerId));
       setAvailableBrokers([...availableBrokers, removedBroker]);
     }
   };
@@ -85,7 +91,8 @@ const CreateTeam: React.FC = () => {
         alert("O arquivo deve ser uma imagem.");
         return;
       }
-      if (file.size > 5 * 1024 * 1024) { // 5MB
+      if (file.size > 5 * 1024 * 1024) {
+        // 5MB
         alert("O arquivo deve ter no máximo 5MB.");
         return;
       }
@@ -99,33 +106,40 @@ const CreateTeam: React.FC = () => {
 
   const handleCreateTeam = async () => {
     if (loading) return;
-  
-    if (teamName.trim() === '') {
+
+    if (teamName.trim() === "") {
       alert("O nome da equipe não pode estar vazio.");
       return;
     }
-  
+
     if (brokers.length === 0) {
       alert("Adicione pelo menos um corretor à equipe.");
       return;
     }
-  
+
     setLoading(true);
-  
+
     const formData = new FormData();
     formData.append("name", teamName);
-    formData.append("members", JSON.stringify(brokers.map(broker => broker.id)));
-  
+    formData.append(
+      "members",
+      JSON.stringify(brokers.map((broker) => broker.id))
+    );
+
     if (teamImage) {
       const imageBlob = dataURItoBlob(teamImage);
       formData.append("image", imageBlob);
     }
-  
+
     try {
-      const response = await axios.post("http://localhost:3333/team", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-  
+      const response = await axios.post(
+        "http://localhost:3333/team",
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+
       // Atualizando o state global de usuário
       if (setUser && user) {
         const updatedUser = {
@@ -135,27 +149,28 @@ const CreateTeam: React.FC = () => {
         setUser(updatedUser);
         localStorage.setItem("user", JSON.stringify(updatedUser)); // Atualiza no localStorage
       }
-  
+
       // Atualizando a lista de corretores com o teamId
       const updatedBrokers = brokers.map((broker) => ({
         ...broker,
       }));
-  
+
       setBrokers(updatedBrokers);
-  
+
       // Limpeza dos dados
-      setTeamName('');
+      setTeamName("");
       setTeamImage(null);
       setBrokers([]);
       setAvailableBrokers([]);
-  
+
       // Redirecionando para outra página, se necessário
       navigate("/team");
-  
     } catch (error) {
       console.error("Erro ao criar equipe:", error);
       if (error instanceof AxiosError) {
-        const errorMessage = error.response?.data?.error || "Erro ao criar equipe. Tente novamente.";
+        const errorMessage =
+          error.response?.data?.error ||
+          "Erro ao criar equipe. Tente novamente.";
         alert(errorMessage);
       } else {
         alert("Erro ao criar equipe. Tente novamente.");
@@ -166,18 +181,18 @@ const CreateTeam: React.FC = () => {
   };
 
   const dataURItoBlob = (dataURI: string) => {
-    const byteString = atob(dataURI.split(',')[1]);
+    const byteString = atob(dataURI.split(",")[1]);
     const ab = new ArrayBuffer(byteString.length);
     const ua = new Uint8Array(ab);
     for (let i = 0; i < byteString.length; i++) {
       ua[i] = byteString.charCodeAt(i);
     }
-    return new Blob([ab], { type: 'image/jpeg' });
+    return new Blob([ab], { type: "image/jpeg" });
   };
 
   const handleIconClick = () => {
     if (imageInputRef) {
-      imageInputRef.click(); 
+      imageInputRef.click();
     }
   };
 
@@ -186,11 +201,11 @@ const CreateTeam: React.FC = () => {
       {teamImage ? (
         <div style={{ position: "relative", display: "inline-block" }}>
           <TeamImage src={teamImage} alt="Imagem da equipe" />
-          <input 
-            type="file" 
-            ref={setImageInputRef} 
-            onChange={handleImageUpload} 
-            style={{ display: "none" }} 
+          <input
+            type="file"
+            ref={setImageInputRef}
+            onChange={handleImageUpload}
+            style={{ display: "none" }}
           />
         </div>
       ) : (
@@ -198,11 +213,11 @@ const CreateTeam: React.FC = () => {
           <button type="button" onClick={handleIconClick}>
             <span>+</span>
           </button>
-          <input 
-            type="file" 
-            ref={setImageInputRef} 
-            onChange={handleImageUpload} 
-            style={{ display: "none" }} 
+          <input
+            type="file"
+            ref={setImageInputRef}
+            onChange={handleImageUpload}
+            style={{ display: "none" }}
           />
         </TeamIcon>
       )}
@@ -226,12 +241,14 @@ const CreateTeam: React.FC = () => {
           />
           <BrokerList>
             {availableBrokers
-              .filter((broker) => broker.name.toLowerCase().includes(brokerName.toLowerCase()))
+              .filter((broker) =>
+                broker.name.toLowerCase().includes(brokerName.toLowerCase())
+              )
               .map((broker) => (
                 <BrokerItem key={broker.id}>
                   {broker.name}
                   <AddBrokerButton onClick={() => handleAddBroker(broker)}>
-                    <FaPlus /> 
+                    <FaPlus />
                   </AddBrokerButton>
                 </BrokerItem>
               ))}
@@ -245,7 +262,7 @@ const CreateTeam: React.FC = () => {
               <BrokerItem key={broker.id}>
                 {broker.name}
                 <AddBrokerButton onClick={() => handleRemoveBroker(broker.id)}>
-                  <FaMinus /> 
+                  <FaMinus />
                 </AddBrokerButton>
               </BrokerItem>
             ))}
