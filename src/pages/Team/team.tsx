@@ -2,28 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { TeamContainer, CreateTeamButton, TeamImage, TeamCard, TeamDetails, TeamMembers, TeamName, UserTag, EditIcon } from './styles';
-import { useAuth } from '../../services/authContext'; // Importe o useAuth
-
+import { useAuth } from '../../services/authContext';
 import { FaSignOutAlt, FaEdit } from 'react-icons/fa';
-
-interface Member {
-  id: number;
-  userId: number;
-  name?: string;
-}
 
 interface Team {
   id: number;
   name: string;
-  members: Member[];
+  members: { userId: number; name: string; email: string }[]; // Alterado para members
   imageUrl?: string;
   creatorId: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 const Team = () => {
-  const { user, setUser } = useAuth(); // Adicione setUser para atualizar o contexto do usuário
+  const { user, setUser } = useAuth();
   const [teams, setTeams] = useState<Team[]>([]);
-  const [membersNames, setMembersNames] = useState<{ [key: number]: string }>({});
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
 
@@ -36,7 +30,8 @@ const Team = () => {
     const fetchTeams = async () => {
       try {
         const response = await axios.get(`http://localhost:3333/teams`);
-        setTeams(response.data);
+        console.log('Dados da API:', response.data); // Verifique os dados retornados
+        setTeams(response.data || []);
       } catch (error) {
         console.error('Erro ao buscar equipes:', error);
       } finally {
@@ -51,57 +46,33 @@ const Team = () => {
     navigate('/create-team');
   };
 
-  const userHasTeam = user?.id && teams.some(team =>
-    team.members.some(member => member.userId === user.id)
+  const userHasTeam = user?.id && Array.isArray(teams) && teams.some(team =>
+    Array.isArray(team.members) && team.members.some(member => member.userId === user.id)
   );
 
-  const getMemberName = async (userId: number) => {
-    try {
-      const response = await axios.get(`http://localhost:3333/users/${userId}`);
-      return response.data.name;
-    } catch (error) {
-      console.error('Erro ao buscar nome do membro:', error);
-      return 'Desconhecido';
-    }
-  };
-
-  useEffect(() => {
-    teams.forEach((team) => {
-      team.members.forEach(async (member) => {
-        const name = await getMemberName(member.userId);
-        setMembersNames((prevNames) => {
-          const updatedNames = { ...prevNames, [member.id]: name };
-          return updatedNames;
-        });
-      });
-    });
-  }, [teams]);
-
-  const sortedTeams = [...teams].sort((a, b) => {
-    const aIsUserTeam = a.members.some(member => member.userId === user?.id);
-    const bIsUserTeam = b.members.some(member => member.userId === user?.id);
+  const sortedTeams = Array.isArray(teams) ? [...teams].sort((a, b) => {
+    const aIsUserTeam = Array.isArray(a.members) && a.members.some(member => member.userId === user?.id);
+    const bIsUserTeam = Array.isArray(b.members) && b.members.some(member => member.userId === user?.id);
     return bIsUserTeam ? 1 : aIsUserTeam ? -1 : 0;
-  });
+  }) : [];
 
   const handleLeaveTeam = async (teamId: number) => {
     const confirmLeave = window.confirm("Você tem certeza que deseja sair da equipe?");
-  
+
     if (confirmLeave) {
       try {
-        const userId = user?.id; // Obtém o ID do usuário do contexto
-  
+        const userId = user?.id;
+
         if (!userId) {
           console.error('Usuário não encontrado');
           return;
         }
-  
-        // Chama a API para sair da equipe
+
         const response = await axios.post(
           `http://localhost:3333/teams/${teamId}/leave`,
-          { userId } // Envia o userId no corpo da requisição
+          { userId }
         );
-  
-        // Atualiza o estado das equipes, removendo o usuário da equipe
+
         setTeams(prevTeams =>
           prevTeams.map(team =>
             team.id === teamId
@@ -112,8 +83,7 @@ const Team = () => {
               : team
           )
         );
-  
-        // Atualiza o contexto do usuário (remove a equipe do usuário)
+
         if (setUser && user) {
           const updatedUser = {
             ...user,
@@ -121,14 +91,11 @@ const Team = () => {
             team: undefined,
           };
           setUser(updatedUser);
-  
-          // Persiste o estado atualizado no localStorage
           localStorage.setItem("user", JSON.stringify(updatedUser));
-  
-          console.log("Usuário atualizado após sair da equipe:", updatedUser); // Depuração
+          console.log("Usuário atualizado após sair da equipe:", updatedUser);
         }
-  
-        console.log(response.data.message); // Mensagem de sucesso
+
+        console.log(response.data.message);
       } catch (error) {
         console.error('Erro ao deixar a equipe:', error);
       }
@@ -149,13 +116,13 @@ const Team = () => {
       <div>
         {loading ? (
           <p>Carregando equipes...</p>
-        ) : sortedTeams.length > 0 ? (
+        ) : Array.isArray(sortedTeams) && sortedTeams.length > 0 ? (
           sortedTeams.map((team) => {
-            const isUserInTeam = team.members.some(
+            const isUserInTeam = Array.isArray(team.members) && team.members.some(
               (member) => member.userId === user?.id
             );
 
-            const isTeamOwner = team.members[0]?.userId === user?.id;
+            const isTeamOwner = team.creatorId === user?.id;
 
             return (
               <TeamCard key={team.id}>
@@ -190,8 +157,8 @@ const Team = () => {
                     {Array.isArray(team.members) && team.members.length > 0 ? (
                       <ul>
                         {team.members.map((member) => (
-                          <li key={member.id}>
-                            {membersNames[member.id] || 'Carregando...'}
+                          <li key={member.userId}>
+                            {member.name || 'Carregando...'}
                           </li>
                         ))}
                       </ul>

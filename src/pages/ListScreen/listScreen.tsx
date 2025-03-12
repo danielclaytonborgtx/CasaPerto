@@ -38,7 +38,7 @@ const ListScreen: React.FC = () => {
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        const response = await fetch('https://servercasaperto.onrender.com/property');
+        const response = await fetch('http://localhost:3333/property');
         if (response.ok) {
           const data = await response.json();
           setProperties(data);
@@ -119,8 +119,8 @@ const ListScreen: React.FC = () => {
       ) : (
         sortedProperties.map((property) => {
           const imageUrl = property.images && property.images.length > 0
-            ? `https://servercasaperto.onrender.com${property.images[0]}`
-            : '/images/default-image.jpg';
+            ? `http://localhost:3333${property.images[0]}`
+            : '/images/default-image.jpg'; 
 
           return (
             <Item key={property.id}>

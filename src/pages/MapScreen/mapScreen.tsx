@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { GoogleMap, InfoWindow } from "@react-google-maps/api";
+import { GoogleMap, InfoWindow, Marker } from "@react-google-maps/api";
 import { FaCrosshairs, FaMapMarkedAlt } from "react-icons/fa";
 import {
   Container,
@@ -24,7 +24,7 @@ interface User {
   id: number;
   name: string;
   team?: Team; // Adicione a propriedade team
-  teamMemberships?: { teamId: number; team: Team }[]; // Adicione a propriedade teamMemberships
+  teamMember?: { teamId: number; team: Team }[]; // Adicione a propriedade teamMemberships
 }
 
 interface Property {
@@ -37,6 +37,7 @@ interface Property {
   images: { url: string }[];
   userId: number;
   user: User; // Adicione a propriedade user
+  teamId?: number; // Adicione teamId à interface Property
 }
 
 const MapScreen: React.FC = () => {
@@ -51,6 +52,7 @@ const MapScreen: React.FC = () => {
   const { state } = useLocation();
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [teamMembers, setTeamMembers] = useState<number[]>([]); // IDs dos membros da equipe
 
   // Carrega a localização do usuário
   useEffect(() => {
@@ -107,36 +109,76 @@ const MapScreen: React.FC = () => {
     }
   }, [user]);
 
+  // Carrega os membros da equipe
+  // Carrega os membros da equipe
+const loadTeamMembers = useCallback(async () => {
+  // Verifica se o usuário tem uma equipe
+  if (!user?.team?.id) {
+    console.log("Usuário não pertence a uma equipe. Nenhum membro para carregar.");
+    setTeamMembers([]); // Define a lista de membros como vazia
+    return;
+  }
+
+  try {
+    const teamId = user.team.id;
+    console.log("Buscando membros da equipe para o teamId:", teamId); // Depuração
+
+    const response = await fetch(`http://localhost:3333/team/${teamId}`);
+    if (!response.ok) {
+      throw new Error("Erro ao buscar membros da equipe");
+    }
+
+    const data = await response.json();
+    console.log("Membros da equipe retornados pelo backend:", data); // Depuração
+
+    // Extrai os IDs dos membros da equipe
+    const memberIds = data.members.map((member: { userId: number }) => member.userId);
+    setTeamMembers(memberIds);
+  } catch (error) {
+    console.error("Erro ao buscar membros da equipe:", error);
+    setError("Falha ao carregar membros da equipe.");
+  }
+}, [user]);
+
   useEffect(() => {
     if (user) {
       console.log("Usuário atualizado:", user); // Depuração
       loadProperties();
+      loadTeamMembers();
     }
-  }, [user, loadProperties]); // Agora `user` está incluído corretamente
-  
+  }, [user, loadProperties, loadTeamMembers]);
 
-  // Filtra as propriedades com base na categoria (venda ou aluguel)
+  // Filtra as propriedades com base na categoria (venda ou aluguel) e na relação com o usuário/equipe
   const filteredProperties = useMemo(() => {
-    const category = isRent ? "venda" : "aluguel";
-  
+    const category = isRent ? "Venda" : "Aluguel";
+
+    // Se o usuário não estiver definido, retorna um array vazio
     if (!user) return [];
-  
-    // Aplica o filtro e armazena o resultado em uma variável temporária
-    const filtered = properties.filter(
-      (property) =>
-        (property.userId === user.id || // Propriedades do usuário
-          (user.team && property.user?.teamMemberships?.some(
-            (membership: { teamId: number; team: Team }) => membership.teamId === user.team?.id
-          ))) && // Propriedades da equipe (se o usuário tiver uma equipe)
-        property.category.toLowerCase() === category.toLowerCase()
-    );
-  
-    // Exibe as propriedades filtradas no console
+
+    // Filtra as propriedades
+    const filtered = properties.filter((property) => {
+      // Verifica se a propriedade pertence ao usuário
+      const isUserProperty = property.userId === user.id;
+
+      // Verifica se a propriedade pertence à equipe do usuário
+      const isTeamProperty = teamMembers.includes(property.userId);
+
+      // Verifica se a categoria da propriedade corresponde à categoria desejada
+      const isCorrectCategory = property.category === category;
+
+      // Retorna true se a propriedade atender a qualquer uma das condições
+      return (isUserProperty || isTeamProperty) && isCorrectCategory;
+    });
+
+    // Exibe as propriedades filtradas no console para depuração
     console.log("Propriedades filtradas:", filtered);
-  
+    console.log("Propriedades brutas:", properties);
+    console.log("Usuário atual:", user);
+    console.log("Membros da equipe:", teamMembers);
+
     // Retorna as propriedades filtradas
     return filtered;
-  }, [properties, isRent, user]);
+  }, [properties, isRent, user, teamMembers]);
 
   // Define o centro do mapa
   const mapCenter = useMemo(() => {
@@ -292,6 +334,13 @@ const MapScreen: React.FC = () => {
           }}
           onLoad={(mapInstance) => setMap(mapInstance)}
         >
+          {filteredProperties.map((property) => (
+            <Marker
+              key={property.id}
+              position={{ lat: property.latitude, lng: property.longitude }}
+              onClick={() => setSelectedProperty(property)}
+            />
+          ))}
           {selectedProperty && (
             <InfoWindow
               position={{
@@ -311,16 +360,14 @@ const MapScreen: React.FC = () => {
                     }}
                   />
                 </NavigationIconContainer>
-
                 <InfoContent>
                   <h3>{selectedProperty.title}</h3>
                   <p>{formatPrice(selectedProperty.price)}</p>
                   <PropertyImage
-                    src={selectedProperty.images?.[0]?.url ? `http://localhost:3333${selectedProperty.images[0].url}` : "caminho/para/imagem/padrao.jpg"}      
+                    src={selectedProperty.images?.[0]?.url ? `http://localhost:3333${selectedProperty.images[0].url}` : "caminho/para/imagem/padrao.jpg"}
                     onClick={() => handleImageClick(selectedProperty.id)}
                   />
                 </InfoContent>
-
               </InfoWindowContainer>
             </InfoWindow>
           )}
@@ -328,7 +375,6 @@ const MapScreen: React.FC = () => {
       ) : (
         <div>Carregando mapa...</div>
       )}
-
       <UpdateButton onClick={handleUpdateLocation}>
         <FaCrosshairs size={20} />
       </UpdateButton>
