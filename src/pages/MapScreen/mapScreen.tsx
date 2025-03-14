@@ -138,7 +138,6 @@ const MapScreen: React.FC = () => {
   }, [user]);
 
   // Carrega os membros da equipe
-  // Carrega os membros da equipe
   const loadTeamMembers = useCallback(async () => {
     // Verifica se o usuário tem uma equipe
     if (!user?.teamMember[0].teamId) {
@@ -267,11 +266,6 @@ const MapScreen: React.FC = () => {
         },
         clickable: false,
       });
-
-      // Limpa os marcadores ao desmontar o componente
-      return () => {
-        newMarkers.forEach((marker) => marker.setMap(null));
-      };
     }
   }, [map, location, filteredProperties]);
 

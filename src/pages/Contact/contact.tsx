@@ -11,7 +11,19 @@ const Contato: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
+    if (!name.trim() || !email.trim() || !message.trim()) {
+      setErrorMessage("Por favor, preencha todos os campos.");
+      return;
+    }
+  
+    // Validação básica de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setErrorMessage("Por favor, insira um email válido.");
+      return;
+    }
+  
     const templateParams = {
       name,
       email,
@@ -26,11 +38,21 @@ const Contato: React.FC = () => {
         templateParams,
         'llxBFEClVYH3PQwDq'      
       );
-      console.log('Email enviado com sucesso:', response);
+
+      console.log('Resposta completa do EmailJS:', response);
+
+      setName('');
+      setEmail('');
+      setMessage('');
+
       setSuccessMessage("Mensagem enviada com sucesso!");
       setErrorMessage("");
     } catch (error) {
-      console.error("Erro ao enviar mensagem:", error);
+
+
+      if (error instanceof Error) {
+        console.error("Mensagem de erro:", error.message);
+      }
       setErrorMessage("Erro ao enviar mensagem. Tente novamente mais tarde.");
       setSuccessMessage("");
     }
@@ -38,12 +60,12 @@ const Contato: React.FC = () => {
 
   return (
     <Container>
-      <Title>Entre em Contato</Title>
-      <Description>Estamos aqui para ajudar! Preencha o formulário abaixo e entraremos em contato com você.</Description>
+      <Title>Contato para cadastro</Title>
+      <Description>Preencha o formulário abaixo e entraremos em contato com você, via email, certifique-se de colocar um email válido!</Description>
       <ContactForm onSubmit={handleSubmit}>
         <InputField 
           type="text" 
-          placeholder="Seu nome" 
+          placeholder="Seu nome completo" 
           value={name} 
           onChange={(e) => setName(e.target.value)} 
           required
@@ -56,7 +78,7 @@ const Contato: React.FC = () => {
           required
         />
         <TextArea 
-          placeholder="Aqui deixe sua mensagem e seu contato!" 
+          placeholder="Aqui coloque seu numero do creci, e sua data de nascimento!" 
           value={message} 
           onChange={(e) => setMessage(e.target.value)} 
           required

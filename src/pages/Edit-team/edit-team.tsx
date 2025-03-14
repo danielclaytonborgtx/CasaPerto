@@ -23,36 +23,43 @@ import { FiEdit } from "react-icons/fi";
 
 import { useAuth, User } from "../../services/authContext";
 
-type Broker = User & { userId: string };
+interface TeamMember {
+  id: number;
+  userId: string;
+  name: string;
+  email: string;
+}
+
+interface TeamData {
+  name: string;
+  members: TeamMember[];
+  imageUrl: string | null;
+}
 
 const EditTeam: React.FC = () => {
   const { id } = useParams();
   const { user, setUser } = useAuth();
-  const [teamName, setTeamName] = useState("");
-  const [brokers, setBrokers] = useState<Broker[]>([]);
-  const [brokerName, setBrokerName] = useState("");
-  const [availableBrokers, setAvailableBrokers] = useState<Broker[]>([]);
-  const [teamImage, setTeamImage] = useState<string | null>(null);
-  const [imageInputRef, setImageInputRef] = useState<HTMLInputElement | null>(
-    null
-  );
-  const [loading, setLoading] = useState(false);
-  const [isDeleted, setIsDeleted] = useState(false); // Novo estado
   const navigate = useNavigate();
 
-  console.log("brokers:", brokers);
+  const [teamName, setTeamName] = useState("");
+  const [brokers, setBrokers] = useState<TeamMember[]>([]);
+  const [brokerName, setBrokerName] = useState("");
+  const [availableBrokers, setAvailableBrokers] = useState<User[]>([]);
+  const [teamImage, setTeamImage] = useState<string | null>(null);
+  const [imageInputRef, setImageInputRef] = useState<HTMLInputElement | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [isDeleted, setIsDeleted] = useState(false);
 
   const fetchTeam = useCallback(async () => {
     if (isDeleted) return;
     try {
-      const response = await axios.get(`http://localhost:3333/team/${id}`);
+      const response = await axios.get<TeamData>(`http://localhost:3333/team/${id}`);
       const teamData = response.data;
       setTeamName(teamData.name);
       setBrokers(teamData.members);
-      setTeamImage(teamData.imageUrl || null);
+      setTeamImage(teamData.imageUrl);
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 404) {
-        // Se a equipe não for encontrada, redireciona para a lista de equipes
         navigate("/team");
         return;
       }
@@ -63,13 +70,8 @@ const EditTeam: React.FC = () => {
 
   const fetchBrokers = useCallback(async () => {
     try {
-      const response = await axios.get("http://localhost:3333/users/no-team");
-      const allBrokers = response.data;
-
-      const validBrokers = allBrokers.filter((broker: User) => {
-        return broker.id && broker.name;
-      });
-
+      const response = await axios.get<User[]>("http://localhost:3333/users/no-team");
+      const validBrokers = response.data.filter((broker) => broker.id && broker.name);
       setAvailableBrokers(validBrokers);
     } catch (error) {
       console.error("Erro ao buscar corretores:", error);
@@ -78,63 +80,57 @@ const EditTeam: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (id) {
+    if (id && !isDeleted) {
       fetchTeam();
     }
     fetchBrokers();
-  }, [id]);
+  }, [id, isDeleted, fetchBrokers, fetchTeam]);
 
-  const handleAddBroker = async (broker: Broker) => {
-    if (!brokers.some((b) => b.id === broker.id)) {
-      try {
-        // Chama a API para adicionar o membro à equipe
-        await axios.post(`http://localhost:3333/team/${id}/member`, {
-          userId: broker.id,
-        });
+  const handleAddBroker = async (user: User) => {
+    try {
+      await axios.post(`http://localhost:3333/teams/${id}/member`, {
+        userId: user.id
+      });
 
-        // Se a chamada à API for bem-sucedida, atualiza o estado local
-        setBrokers([...brokers, broker]);
-        setAvailableBrokers(availableBrokers.filter((b) => b.id !== broker.id));
-      } catch (error) {
-        console.error("Erro ao adicionar corretor:", error);
-        if (error instanceof AxiosError) {
-          const errorMessage =
-            error.response?.data?.error ||
-            "Erro ao adicionar corretor à equipe.";
-          alert(errorMessage);
-        } else {
-          alert("Erro ao adicionar corretor à equipe. Tente novamente.");
-        }
+      const newTeamMember: TeamMember = {
+        id: Number(user.id),
+        userId: String(user.id),
+        name: user.name,
+        email: user.email
+      };
+
+      setBrokers(prev => [...prev, newTeamMember]);
+      setAvailableBrokers(prev => prev.filter(b => b.id !== user.id));
+    } catch (error) {
+      console.error("Erro ao adicionar corretor:", error);
+      if (error instanceof AxiosError) {
+        const errorMessage = error.response?.data?.error || "Erro ao adicionar corretor à equipe.";
+        alert(errorMessage);
       }
     }
   };
 
-  const handleRemoveBroker = async (broker: Broker) => {
+  const handleRemoveBroker = async (broker: TeamMember) => {
     try {
-      console.log("Tentando remover broker:", {
-        teamId: id,
-        userId: broker.id, // Usando userId em vez de id
+      await axios.post(`http://localhost:3333/teams/${id}/leave`, {
+        userId: broker.userId
       });
 
-      // Chama a API usando a rota /teams/:teamId/leave
-      const response = await axios.post(
-        `http://localhost:3333/teams/${broker.userId}/leave`,
-        {
-          userId: broker.id, // Usando userId em vez de id
-        }
-      );
+      setBrokers(prev => prev.filter(b => b.userId !== broker.userId));
+      
+      const brokerAsUser: User = {
+        id: Number(broker.userId),
+        name: broker.name,
+        email: broker.email,
+        username: '',
+        password: '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
 
-      console.log("Resposta da API:", response.data);
+      setAvailableBrokers(prev => [...prev, brokerAsUser]);
 
-      // Atualiza o estado local usando userId para comparação
-      setBrokers((prevBrokers) =>
-        prevBrokers.filter((b) => b.id !== broker.id)
-      );
-
-      setAvailableBrokers((prevAvailable) => [...prevAvailable, broker]);
-
-      // Atualiza o usuário se ele estiver removendo a si mesmo
-      if (broker.id === user?.id && setUser && user) {
+      if (Number(broker.userId) === user?.id && setUser && user) {
         const updatedUser = {
           ...user,
           teamId: undefined,
@@ -146,16 +142,8 @@ const EditTeam: React.FC = () => {
     } catch (error) {
       console.error("Erro ao remover corretor:", error);
       if (error instanceof AxiosError) {
-        console.error("Detalhes do erro:", {
-          status: error.response?.status,
-          data: error.response?.data,
-          message: error.message,
-        });
-        const errorMessage =
-          error.response?.data?.error || "Erro ao remover corretor da equipe.";
+        const errorMessage = error.response?.data?.error || "Erro ao remover corretor da equipe.";
         alert(errorMessage);
-      } else {
-        alert("Erro ao remover corretor da equipe. Tente novamente.");
       }
     }
   };
@@ -177,10 +165,7 @@ const EditTeam: React.FC = () => {
 
     const formData = new FormData();
     formData.append("name", teamName);
-    formData.append(
-      "members",
-      JSON.stringify(brokers.map((broker) => broker.id))
-    );
+    formData.append("members", JSON.stringify(brokers.map(broker => broker.userId)));
 
     if (teamImage && teamImage.startsWith("data:image")) {
       const imageBlob = dataURItoBlob(teamImage);
@@ -190,13 +175,9 @@ const EditTeam: React.FC = () => {
     }
 
     try {
-      const response = await axios.put(
-        `http://localhost:3333/team/${id}`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
+      const response = await axios.put(`http://localhost:3333/team/${id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       if (setUser && user) {
         const updatedUser = {
@@ -211,12 +192,8 @@ const EditTeam: React.FC = () => {
     } catch (error) {
       console.error("Erro ao editar equipe:", error);
       if (error instanceof AxiosError) {
-        const errorMessage =
-          error.response?.data?.error ||
-          "Erro ao editar equipe. Tente novamente.";
+        const errorMessage = error.response?.data?.error || "Erro ao editar equipe. Tente novamente.";
         alert(errorMessage);
-      } else {
-        alert("Erro ao editar equipe. Tente novamente.");
       }
     } finally {
       setLoading(false);
@@ -266,15 +243,12 @@ const EditTeam: React.FC = () => {
   };
 
   const handleDeleteTeam = async () => {
-    const confirmDelete = window.confirm(
-      "Você tem certeza que deseja excluir esta equipe?"
-    );
+    const confirmDelete = window.confirm("Você tem certeza que deseja excluir esta equipe?");
     if (confirmDelete) {
       try {
         setIsDeleted(true);
         await axios.delete(`http://localhost:3333/team/${id}`);
 
-        // Atualiza o estado do usuário para remover o teamId
         if (setUser && user) {
           const updatedUser = {
             ...user,
@@ -285,23 +259,15 @@ const EditTeam: React.FC = () => {
           localStorage.setItem("user", JSON.stringify(updatedUser));
         }
 
-        navigate("/team"); // Redireciona para a lista de equipes após a exclusão
+        navigate("/team");
       } catch (error) {
+        setIsDeleted(false);
         console.error("Erro ao excluir equipe:", error);
         alert("Erro ao excluir equipe. Tente novamente.");
       }
     }
   };
 
-  useEffect(() => {
-    if (id && !isDeleted) {
-      // Só busca se não estiver excluída
-      fetchTeam();
-    }
-    fetchBrokers();
-  }, [id, isDeleted]);
-
-  // Se a equipe foi excluída, não renderiza nada
   if (isDeleted) {
     return null;
   }
@@ -311,11 +277,7 @@ const EditTeam: React.FC = () => {
       {teamImage ? (
         <div style={{ position: "relative", display: "inline-block" }}>
           <TeamImage
-            src={
-              teamImage.startsWith("data:image")
-                ? teamImage
-                : `http://localhost:3333${teamImage}`
-            }
+            src={teamImage.startsWith("data:image") ? teamImage : `http://localhost:3333${teamImage}`}
             alt="Imagem da equipe"
           />
           <EditButton onClick={handleIconClick}>
@@ -362,11 +324,9 @@ const EditTeam: React.FC = () => {
           />
           <BrokerList>
             {availableBrokers
-              .filter((broker) =>
-                broker.name.toLowerCase().includes(brokerName.toLowerCase())
-              )
-              .map((broker, index) => (
-                <BrokerItem key={`${broker.id}-${broker.name}-${index}`}>
+              .filter((broker) => broker.name.toLowerCase().includes(brokerName.toLowerCase()))
+              .map((broker) => (
+                <BrokerItem key={broker.id}>
                   {broker.name}
                   <AddBrokerButton onClick={() => handleAddBroker(broker)}>
                     <FaPlus />
@@ -379,8 +339,8 @@ const EditTeam: React.FC = () => {
         <RightColumn>
           <h3>Corretores Adicionados</h3>
           <AddedBrokerList>
-            {brokers.map((broker, index) => (
-              <BrokerItem key={`${broker.id}-${broker.name}-${index}`}>
+            {brokers.map((broker) => (
+              <BrokerItem key={broker.userId}>
                 {broker.name}
                 <AddBrokerButton onClick={() => handleRemoveBroker(broker)}>
                   <FaMinus />
@@ -391,7 +351,9 @@ const EditTeam: React.FC = () => {
         </RightColumn>
       </ListsContainer>
 
-      <Button onClick={handleUpdateTeam}>Salvar Alterações</Button>
+      <Button onClick={handleUpdateTeam} disabled={loading}>
+        {loading ? "Salvando..." : "Salvar Alterações"}
+      </Button>
 
       <DeleteTeamButton onClick={handleDeleteTeam}>
         Excluir Equipe

@@ -20,7 +20,12 @@ export const CreateTeamButton = styled.button`
   border-radius: 5px;
   cursor: pointer;
   margin-top: 20px;
+  margin-bottom: 20px;
   transition: background-color 0.3s ease;
+
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 
   &:hover {
     background-color: #0056b3;
