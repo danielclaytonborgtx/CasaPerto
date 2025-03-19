@@ -1,60 +1,148 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { TeamContainer, CreateTeamButton, TeamImage, TeamCard, TeamDetails, TeamMembers, TeamName, UserTag, EditIcon } from './styles';
+import axios, { AxiosError } from 'axios';
+import { 
+  TeamContainer, 
+  CreateTeamButton, 
+  TeamImage, 
+  TeamCard, 
+  TeamDetails, 
+  TeamMembers, 
+  TeamName, 
+  UserTag, 
+  EditIcon,
+  InviteButtons,
+  AcceptButton,
+  RejectButton,
+  LeaveButton,
+  TeamHeader,
+  TeamNameSection,
+  ButtonsSection
+} from './styles';
 import { useAuth } from '../../services/authContext';
 import { FaSignOutAlt, FaEdit } from 'react-icons/fa';
+
+interface TeamInvitation {
+  id: number;
+  teamId: number;
+  userId: number;
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+}
 
 interface Team {
   id: number;
   name: string;
-  members: { userId: number; name: string; email: string }[]; // Alterado para members
+  members: { userId: number; name: string; email: string }[];
   imageUrl?: string;
   creatorId: number;
   createdAt: string;
   updatedAt: string;
+  invitations?: TeamInvitation[];
 }
 
 const Team = () => {
   const { user, setUser } = useAuth();
   const [teams, setTeams] = useState<Team[]>([]);
+  const [invitations, setInvitations] = useState<TeamInvitation[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!user?.id) {
+  const fetchTeams = async () => {
+    try {
+      const response = await axios.get(`https://servercasaperto.onrender.com/teams`);
+      setTeams(response.data || []);
+    } catch (error) {
+      console.error('Erro ao buscar equipes:', error);
+    } finally {
       setLoading(false);
-      return;
     }
+  };
 
-    const fetchTeams = async () => {
-      try {
-        const response = await axios.get(`http://localhost:3333/teams`);
-        console.log('Dados da API:', response.data); // Verifique os dados retornados
-        setTeams(response.data || []);
-      } catch (error) {
-        console.error('Erro ao buscar equipes:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchInvitations = async () => {
+    if (!user?.id) return;
+    
+    try {
+      const response = await axios.get(`https://servercasaperto.onrender.com/team-invitations/${user.id}`);
+      setInvitations(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar convites:', error);
+    }
+  };
 
-    fetchTeams();
+  useEffect(() => {
+    if (user?.id) {
+      fetchTeams();
+      fetchInvitations();
+    } else {
+      setLoading(false);
+    }
   }, [user]);
 
   const handleCreateTeam = () => {
     navigate('/create-team');
   };
 
-  const userHasTeam = user?.id && Array.isArray(teams) && teams.some(team =>
-    Array.isArray(team.members) && team.members.some(member => member.userId === user.id)
-  );
+  const handleAcceptInvitation = async (invitationId: number) => {
+    try {
+      if (!user?.id) {
+        alert('Usuário não autenticado');
+        return;
+      }
+  
+      console.log('Enviando requisição:', {
+        invitationId,
+        userId: user.id
+      });
+  
+      const response = await axios.post(
+        `https://servercasaperto.onrender.com/team/invite/${invitationId}/accept`,
+        { userId: user.id } // Enviando userId no corpo
+      );
+      
+      await Promise.all([fetchTeams(), fetchInvitations()]);
+      alert(response.data.message || 'Convite aceito com sucesso!');
+    } catch (error) {
+      console.error('Erro ao aceitar convite:', error);
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.error || 
+                           'Erro ao aceitar convite. Tente novamente.';
+        alert(errorMessage);
+      } else {
+        alert('Erro ao aceitar convite. Tente novamente.');
+      }
+    }
+  };
 
-  const sortedTeams = Array.isArray(teams) ? [...teams].sort((a, b) => {
-    const aIsUserTeam = Array.isArray(a.members) && a.members.some(member => member.userId === user?.id);
-    const bIsUserTeam = Array.isArray(b.members) && b.members.some(member => member.userId === user?.id);
-    return bIsUserTeam ? 1 : aIsUserTeam ? -1 : 0;
-  }) : [];
+  const handleRejectInvitation = async (invitationId: number) => {
+    try {
+      if (!user?.id) {
+        alert('Usuário não autenticado');
+        return;
+      }
+  
+      console.log('Enviando requisição de rejeição:', {
+        invitationId,
+        userId: user.id
+      });
+  
+      const response = await axios.post(
+        `https://servercasaperto.onrender.com/team/invite/${invitationId}/reject`,
+        { userId: user.id } // Adicionando userId no corpo da requisição
+      );
+      
+      await fetchInvitations();
+      alert(response.data.message || 'Convite rejeitado.');
+    } catch (error) {
+      console.error('Erro ao rejeitar convite:', error);
+      if (error instanceof AxiosError) {
+        const errorMessage = error.response?.data?.error || 
+                           'Erro ao rejeitar convite. Tente novamente.';
+        alert(errorMessage);
+      } else {
+        alert('Erro ao rejeitar convite. Tente novamente.');
+      }
+    }
+  };
 
   const handleLeaveTeam = async (teamId: number) => {
     const confirmLeave = window.confirm("Você tem certeza que deseja sair da equipe?");
@@ -68,10 +156,7 @@ const Team = () => {
           return;
         }
 
-        const response = await axios.post(
-          `http://localhost:3333/teams/${teamId}/leave`,
-          { userId }
-        );
+        await axios.post(`https://servercasaperto.onrender.com/teams/${teamId}/leave`, { userId });
 
         setTeams(prevTeams =>
           prevTeams.map(team =>
@@ -92,18 +177,25 @@ const Team = () => {
           };
           setUser(updatedUser);
           localStorage.setItem("user", JSON.stringify(updatedUser));
-          console.log("Usuário atualizado após sair da equipe:", updatedUser);
         }
 
-        console.log(response.data.message);
+        alert('Você saiu da equipe com sucesso.');
       } catch (error) {
         console.error('Erro ao deixar a equipe:', error);
+        alert('Ocorreu um erro ao tentar sair da equipe. Tente novamente mais tarde.');
       }
-    } else {
-      console.log("Ação cancelada");
-      alert('Ocorreu um erro ao tentar sair da equipe. Tente novamente mais tarde.');
     }
   };
+
+  const userHasTeam = user?.id && Array.isArray(teams) && teams.some(team =>
+    Array.isArray(team.members) && team.members.some(member => member.userId === user.id)
+  );
+
+  const sortedTeams = Array.isArray(teams) ? [...teams].sort((a, b) => {
+    const aIsUserTeam = Array.isArray(a.members) && a.members.some(member => member.userId === user?.id);
+    const bIsUserTeam = Array.isArray(b.members) && b.members.some(member => member.userId === user?.id);
+    return bIsUserTeam ? 1 : aIsUserTeam ? -1 : 0;
+  }) : [];
 
   return (
     <TeamContainer>
@@ -118,47 +210,63 @@ const Team = () => {
           <p>Carregando equipes...</p>
         ) : Array.isArray(sortedTeams) && sortedTeams.length > 0 ? (
           sortedTeams.map((team) => {
-            const isUserInTeam = Array.isArray(team.members) && team.members.some(
-              (member) => member.userId === user?.id
-            );
-
+            const isUserInTeam = Array.isArray(team.members) && 
+              team.members.some(member => member.userId === user?.id);
+            
             const isTeamOwner = team.creatorId === user?.id;
+            
+            const pendingInvitation = invitations.find(
+              inv => inv.teamId === team.id && inv.status === 'PENDING'
+            );
 
             return (
               <TeamCard key={team.id}>
                 {team.imageUrl && (
-                  <TeamImage src={`http://localhost:3333${team.imageUrl}`} alt={`Imagem da equipe ${team.name}`} />
+                  <TeamImage 
+                    src={`https://servercasaperto.onrender.com${team.imageUrl}`} 
+                    alt={`Imagem da equipe ${team.name}`} 
+                  />
                 )}
                 <TeamDetails>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <TeamName>{team.name}</TeamName>
-                    {isTeamOwner && (
-                      <EditIcon onClick={() => navigate(`/edit-team/${team.id}`)}>
-                        <FaEdit />
-                      </EditIcon>
-                    )}
-                    {isUserInTeam && !isTeamOwner && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span
-                          style={{ cursor: 'pointer', color: 'red' }}
-                          onClick={() => handleLeaveTeam(team.id)}
-                        >
-                          Sair
-                        </span>
-                        <FaSignOutAlt
-                          onClick={() => handleLeaveTeam(team.id)}
-                          style={{ cursor: 'pointer', fontSize: '20px', color: 'red' }}
-                        />
-                      </div>
-                    )}
-                  </div>
-                  {isUserInTeam && <UserTag>Sua equipe!</UserTag>}
+                  <TeamHeader>
+                    <TeamNameSection>
+                      <TeamName>{team.name}</TeamName>
+                      {isUserInTeam && <UserTag>Sua equipe!</UserTag>}
+                    </TeamNameSection>
+                    
+                    <ButtonsSection>
+                      {pendingInvitation && (
+                        <InviteButtons>
+                          <AcceptButton onClick={() => handleAcceptInvitation(pendingInvitation.id)}>
+                            Aceitar
+                          </AcceptButton>
+                          <RejectButton onClick={() => handleRejectInvitation(pendingInvitation.id)}>
+                            Rejeitar
+                          </RejectButton>
+                        </InviteButtons>
+                      )}
+                      {isUserInTeam && !isTeamOwner && (
+                        <LeaveButton onClick={() => handleLeaveTeam(team.id)}>
+                          <span>Sair</span>
+                          <FaSignOutAlt />
+                        </LeaveButton>
+                      )}
+                      {isTeamOwner && (
+                        <EditIcon onClick={() => navigate(`/edit-team/${team.id}`)}>
+                          <FaEdit />
+                        </EditIcon>
+                      )}
+                    </ButtonsSection>
+                  </TeamHeader>
+
                   <TeamMembers>
                     {Array.isArray(team.members) && team.members.length > 0 ? (
                       <ul>
                         {team.members.map((member) => (
                           <li key={member.userId}>
-                            {member.name || 'Carregando...'}
+                            {member.name}
+                            {pendingInvitation && member.userId === user?.id && 
+                              " (Convite Pendente)"}
                           </li>
                         ))}
                       </ul>

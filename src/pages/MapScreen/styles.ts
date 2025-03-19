@@ -5,8 +5,8 @@ export const Container = styled.div`
   flex-direction: column;
   width: 100%;
   height: 100vh; 
-  margin-top: 50px; 
-  margin-bottom: 50px;
+  margin-top: 40px; 
+  margin-bottom: 40px;
   padding: 0; 
 
   .map-container {

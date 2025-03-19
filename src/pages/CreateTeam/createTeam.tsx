@@ -19,6 +19,13 @@ import {
 import { useAuth, User } from "../../services/authContext";
 import { FaPlus, FaMinus } from "react-icons/fa";
 
+interface TeamInvitation {
+  id: number;
+  userId: number;
+  teamId: number;
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+}
+
 const CreateTeam: React.FC = () => {
   const { user, setUser } = useAuth();
   const [teamName, setTeamName] = useState("");
@@ -32,9 +39,11 @@ const CreateTeam: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const [pendingInvites, setPendingInvites] = useState<TeamInvitation[]>([]);
+
   const fetchBrokers = useCallback(async () => {
     try {
-      const response = await axios.get("http://localhost:3333/users/no-team");
+      const response = await axios.get("https://servercasaperto.onrender.com/users/no-team");
       setAvailableBrokers(response.data);
     } catch (error) {
       console.error("Erro ao buscar corretores:", error);
@@ -133,7 +142,7 @@ const CreateTeam: React.FC = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:3333/team",
+        "https://servercasaperto.onrender.com/team",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -150,12 +159,7 @@ const CreateTeam: React.FC = () => {
         localStorage.setItem("user", JSON.stringify(updatedUser)); // Atualiza no localStorage
       }
 
-      // Atualizando a lista de corretores com o teamId
-      const updatedBrokers = brokers.map((broker) => ({
-        ...broker,
-      }));
-
-      setBrokers(updatedBrokers);
+      setPendingInvites(response.data.invitations || []);
 
       // Limpeza dos dados
       setTeamName("");
@@ -194,6 +198,22 @@ const CreateTeam: React.FC = () => {
     if (imageInputRef) {
       imageInputRef.click();
     }
+  };
+
+  // Atualiza o UI para mostrar status dos convites
+  const renderBrokerStatus = (broker: User) => {
+    const invitation = pendingInvites.find(inv => inv.userId === broker.id);
+    if (invitation) {
+      return (
+        <span style={{ 
+          fontSize: '12px', 
+          color: invitation.status === 'PENDING' ? '#f0ad4e' : '#5cb85c' 
+        }}>
+          {invitation.status === 'PENDING' ? ' (Convite Pendente)' : ' (Convite Aceito)'}
+        </span>
+      );
+    }
+    return null;
   };
 
   return (
@@ -261,6 +281,7 @@ const CreateTeam: React.FC = () => {
             {brokers.map((broker) => (
               <BrokerItem key={broker.id}>
                 {broker.name}
+                {renderBrokerStatus(broker)}
                 <AddBrokerButton onClick={() => handleRemoveBroker(broker.id)}>
                   <FaMinus />
                 </AddBrokerButton>

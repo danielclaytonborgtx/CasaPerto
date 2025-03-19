@@ -16,28 +16,42 @@ export const SlideMenuContainer = styled.div<SlideMenuContainerProps>`
   z-index: 1000;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 20px;
   transition: transform 0.3s ease;
   transform: translateX(${props => props.$slide}%);
 `;
 
 export const MenuContent = styled.div`
-  margin-top: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%; 
+  margin-top: 20px; 
 `;
 
 export const MenuItem = styled.div`
-  margin-bottom: 20px;
+  width: 100%;
   display: flex;
-  align-items: center; 
-  justify-content: flex-start; 
-  
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 25px; 
+  padding-bottom: 10px; 
+  border-bottom: 1px solid #696969;
+
+  &:last-child {
+    border-bottom: none; 
+  }
+
   a {
     text-decoration: none;
     color: black;
     font-size: 18px;
     padding: 10px 0;
     display: block;
+    text-align: center;
     width: 100%; 
-    padding-left: 5px; 
     
     &:hover {
       color: #000;
@@ -57,7 +71,8 @@ export const UserNameSpan = styled.span`
   font-weight: bold;
   display: flex;
   align-items: center;
-  gap: 10px; 
+  justify-content: center;
+  gap: 10px;
 `;
 
 export const ProfileImage = styled.img`

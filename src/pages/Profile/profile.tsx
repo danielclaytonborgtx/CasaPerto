@@ -70,9 +70,9 @@ const Profile: React.FC = () => {
   // Busca a imagem do perfil do usuário
   const fetchProfileImage = useCallback(
     async (userId: number) => {
-      const data = await fetchData(`http://localhost:3333/users/${userId}/profile-picture`);
+      const data = await fetchData(`https://servercasaperto.onrender.com/users/${userId}/profile-picture`);
       if (data?.user?.picture) {
-        setProfileImage(`http://localhost:3333${data.user.picture}`);
+        setProfileImage(`https://servercasaperto.onrender.com${data.user.picture}`);
       } else {
         setProfileImage(null);
       }
@@ -84,7 +84,7 @@ const Profile: React.FC = () => {
   const fetchProperties = useCallback(
     async (userId: number) => {
       setLoading(true);
-      const data = await fetchData(`http://localhost:3333/property/user?userId=${userId}`);
+      const data = await fetchData(`https://servercasaperto.onrender.com/property/user?userId=${userId}`);
       if (data) {
         if (data.message) {
           setProperties([]);
@@ -108,7 +108,7 @@ const Profile: React.FC = () => {
     const confirmDelete = window.confirm("Deseja excluir este imóvel?");
     if (!confirmDelete) return;
 
-    const data = await fetchData(`http://localhost:3333/property/${propertyId}`, {
+    const data = await fetchData(`https://servercasaperto.onrender.com/property/${propertyId}`, {
       method: "DELETE",
     });
     if (data) {

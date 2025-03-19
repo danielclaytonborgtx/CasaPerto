@@ -11,8 +11,8 @@ export const Container = styled.div`
 `;
 
 export const Image = styled.img`
-  width: 300px;
-  height: 200px;
+  width: 100%;
+  height: 300px;
   border-radius: 10px;
   margin-bottom: 20px;
 `;

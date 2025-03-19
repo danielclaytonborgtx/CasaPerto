@@ -32,7 +32,7 @@ const Header: React.FC = () => {
     <Container>
       <MenuButton onClick={toggleSlideMenu}>
         <Icon>
-          <FaBars size={30} />
+          <FaBars size={25} />
         </Icon>
       </MenuButton>
 
@@ -42,7 +42,7 @@ const Header: React.FC = () => {
             onChange={handleSwitchChange}
             offColor="#E0FFFF"
             onColor="#E0FFFF"
-            height={40}
+            height={30}
             width={160}
             uncheckedIcon={
               <span style={{
@@ -55,7 +55,7 @@ const Header: React.FC = () => {
                 height: '110%',
                 width: '100%',
                 position: 'absolute',
-                left: -48,
+                left: -58,
                 textAlign: 'center', 
               }}>
                 Aluguel
@@ -72,13 +72,13 @@ const Header: React.FC = () => {
                 height: '110%',
                 width: '100%',
                 position: 'absolute',
-                right: -45,
+                right: -56,
                 textAlign: 'center',
               }}>
                 Venda
               </span>
             }
-            handleDiameter={35}
+            handleDiameter={25}
             onHandleColor="#00BFFF"
             offHandleColor="#00BFFF"
           />
@@ -86,7 +86,7 @@ const Header: React.FC = () => {
 
       <AddButton onClick={handleAddPropertyClick}>
         <Icon>
-          <FaPlus size={30} />
+          <FaPlus size={25} />
         </Icon>
       </AddButton>
 

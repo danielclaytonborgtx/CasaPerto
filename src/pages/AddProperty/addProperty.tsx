@@ -103,7 +103,7 @@ const AddProperty = () => {
 
     try {
       const response = await axios.post(
-        'http://localhost:3333/property',
+        'https://servercasaperto.onrender.com/property',
         formData
       );
 

@@ -36,6 +36,12 @@ interface TeamData {
   imageUrl: string | null;
 }
 
+interface PendingInvite {
+  userId: string;
+  name: string;
+  email: string;
+}
+
 const EditTeam: React.FC = () => {
   const { id } = useParams();
   const { user, setUser } = useAuth();
@@ -49,11 +55,12 @@ const EditTeam: React.FC = () => {
   const [imageInputRef, setImageInputRef] = useState<HTMLInputElement | null>(null);
   const [loading, setLoading] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
+  const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([]);
 
   const fetchTeam = useCallback(async () => {
     if (isDeleted) return;
     try {
-      const response = await axios.get<TeamData>(`http://localhost:3333/team/${id}`);
+      const response = await axios.get<TeamData>(`https://servercasaperto.onrender.com/team/${id}`);
       const teamData = response.data;
       setTeamName(teamData.name);
       setBrokers(teamData.members);
@@ -70,7 +77,7 @@ const EditTeam: React.FC = () => {
 
   const fetchBrokers = useCallback(async () => {
     try {
-      const response = await axios.get<User[]>("http://localhost:3333/users/no-team");
+      const response = await axios.get<User[]>("https://servercasaperto.onrender.com/users/no-team");
       const validBrokers = response.data.filter((broker) => broker.id && broker.name);
       setAvailableBrokers(validBrokers);
     } catch (error) {
@@ -88,23 +95,25 @@ const EditTeam: React.FC = () => {
 
   const handleAddBroker = async (user: User) => {
     try {
-      await axios.post(`http://localhost:3333/teams/${id}/member`, {
-        userId: user.id
+      // Enviar convite
+      await axios.post(`https://servercasaperto.onrender.com/teams/${id}/member`, {
+        userId: user.id,
       });
 
-      const newTeamMember: TeamMember = {
-        id: Number(user.id),
-        userId: String(user.id),
+      // Adicionar à lista de convites pendentes
+      const newInvite: PendingInvite = {
+        userId: user.id.toString(),
         name: user.name,
-        email: user.email
+        email: user.email,
       };
+      setPendingInvites((prev) => [...prev, newInvite]);
 
-      setBrokers(prev => [...prev, newTeamMember]);
-      setAvailableBrokers(prev => prev.filter(b => b.id !== user.id));
+      // Remover da lista de corretores disponíveis
+      setAvailableBrokers((prev) => prev.filter((b) => b.id !== user.id));
     } catch (error) {
-      console.error("Erro ao adicionar corretor:", error);
+      console.error("Erro ao enviar convite:", error);
       if (error instanceof AxiosError) {
-        const errorMessage = error.response?.data?.error || "Erro ao adicionar corretor à equipe.";
+        const errorMessage = error.response?.data?.error || "Erro ao enviar convite.";
         alert(errorMessage);
       }
     }
@@ -112,12 +121,12 @@ const EditTeam: React.FC = () => {
 
   const handleRemoveBroker = async (broker: TeamMember) => {
     try {
-      await axios.post(`http://localhost:3333/teams/${id}/leave`, {
-        userId: broker.userId
+      await axios.post(`https://servercasaperto.onrender.com/teams/${id}/leave`, {
+        userId: broker.userId,
       });
 
-      setBrokers(prev => prev.filter(b => b.userId !== broker.userId));
-      
+      setBrokers((prev) => prev.filter((b) => b.userId !== broker.userId));
+
       const brokerAsUser: User = {
         id: Number(broker.userId),
         name: broker.name,
@@ -125,10 +134,10 @@ const EditTeam: React.FC = () => {
         username: '',
         password: '',
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
 
-      setAvailableBrokers(prev => [...prev, brokerAsUser]);
+      setAvailableBrokers((prev) => [...prev, brokerAsUser]);
 
       if (Number(broker.userId) === user?.id && setUser && user) {
         const updatedUser = {
@@ -165,7 +174,7 @@ const EditTeam: React.FC = () => {
 
     const formData = new FormData();
     formData.append("name", teamName);
-    formData.append("members", JSON.stringify(brokers.map(broker => broker.userId)));
+    formData.append("members", JSON.stringify(brokers.map((broker) => broker.userId)));
 
     if (teamImage && teamImage.startsWith("data:image")) {
       const imageBlob = dataURItoBlob(teamImage);
@@ -175,7 +184,7 @@ const EditTeam: React.FC = () => {
     }
 
     try {
-      const response = await axios.put(`http://localhost:3333/team/${id}`, formData, {
+      const response = await axios.put(`https://servercasaperto.onrender.com/team/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -247,7 +256,7 @@ const EditTeam: React.FC = () => {
     if (confirmDelete) {
       try {
         setIsDeleted(true);
-        await axios.delete(`http://localhost:3333/team/${id}`);
+        await axios.delete(`https://servercasaperto.onrender.com/team/${id}`);
 
         if (setUser && user) {
           const updatedUser = {
@@ -263,21 +272,22 @@ const EditTeam: React.FC = () => {
       } catch (error) {
         setIsDeleted(false);
         console.error("Erro ao excluir equipe:", error);
-        alert("Erro ao excluir equipe. Tente novamente.");
+        if (axios.isAxiosError(error)) {
+          const errorMessage = error.response?.data?.error || "Erro ao excluir equipe. Tente novamente.";
+          alert(errorMessage);
+        } else {
+          alert("Erro ao excluir equipe. Tente novamente.");
+        }
       }
     }
   };
-
-  if (isDeleted) {
-    return null;
-  }
 
   return (
     <Container>
       {teamImage ? (
         <div style={{ position: "relative", display: "inline-block" }}>
           <TeamImage
-            src={teamImage.startsWith("data:image") ? teamImage : `http://localhost:3333${teamImage}`}
+            src={teamImage.startsWith("data:image") ? teamImage : `https://servercasaperto.onrender.com${teamImage}`}
             alt="Imagem da equipe"
           />
           <EditButton onClick={handleIconClick}>
@@ -345,6 +355,11 @@ const EditTeam: React.FC = () => {
                 <AddBrokerButton onClick={() => handleRemoveBroker(broker)}>
                   <FaMinus />
                 </AddBrokerButton>
+              </BrokerItem>
+            ))}
+            {pendingInvites.map((invite) => (
+              <BrokerItem key={invite.userId}>
+                {invite.name} (Convite Pendente)
               </BrokerItem>
             ))}
           </AddedBrokerList>
