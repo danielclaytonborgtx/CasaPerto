@@ -43,7 +43,7 @@ const CreateTeam: React.FC = () => {
 
   const fetchBrokers = useCallback(async () => {
     try {
-      const response = await axios.get("https://servercasaperto.onrender.com/users/no-team");
+      const response = await axios.get("http://localhost:3333/users/no-team");
       setAvailableBrokers(response.data);
     } catch (error) {
       console.error("Erro ao buscar corretores:", error);
@@ -142,7 +142,7 @@ const CreateTeam: React.FC = () => {
 
     try {
       const response = await axios.post(
-        "https://servercasaperto.onrender.com/team",
+        "http://localhost:3333/team",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },

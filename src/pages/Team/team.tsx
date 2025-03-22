@@ -49,7 +49,7 @@ const Team = () => {
 
   const fetchTeams = async () => {
     try {
-      const response = await axios.get(`https://servercasaperto.onrender.com/teams`);
+      const response = await axios.get(`http://localhost:3333/teams`);
       setTeams(response.data || []);
     } catch (error) {
       console.error('Erro ao buscar equipes:', error);
@@ -62,7 +62,7 @@ const Team = () => {
     if (!user?.id) return;
     
     try {
-      const response = await axios.get(`https://servercasaperto.onrender.com/team-invitations/${user.id}`);
+      const response = await axios.get(`http://localhost:3333/team-invitations/${user.id}`);
       setInvitations(response.data);
     } catch (error) {
       console.error('Erro ao buscar convites:', error);
@@ -95,7 +95,7 @@ const Team = () => {
       });
   
       const response = await axios.post(
-        `https://servercasaperto.onrender.com/team/invite/${invitationId}/accept`,
+        `http://localhost:3333/team/invite/${invitationId}/accept`,
         { userId: user.id } // Enviando userId no corpo
       );
       
@@ -126,7 +126,7 @@ const Team = () => {
       });
   
       const response = await axios.post(
-        `https://servercasaperto.onrender.com/team/invite/${invitationId}/reject`,
+        `http://localhost:3333/team/invite/${invitationId}/reject`,
         { userId: user.id } // Adicionando userId no corpo da requisição
       );
       
@@ -156,7 +156,7 @@ const Team = () => {
           return;
         }
 
-        await axios.post(`https://servercasaperto.onrender.com/teams/${teamId}/leave`, { userId });
+        await axios.post(`http://localhost:3333/teams/${teamId}/leave`, { userId });
 
         setTeams(prevTeams =>
           prevTeams.map(team =>
@@ -223,7 +223,7 @@ const Team = () => {
               <TeamCard key={team.id}>
                 {team.imageUrl && (
                   <TeamImage 
-                    src={`https://servercasaperto.onrender.com${team.imageUrl}`} 
+                    src={`http://localhost:3333${team.imageUrl}`} 
                     alt={`Imagem da equipe ${team.name}`} 
                   />
                 )}

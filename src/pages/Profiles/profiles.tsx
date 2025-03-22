@@ -72,6 +72,7 @@ const Profiles: React.FC = () => {
         }
 
         setUser(userData);
+        console.log("Dados do usuário:", userData);
         fetchProperties(userData.id); 
         fetchProfileImage(userData.id); 
       } catch {

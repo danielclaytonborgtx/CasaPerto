@@ -47,7 +47,7 @@ const PropertyDetails: React.FC = () => {
       if (!location.state) {
         try {
           const response = await fetch(
-            `https://servercasaperto.onrender.com/property/${id}`
+            `http://localhost:3333/property/${id}`
           );
           if (!response.ok) {
             throw new Error("Erro ao buscar imóvel");
@@ -108,9 +108,9 @@ const PropertyDetails: React.FC = () => {
 
   const resolveImageUrl = (img: PropertyImage | string) => {
     if (typeof img === "string") {
-      return `https://servercasaperto.onrender.com${img}`;
+      return `http://localhost:3333${img}`;
     } else if (img && typeof img === "object" && "url" in img) {
-      return `https://servercasaperto.onrender.com${img.url}`;
+      return `http://localhost:3333${img.url}`;
     }
     return "/fallback-image.jpg"; // Imagem padrão em caso de erro
   };

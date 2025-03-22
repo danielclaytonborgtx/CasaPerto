@@ -19,11 +19,11 @@ const Settings: React.FC = () => {
 
   const fetchProfileImage = async (userId: number) => {
     try {
-      const response = await fetch(`https://servercasaperto.onrender.com/users/${userId}/profile-picture`);
+      const response = await fetch(`http://localhost:3333/users/${userId}/profile-picture`);
       if (response.ok) {
         const data = await response.json();
         if (data.user?.picture) {
-          setProfileImage(`https://servercasaperto.onrender.com${data.user.picture}`);
+          setProfileImage(`http://localhost:3333${data.user.picture}`);
         } else {
           setProfileImage(null);
         }
@@ -49,7 +49,7 @@ const Settings: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`https://servercasaperto.onrender.com/users/${userId}/profile-picture`, {
+      const response = await fetch(`http://localhost:3333/users/${userId}/profile-picture`, {
         method: "POST",
         body: formData,
       });
@@ -57,7 +57,7 @@ const Settings: React.FC = () => {
       if (response.ok) {
         const data = await response.json();
         if (data.user?.picture) {
-          setProfileImage(`https://servercasaperto.onrender.com${data.user.picture}`);
+          setProfileImage(`http://localhost:3333${data.user.picture}`);
         } else {
           setError("Caminho da imagem não encontrado na resposta da API.");
         }

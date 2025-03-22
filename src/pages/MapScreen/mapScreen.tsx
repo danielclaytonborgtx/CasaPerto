@@ -119,7 +119,7 @@ const MapScreen: React.FC = () => {
       console.log("Parâmetros da requisição:", queryParams.toString());
 
       const response = await fetch(
-        `https://servercasaperto.onrender.com/properties/filter?${queryParams.toString()}`
+        `http://localhost:3333/properties/filter?${queryParams.toString()}`
       );
 
       if (!response.ok) {
@@ -152,7 +152,7 @@ const MapScreen: React.FC = () => {
       const teamId = user.teamMember[0].teamId;
       console.log("Buscando membros da equipe para o teamId:", teamId); // Depuração
 
-      const response = await fetch(`https://servercasaperto.onrender.com/team/${teamId}`);
+      const response = await fetch(`http://localhost:3333/team/${teamId}`);
       if (!response.ok) {
         throw new Error("Erro ao buscar membros da equipe");
       }
@@ -402,7 +402,7 @@ const MapScreen: React.FC = () => {
                   <PropertyImage
                     src={
                       selectedProperty.images?.[0]?.url
-                        ? `https://servercasaperto.onrender.com${selectedProperty.images[0].url}`
+                        ? `http://localhost:3333${selectedProperty.images[0].url}`
                         : "caminho/para/imagem/padrao.jpg"
                     }
                     onClick={() => handleImageClick(selectedProperty.id)}
