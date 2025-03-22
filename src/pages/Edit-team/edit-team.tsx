@@ -60,7 +60,7 @@ const EditTeam: React.FC = () => {
   const fetchTeam = useCallback(async () => {
     if (isDeleted) return;
     try {
-      const response = await axios.get<TeamData>(`http://localhost:3333/team/${id}`);
+      const response = await axios.get<TeamData>(`https://servercasaperto.onrender.com/team/${id}`);
       const teamData = response.data;
       setTeamName(teamData.name);
       setBrokers(teamData.members);
@@ -77,7 +77,7 @@ const EditTeam: React.FC = () => {
 
   const fetchBrokers = useCallback(async () => {
     try {
-      const response = await axios.get<User[]>("http://localhost:3333/users/no-team");
+      const response = await axios.get<User[]>("https://servercasaperto.onrender.com/users/no-team");
       const validBrokers = response.data.filter((broker) => broker.id && broker.name);
       setAvailableBrokers(validBrokers);
     } catch (error) {
@@ -96,7 +96,7 @@ const EditTeam: React.FC = () => {
   const handleAddBroker = async (user: User) => {
     try {
       // Enviar convite
-      await axios.post(`http://localhost:3333/teams/${id}/member`, {
+      await axios.post(`https://servercasaperto.onrender.com/teams/${id}/member`, {
         userId: user.id,
       });
 
@@ -121,7 +121,7 @@ const EditTeam: React.FC = () => {
 
   const handleRemoveBroker = async (broker: TeamMember) => {
     try {
-      await axios.post(`http://localhost:3333/teams/${id}/leave`, {
+      await axios.post(`https://servercasaperto.onrender.com/teams/${id}/leave`, {
         userId: broker.userId,
       });
 
@@ -184,7 +184,7 @@ const EditTeam: React.FC = () => {
     }
 
     try {
-      const response = await axios.put(`http://localhost:3333/team/${id}`, formData, {
+      const response = await axios.put(`https://servercasaperto.onrender.com/team/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -256,7 +256,7 @@ const EditTeam: React.FC = () => {
     if (confirmDelete) {
       try {
         setIsDeleted(true);
-        await axios.delete(`http://localhost:3333/team/${id}`);
+        await axios.delete(`https://servercasaperto.onrender.com/team/${id}`);
 
         if (setUser && user) {
           const updatedUser = {
@@ -287,7 +287,7 @@ const EditTeam: React.FC = () => {
       {teamImage ? (
         <div style={{ position: "relative", display: "inline-block" }}>
           <TeamImage
-            src={teamImage.startsWith("data:image") ? teamImage : `http://localhost:3333${teamImage}`}
+            src={teamImage.startsWith("data:image") ? teamImage : `https://servercasaperto.onrender.com${teamImage}`}
             alt="Imagem da equipe"
           />
           <EditButton onClick={handleIconClick}>

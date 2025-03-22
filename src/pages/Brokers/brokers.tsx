@@ -31,7 +31,7 @@ const Brokers: React.FC = () => {
 
   const fetchBrokers = useCallback(async () => {
     try {
-      const response = await fetch("http://localhost:3333/users");
+      const response = await fetch("https://servercasaperto.onrender.com/users");
       if (response.ok) {
         const data: User[] = await response.json();
         const filteredBrokers = data.filter(broker => broker.id !== user?.id);
@@ -48,12 +48,12 @@ const Brokers: React.FC = () => {
 
   const fetchProfileImage = async (brokerId: number) => {
     try {
-      const response = await fetch(`http://localhost:3333/users/${brokerId}/profile-picture`);
+      const response = await fetch(`https://servercasaperto.onrender.com/users/${brokerId}/profile-picture`);
       if (response.ok) {
         const data = await response.json();
         setProfileImages((prev) => ({
           ...prev,
-          [brokerId]: data.user?.picture ? `http://localhost:3333${data.user.picture}` : null
+          [brokerId]: data.user?.picture ? `https://servercasaperto.onrender.com${data.user.picture}` : null
         }));
       } else {
         setProfileImages((prev) => ({
