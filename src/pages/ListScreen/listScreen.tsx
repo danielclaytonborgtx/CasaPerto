@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Container, Item, Image, Title, Button, Price, SearchInput } from './styles';
 import { usePropertyContext } from "../../contexts/PropertyContext";
 
+const DEFAULT_IMAGE = '/images/default-property.jpg';
+
 interface Property {
   id: number;
   title: string;
@@ -106,6 +108,14 @@ const ListScreen: React.FC = () => {
     return <div>{error}</div>;
   }
 
+  const getImageUrl = (images: string[] | undefined) => {
+    // Se não houver imagens ou array vazio, retorna imagem padrão
+    if (!images || images.length === 0) return DEFAULT_IMAGE;
+    
+    // Cloudinary já retorna URL completa, pega a primeira imagem
+    return images[0];
+  };
+
   return (
     <Container>
       <SearchInput
@@ -118,13 +128,18 @@ const ListScreen: React.FC = () => {
         <div>Nenhum imóvel disponível para esta categoria.</div>
       ) : (
         sortedProperties.map((property) => {
-          const imageUrl = property.images && property.images.length > 0
-            ? `https://servercasaperto.onrender.com${property.images[0]}`
-            : '/images/default-image.jpg'; 
+          const imageUrl = getImageUrl(property.images as unknown as string[]);
 
           return (
             <Item key={property.id}>
-              <Image src={imageUrl} alt={property.title} />
+              <Image 
+                src={imageUrl}
+                alt={property.title}
+                onError={(e) => {
+                  // Fallback para imagem padrão se houver erro
+                  (e.target as HTMLImageElement).src = DEFAULT_IMAGE;
+                }}
+              />
               <Title>{property.title}</Title>
               <Price>{formatPrice(property.price)}</Price>
               <Button onClick={() => navigate(`/property/${property.id}`, { state: property })}>

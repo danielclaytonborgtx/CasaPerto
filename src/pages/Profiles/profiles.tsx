@@ -102,12 +102,28 @@ const Profiles: React.FC = () => {
   const fetchProfileImage = async (userId: number) => {
     try {
       const response = await fetch(`https://servercasaperto.onrender.com/users/${userId}/profile-picture`);
+      
       if (response.ok) {
-        const data = await response.json();
-        setProfileImage(data.user?.picture ? `https://servercasaperto.onrender.com${data.user.picture}` : null);
+        const data = await response.json();    
+        // Verifique a estrutura real da resposta
+        const imagePath = data.picture || data.user?.picture || data.avatar || data.url;
+        
+        if (imagePath) {
+          // Se a imagem já é uma URL completa (como do Cloudinary), usa diretamente
+          // Caso contrário, monta a URL local
+          const fullUrl = imagePath.startsWith('http') ? 
+            imagePath : 
+            `https://servercasaperto.onrender.com${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
+          
+          setProfileImage(fullUrl);
+        } else {
+          console.warn(`No image path found for user ${userId}`);
+          setProfileImage(null);
+        }
       }
-    } catch {
-      setError("Erro ao carregar a imagem do perfil.");
+    } catch (error) {
+      console.error("Error loading profile image:", error);
+      setProfileImage(null);
     }
   };
 
@@ -119,11 +135,19 @@ const Profiles: React.FC = () => {
     <ProfileContainer>
       <ProfileImageContainer>
         {profileImage ? (
-          <ProfileImage src={profileImage} alt="Foto de perfil" />
+          <ProfileImage 
+            src={profileImage} 
+            alt="Foto de perfil"
+            onError={(e) => {
+              // Fallback caso a imagem não carregue
+              e.currentTarget.onerror = null;
+              e.currentTarget.style.display = 'none';
+            }}
+          />
         ) : (
           <DefaultIcon>👤</DefaultIcon>
         )}
-         </ProfileImageContainer>
+      </ProfileImageContainer>
 
             <UserName>{user.name}</UserName>
             <UserInfo>Creci-{user.username}</UserInfo>

@@ -287,7 +287,7 @@ const EditTeam: React.FC = () => {
       {teamImage ? (
         <div style={{ position: "relative", display: "inline-block" }}>
           <TeamImage
-            src={teamImage.startsWith("data:image") ? teamImage : `https://servercasaperto.onrender.com${teamImage}`}
+            src={teamImage}
             alt="Imagem da equipe"
           />
           <EditButton onClick={handleIconClick}>

@@ -22,8 +22,10 @@ const Settings: React.FC = () => {
       const response = await fetch(`https://servercasaperto.onrender.com/users/${userId}/profile-picture`);
       if (response.ok) {
         const data = await response.json();
-        if (data.user?.picture) {
-          setProfileImage(`https://servercasaperto.onrender.com${data.user.picture}`);
+        if (data?.user?.picture) {
+          // Aqui, você deve usar diretamente a URL fornecida pela API (sem tentar concatenar com o Cloudinary)
+          const imageUrl = data.user.picture;  // Usar a URL completa da imagem fornecida pela API
+          setProfileImage(imageUrl);
         } else {
           setProfileImage(null);
         }

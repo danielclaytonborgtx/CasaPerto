@@ -71,15 +71,21 @@ const Profile: React.FC = () => {
   const fetchProfileImage = useCallback(
     async (userId: number) => {
       const data = await fetchData(`https://servercasaperto.onrender.com/users/${userId}/profile-picture`);
+      
       if (data?.user?.picture) {
-        setProfileImage(`https://servercasaperto.onrender.com${data.user.picture}`);
+        // Aqui, você deve usar diretamente a URL fornecida pela API (sem tentar concatenar com o Cloudinary)
+        const imageUrl = data.user.picture;  // Usar a URL completa da imagem fornecida pela API
+        setProfileImage(imageUrl);
+        
+        // Log para verificar a URL correta
+        // console.log('Imagem de perfil gerada:', imageUrl);  
       } else {
         setProfileImage(null);
       }
     },
     [fetchData]
   );
-
+  
   // Busca as propriedades do usuário
   const fetchProperties = useCallback(
     async (userId: number) => {
@@ -90,6 +96,7 @@ const Profile: React.FC = () => {
           setProperties([]);
           setError(data.message);
         } else {
+          console.log('Dados das propriedades recebidos:', data);
           const sortedProperties = data.sort((a: Property, b: Property) => {
             const dateA = new Date(a.createdAt);
             const dateB = new Date(b.createdAt);
@@ -204,7 +211,7 @@ const Profile: React.FC = () => {
             ? property.images[0] // Já é a URL completa da imagem
             : 'https://via.placeholder.com/150'; // Imagem padrão de exemplo
 
-              console.log("Image URL:", imageUrl);
+           
 
             return (
               <PropertyItem key={property.id}>

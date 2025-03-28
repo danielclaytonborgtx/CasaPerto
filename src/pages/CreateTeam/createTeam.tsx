@@ -96,20 +96,29 @@ const CreateTeam: React.FC = () => {
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files ? event.target.files[0] : null;
     if (file) {
+      console.log("Arquivo selecionado:", file);
+      // Verificar se o arquivo é uma imagem
       if (!file.type.startsWith("image/")) {
         alert("O arquivo deve ser uma imagem.");
         return;
       }
+
+      // Verificar se o arquivo não ultrapassa o limite de 5MB
       if (file.size > 5 * 1024 * 1024) {
-        // 5MB
         alert("O arquivo deve ter no máximo 5MB.");
         return;
       }
+
+      console.log("Arquivo é uma imagem válida e está dentro do limite de tamanho.");
+
+      // Ler o arquivo como URL de imagem
       const reader = new FileReader();
       reader.onloadend = () => {
+        // Atualiza o estado com a imagem selecionada
+        console.log("Imagem carregada com sucesso:", reader.result);
         setTeamImage(reader.result as string);
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(file); // Lê o arquivo como uma URL de dados
     }
   };
 
@@ -138,6 +147,7 @@ const CreateTeam: React.FC = () => {
     if (teamImage) {
       const imageBlob = dataURItoBlob(teamImage);
       formData.append("image", imageBlob);
+      console.log("Imagem adicionada ao FormData:", imageBlob);
     }
 
     try {

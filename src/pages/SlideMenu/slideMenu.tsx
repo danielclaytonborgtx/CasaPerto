@@ -45,7 +45,7 @@ const SlideMenu: React.FC<{ onClose: () => void; isVisible: boolean }> = ({ onCl
       if (response.ok) {
         const data = await response.json();
         if (data.user?.picture) {
-          setProfileImage(`https://servercasaperto.onrender.com${data.user.picture}`);
+          setProfileImage(data.user.picture);
         } else {
           setProfileImage(null); 
         }

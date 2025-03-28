@@ -68,7 +68,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         const parsedUser = JSON.parse(storedUser) as User;
         if (parsedUser.id && parsedUser.email) {
-          console.log("Usuário carregado do localStorage:", parsedUser);
+          // console.log("Usuário carregado do localStorage:", parsedUser);
           setUser(parsedUser);
 
           // Correção aqui

@@ -401,9 +401,7 @@ const MapScreen: React.FC = () => {
                   <p>{formatPrice(selectedProperty.price)}</p>
                   <PropertyImage
                     src={
-                      selectedProperty.images?.[0]?.url
-                        ? `https://servercasaperto.onrender.com${selectedProperty.images[0].url}`
-                        : "caminho/para/imagem/padrao.jpg"
+                      selectedProperty.images?.[0]?.url || "caminho/para/imagem/padrao.jpg"
                     }
                     onClick={() => handleImageClick(selectedProperty.id)}
                   />

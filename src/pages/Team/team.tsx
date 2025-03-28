@@ -50,6 +50,7 @@ const Team = () => {
   const fetchTeams = async () => {
     try {
       const response = await axios.get(`https://servercasaperto.onrender.com/teams`);
+      console.log('Dados das equipes recebidos:', response.data);
       setTeams(response.data || []);
     } catch (error) {
       console.error('Erro ao buscar equipes:', error);
@@ -223,7 +224,7 @@ const Team = () => {
               <TeamCard key={team.id}>
                 {team.imageUrl && (
                   <TeamImage 
-                    src={`https://servercasaperto.onrender.com${team.imageUrl}`} 
+                    src={team.imageUrl}
                     alt={`Imagem da equipe ${team.name}`} 
                   />
                 )}

@@ -49,24 +49,27 @@ const Brokers: React.FC = () => {
   const fetchProfileImage = async (brokerId: number) => {
     try {
       const response = await fetch(`https://servercasaperto.onrender.com/users/${brokerId}/profile-picture`);
+      
       if (response.ok) {
-        const data = await response.json();
-        setProfileImages((prev) => ({
-          ...prev,
-          [brokerId]: data.user?.picture ? `https://servercasaperto.onrender.com${data.user.picture}` : null
-        }));
-      } else {
-        setProfileImages((prev) => ({
-          ...prev,
-          [brokerId]: null 
-        }));
+        const data = await response.json();    
+        // Verifique a estrutura real da resposta
+        const imagePath = data.picture || data.user?.picture || data.avatar || data.url;
+        
+        if (imagePath) {
+          const fullUrl = imagePath.startsWith('http') ? imagePath : `https://servercasaperto.onrender.com${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
+          
+          setProfileImages((prev) => ({
+            ...prev,
+            [brokerId]: fullUrl
+          }));
+        } else {
+          console.warn(`No image path found in response for broker ${brokerId}`);
+          setProfileImages((prev) => ({ ...prev, [brokerId]: null }));
+        }
       }
     } catch (error) {
-      console.error("Erro ao carregar a imagem:", error);
-      setProfileImages((prev) => ({
-        ...prev,
-        [brokerId]: null 
-      }));
+      console.error("Error loading image:", error);
+      setProfileImages((prev) => ({ ...prev, [brokerId]: null }));
     }
   };
 
