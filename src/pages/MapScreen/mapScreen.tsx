@@ -6,7 +6,7 @@ import React, {
   useCallback,
 } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { GoogleMap, InfoWindow, Marker } from "@react-google-maps/api";
+import { GoogleMap, InfoWindow } from "@react-google-maps/api";
 import { FaCrosshairs, FaMapMarkedAlt } from "react-icons/fa";
 import {
   Container,
@@ -370,13 +370,13 @@ const MapScreen: React.FC = () => {
           }}
           onLoad={(mapInstance) => setMap(mapInstance)}
         >
-          {filteredProperties.map((property) => (
+          {/* {filteredProperties.map((property) => (
             <Marker
               key={property.id}
               position={{ lat: property.latitude, lng: property.longitude }}
               onClick={() => setSelectedProperty(property)}
             />
-          ))}
+          ))} */}
           {selectedProperty && (
             <InfoWindow
               position={{
