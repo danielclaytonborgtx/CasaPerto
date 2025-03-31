@@ -10,14 +10,14 @@ const Home: React.FC = () => {
       />
       <Title>Bem-vindo ao Casa Perto</Title>
       <Description>
-      Descubra os Melhores Imóveis Perto de Você!
-      Nossa aplicação foi desenvolvida para facilitar a busca por imóveis de forma rápida e intuitiva. 
-      Na opção de Lista, você pode ver todos os imóveis disponíveis, organizados por proximidade.
-      Com apenas alguns toques, você pode visualizar as melhores opções disponíveis ao seu redor, garantindo praticidade na hora de encontrar o imóvel ideal.
-      Para corretores, a plataforma funciona como um CRM completo, permitindo o cadastro e a organização de imóveis com todas as informações essenciais, 
-      incluindo características detalhadas, imagens, contatos e localização exata. Assim, 
-      você gerencia seu portfólio de maneira eficiente e nunca perde uma oportunidade de negócio.
-      Aproveite a experiência de encontrar e gerenciar imóveis de forma simples e inteligente!
+        Encontre os Melhores Imóveis Perto de Você!
+        Nossa aplicação foi criada para tornar a busca por imóveis mais rápida, intuitiva e eficiente.
+        Na aba Lista, você pode explorar todos os imóveis disponíveis, organizados por proximidade, 
+         facilitando a escolha do lugar ideal com apenas alguns toques.
+        Para corretores, a plataforma funciona como um <strong>CRM completo</strong>, permitindo o cadastro e a gestão de imóveis com todas as informações essenciais, 
+         incluindo características detalhadas, imagens, contatos e localização exata. Dessa forma, 
+         você organiza seu portfólio com eficiência e nunca perde uma oportunidade de negócio.
+        Aproveite uma experiência inteligente e simplificada para encontrar e gerenciar imóveis com praticidade!
       </Description>
     </Container>
   );
