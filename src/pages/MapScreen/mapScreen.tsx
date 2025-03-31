@@ -21,7 +21,6 @@ import { usePropertyContext } from "../../contexts/PropertyContext";
 import { useAuth } from "../../services/authContext";
 import api from "../../services/api";
 
-// Defina as interfaces corretamente
 interface Team {
   id: number;
   name: string;
@@ -30,7 +29,7 @@ interface Team {
 interface User {
   id: number;
   name: string;
-  teamMember: { teamId: number; team: Team }[]; // Adicione a propriedade teamMemberships
+  teamMember: { teamId: number; team: Team }[]; 
 }
 
 interface Property {
@@ -42,8 +41,8 @@ interface Property {
   category: string;
   images: { url: string }[];
   userId: number;
-  user: User; // Adicione a propriedade user
-  teamId?: number; // Adicione teamId à interface Property
+  user: User; 
+  teamId?: number; 
 }
 
 const MapScreen: React.FC = () => {
@@ -71,8 +70,6 @@ const MapScreen: React.FC = () => {
 
       const response = await api.get(`/users/${useContext.user?.id}`);
 
-      console.log("Usuário carregado<<<<<<<<<<<<<<<<<<<<<<<<:", response.data);
-
       setUser({
         id: response.data.id,
         name: response.data.name,
@@ -82,7 +79,6 @@ const MapScreen: React.FC = () => {
     loadUser();
   }, [useContext]);
 
-  // Carrega a localização do usuário
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -92,13 +88,12 @@ const MapScreen: React.FC = () => {
         },
         (error) => {
           console.error("Erro ao obter localização: ", error);
-          setLocation({ lat: -16.679738, lng: -49.256688 }); // Fallback para uma localização padrão
+          setLocation({ lat: -16.679738, lng: -49.256688 }); 
         }
       );
     }
   }, []);
 
-  // Carrega as propriedades do backend
   const loadProperties = useCallback(async () => {
     try {
       if (!user) {
@@ -108,15 +103,12 @@ const MapScreen: React.FC = () => {
         return;
       }
 
-      // Verifica se o usuário tem um teamId
       const teamId = user?.teamMember?.[0]?.teamId;
 
-      // Monta os parâmetros da requisição
       const queryParams = new URLSearchParams({
         userId: user.id.toString(),
-        ...(teamId && { teamId: teamId.toString() }), // Adiciona teamId apenas se estiver definido
+        ...(teamId && { teamId: teamId.toString() }), 
       });
-      console.log("Parâmetros da requisição:", queryParams.toString());
 
       const response = await fetch(
         `https://servercasaperto.onrender.com/properties/filter?${queryParams.toString()}`
@@ -127,7 +119,7 @@ const MapScreen: React.FC = () => {
       }
 
       const data = await response.json();
-      console.log("Propriedades retornadas pelo backend:", data); // Depuração
+      
       setProperties(data);
       setIsLoaded(true);
     } catch (error) {
@@ -137,30 +129,23 @@ const MapScreen: React.FC = () => {
     }
   }, [user]);
 
-  // Carrega os membros da equipe
   const loadTeamMembers = useCallback(async () => {
-    // Verifica se o usuário tem uma equipe
-    if (!user?.teamMember[0].teamId) {
-      console.log(
-        "Usuário não pertence a uma equipe. Nenhum membro para carregar."
-      );
-      setTeamMembers([]); // Define a lista de membros como vazia
+   
+    if (!user?.teamMember || user.teamMember.length === 0) {
+      setTeamMembers([]); 
       return;
     }
-
+  
     try {
       const teamId = user.teamMember[0].teamId;
-      console.log("Buscando membros da equipe para o teamId:", teamId); // Depuração
-
+  
       const response = await fetch(`https://servercasaperto.onrender.com/team/${teamId}`);
       if (!response.ok) {
         throw new Error("Erro ao buscar membros da equipe");
       }
-
+  
       const data = await response.json();
-      console.log("Membros da equipe retornados pelo backend:", data); // Depuração
-
-      // Extrai os IDs dos membros da equipe
+  
       const memberIds = data.members.map(
         (member: { userId: number }) => member.userId
       );
@@ -173,57 +158,40 @@ const MapScreen: React.FC = () => {
 
   useEffect(() => {
     if (user) {
-      console.log("Usuário atualizado:", user); // Depuração
       loadProperties();
       loadTeamMembers();
     }
   }, [user, loadProperties, loadTeamMembers]);
 
-  // Filtra as propriedades com base na categoria (venda ou aluguel) e na relação com o usuário/equipe
   const filteredProperties = useMemo(() => {
     const category = isRent ? "Venda" : "Aluguel";
 
-    // Se o usuário não estiver definido, retorna um array vazio
     if (!user) return [];
 
-    // Filtra as propriedades
     const filtered = properties.filter((property) => {
-      // Verifica se a propriedade pertence ao usuário
+     
       const isUserProperty = property.userId === user.id;
 
-      // Verifica se a propriedade pertence à equipe do usuário
       const isTeamProperty = teamMembers.includes(property.userId);
 
-      // Verifica se a categoria da propriedade corresponde à categoria desejada
       const isCorrectCategory = property.category === category;
 
-      // Retorna true se a propriedade atender a qualquer uma das condições
       return (isUserProperty || isTeamProperty) && isCorrectCategory;
     });
 
-    // Exibe as propriedades filtradas no console para depuração
-    console.log("Propriedades filtradas:", filtered);
-    console.log("Propriedades brutas:", properties);
-    console.log("Usuário atual:", user);
-    console.log("Membros da equipe:", teamMembers);
-
-    // Retorna as propriedades filtradas
     return filtered;
   }, [properties, isRent, user, teamMembers]);
 
-  // Define o centro do mapa
   const mapCenter = useMemo(() => {
     return location || { lat: -22.9068, lng: -43.1729 };
   }, [location]);
 
-  // Adiciona marcadores ao mapa
   useEffect(() => {
     if (map && location) {
-      // Limpa marcadores anteriores
+      
       markersRef.current.forEach((marker) => marker.setMap(null));
       markersRef.current = [];
 
-      // Adiciona novos marcadores para as propriedades filtradas
       const newMarkers: google.maps.Marker[] = [];
       filteredProperties.forEach((property) => {
         const propertyMarker = new google.maps.Marker({
@@ -251,7 +219,6 @@ const MapScreen: React.FC = () => {
 
       markersRef.current = newMarkers;
 
-      // Adiciona um marcador para a localização do usuário
       new google.maps.Marker({
         position: location,
         map,
@@ -269,7 +236,6 @@ const MapScreen: React.FC = () => {
     }
   }, [map, location, filteredProperties]);
 
-  // Seleciona uma propriedade com base no estado da rota
   useEffect(() => {
     if (state && state.id) {
       const propertyToSelect = properties.find(
@@ -288,12 +254,10 @@ const MapScreen: React.FC = () => {
     }
   }, [state, properties, map]);
 
-  // Fecha a janela de informações
   const handleCloseInfoWindow = useCallback(() => {
     setSelectedProperty(null);
   }, []);
 
-  // Atualiza a localização do usuário
   const handleUpdateLocation = useCallback(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -312,7 +276,6 @@ const MapScreen: React.FC = () => {
     }
   }, [map]);
 
-  // Formata o preço para o formato BRL
   const formatPrice = (price: string | number) => {
     const priceString = typeof price === "string" ? price : String(price);
     const priceNumber = parseFloat(
@@ -324,7 +287,6 @@ const MapScreen: React.FC = () => {
     }).format(priceNumber);
   };
 
-  // Navega para a página de detalhes da propriedade
   const handleImageClick = useCallback(
     (propertyId: number) => {
       const property = properties.find((p) => p.id === propertyId);
@@ -370,13 +332,6 @@ const MapScreen: React.FC = () => {
           }}
           onLoad={(mapInstance) => setMap(mapInstance)}
         >
-          {/* {filteredProperties.map((property) => (
-            <Marker
-              key={property.id}
-              position={{ lat: property.latitude, lng: property.longitude }}
-              onClick={() => setSelectedProperty(property)}
-            />
-          ))} */}
           {selectedProperty && (
             <InfoWindow
               position={{

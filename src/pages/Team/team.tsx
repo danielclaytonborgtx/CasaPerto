@@ -263,13 +263,16 @@ const Team = () => {
                   <TeamMembers>
                     {Array.isArray(team.members) && team.members.length > 0 ? (
                       <ul>
-                        {team.members.map((member) => (
-                          <li key={member.userId}>
-                            {member.name}
-                            {pendingInvitation && member.userId === user?.id && 
-                              " (Convite Pendente)"}
-                          </li>
-                        ))}
+                        {team.members
+                          // Remova qualquer ordenação existente para manter a ordem original
+                          .sort((a, b) => a.userId - b.userId) // Ou mantenha a ordem do backend
+                          .map((member) => (
+                            <li key={member.userId}>
+                              {member.name}
+                              {pendingInvitation && member.userId === user?.id && 
+                                " (Convite Pendente)"}
+                            </li>
+                          ))}
                       </ul>
                     ) : (
                       <p>Sem membros na equipe.</p>
