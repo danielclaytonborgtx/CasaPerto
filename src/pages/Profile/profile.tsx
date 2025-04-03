@@ -219,10 +219,10 @@ const Profile: React.FC = () => {
                 </PropertyDetails>
                 <div>
                   <TrashIcon onClick={() => handleDeleteProperty(property.id)}>
-                    <FaTrashAlt size={18} color="black" />
+                    <FaTrashAlt size={18} color="red" />
                   </TrashIcon>
                   <EditIcon onClick={() => handleEditProperty(property.id)}>
-                    <FaPen size={18} color="black" />
+                    <FaPen size={18} color="#007bff" />
                   </EditIcon>
                 </div>
               </PropertyItem>

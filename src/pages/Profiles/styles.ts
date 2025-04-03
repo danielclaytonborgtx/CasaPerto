@@ -5,8 +5,8 @@ export const ProfileContainer = styled.div`
   flex-direction: column;
   align-items: center;
   padding: 0;
-  margin-top: 90px;
-  margin-bottom: 80px;
+  margin-top: 70px;
+  margin-bottom: 40px;
   width: 100%;
   box-sizing: border-box;
 `;
