@@ -109,10 +109,9 @@ const ListScreen: React.FC = () => {
   }
 
   const getImageUrl = (images: string[] | undefined) => {
-    // Se não houver imagens ou array vazio, retorna imagem padrão
+   
     if (!images || images.length === 0) return DEFAULT_IMAGE;
     
-    // Cloudinary já retorna URL completa, pega a primeira imagem
     return images[0];
   };
 
@@ -136,7 +135,6 @@ const ListScreen: React.FC = () => {
                 src={imageUrl}
                 alt={property.title}
                 onError={(e) => {
-                  // Fallback para imagem padrão se houver erro
                   (e.target as HTMLImageElement).src = DEFAULT_IMAGE;
                 }}
               />

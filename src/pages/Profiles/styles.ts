@@ -202,6 +202,7 @@ export const Loading = styled.div`
   font-size: 1.5em;
   color: #888;
   padding: 20px;
+  margin-top: 50px;
 `;
 
 export const ErrorMessage = styled.div`

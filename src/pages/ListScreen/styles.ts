@@ -6,7 +6,7 @@ export const Container = styled.div`
   align-items: center;
   padding: 0;
   margin-top: 60px;
-  margin-bottom: 80px;
+  margin-bottom: 50px;
   width: 100%;
   box-sizing: border-box;
 `;

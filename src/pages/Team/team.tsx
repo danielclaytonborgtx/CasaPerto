@@ -50,7 +50,6 @@ const Team = () => {
   const fetchTeams = async () => {
     try {
       const response = await axios.get(`https://servercasaperto.onrender.com/teams`);
-      console.log('Dados das equipes recebidos:', response.data);
       setTeams(response.data || []);
     } catch (error) {
       console.error('Erro ao buscar equipes:', error);
@@ -97,7 +96,7 @@ const Team = () => {
   
       const response = await axios.post(
         `https://servercasaperto.onrender.com/team/invite/${invitationId}/accept`,
-        { userId: user.id } // Enviando userId no corpo
+        { userId: user.id } 
       );
       
       await Promise.all([fetchTeams(), fetchInvitations()]);
@@ -128,7 +127,7 @@ const Team = () => {
   
       const response = await axios.post(
         `https://servercasaperto.onrender.com/team/invite/${invitationId}/reject`,
-        { userId: user.id } // Adicionando userId no corpo da requisição
+        { userId: user.id } 
       );
       
       await fetchInvitations();
@@ -264,8 +263,7 @@ const Team = () => {
                     {Array.isArray(team.members) && team.members.length > 0 ? (
                       <ul>
                         {team.members
-                          // Remova qualquer ordenação existente para manter a ordem original
-                          .sort((a, b) => a.userId - b.userId) // Ou mantenha a ordem do backend
+                          .sort((a, b) => a.userId - b.userId) 
                           .map((member) => (
                             <li key={member.userId}>
                               {member.name}

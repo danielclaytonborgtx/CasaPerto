@@ -72,7 +72,6 @@ const Profiles: React.FC = () => {
         }
 
         setUser(userData);
-        console.log("Dados do usuário:", userData);
         fetchProperties(userData.id); 
         fetchProfileImage(userData.id); 
       } catch {
@@ -105,12 +104,10 @@ const Profiles: React.FC = () => {
       
       if (response.ok) {
         const data = await response.json();    
-        // Verifique a estrutura real da resposta
+        
         const imagePath = data.picture || data.user?.picture || data.avatar || data.url;
         
         if (imagePath) {
-          // Se a imagem já é uma URL completa (como do Cloudinary), usa diretamente
-          // Caso contrário, monta a URL local
           const fullUrl = imagePath.startsWith('http') ? 
             imagePath : 
             `https://servercasaperto.onrender.com${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
@@ -139,7 +136,6 @@ const Profiles: React.FC = () => {
             src={profileImage} 
             alt="Foto de perfil"
             onError={(e) => {
-              // Fallback caso a imagem não carregue
               e.currentTarget.onerror = null;
               e.currentTarget.style.display = 'none';
             }}

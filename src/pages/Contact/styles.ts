@@ -8,7 +8,7 @@ export const Container = styled.div`
   min-height: 100vh; 
   padding: 20px;
   box-sizing: border-box;
-  margin-top: 80px;
+  margin-top: 40px;
 `;
 
 export const ContactForm = styled.form`

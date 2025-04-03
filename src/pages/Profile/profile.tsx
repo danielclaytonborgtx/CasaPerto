@@ -55,7 +55,6 @@ const Profile: React.FC = () => {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  // Função utilitária para fazer chamadas fetch
   const fetchData = useCallback(async (url: string, options?: RequestInit) => {
     try {
       const response = await fetch(url, options);
@@ -67,18 +66,15 @@ const Profile: React.FC = () => {
     }
   }, []);
 
-  // Busca a imagem do perfil do usuário
   const fetchProfileImage = useCallback(
     async (userId: number) => {
       const data = await fetchData(`https://servercasaperto.onrender.com/users/${userId}/profile-picture`);
       
       if (data?.user?.picture) {
-        // Aqui, você deve usar diretamente a URL fornecida pela API (sem tentar concatenar com o Cloudinary)
-        const imageUrl = data.user.picture;  // Usar a URL completa da imagem fornecida pela API
+      
+        const imageUrl = data.user.picture;  
         setProfileImage(imageUrl);
-        
-        // Log para verificar a URL correta
-        // console.log('Imagem de perfil gerada:', imageUrl);  
+         
       } else {
         setProfileImage(null);
       }
@@ -86,7 +82,6 @@ const Profile: React.FC = () => {
     [fetchData]
   );
   
-  // Busca as propriedades do usuário
   const fetchProperties = useCallback(
     async (userId: number) => {
       setLoading(true);
@@ -96,7 +91,6 @@ const Profile: React.FC = () => {
           setProperties([]);
           setError(data.message);
         } else {
-          console.log('Dados das propriedades recebidos:', data);
           const sortedProperties = data.sort((a: Property, b: Property) => {
             const dateA = new Date(a.createdAt);
             const dateB = new Date(b.createdAt);
@@ -110,7 +104,6 @@ const Profile: React.FC = () => {
     [fetchData]
   );
 
-  // Exclui uma propriedade
   const handleDeleteProperty = async (propertyId: number) => {
     const confirmDelete = window.confirm("Deseja excluir este imóvel?");
     if (!confirmDelete) return;
@@ -123,7 +116,6 @@ const Profile: React.FC = () => {
     }
   };
 
-  // Redireciona para a página de edição da propriedade
   const handleEditProperty = (propertyId: number) => {
     const property = properties.find((p) => p.id === propertyId);
     if (property) {
@@ -131,12 +123,10 @@ const Profile: React.FC = () => {
     }
   };
 
-  // Redireciona para a página de detalhes da propriedade
   const handleImageClick = (propertyId: number) => {
     navigate(`/property/${propertyId}`);
   };
 
-  // Formata o preço para o padrão brasileiro (BRL)
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
@@ -144,7 +134,6 @@ const Profile: React.FC = () => {
     }).format(price);
   };
 
-  // Verifica se o usuário está logado ao carregar o componente
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (!storedUser) {
@@ -163,10 +152,8 @@ const Profile: React.FC = () => {
     }
   }, [navigate, fetchProperties, fetchProfileImage]);
 
-  // Exibe um loading enquanto os dados são carregados
   if (loading) return <Loading>Carregando...</Loading>;
 
-  // Exibe uma mensagem se o usuário não for encontrado
   if (!user) return <div>Usuário não encontrado</div>;
 
   return (
@@ -208,10 +195,8 @@ const Profile: React.FC = () => {
         <UserList>
           {properties.map((property) => {
             const imageUrl = property.images && property.images[0]
-            ? property.images[0] // Já é a URL completa da imagem
-            : 'https://via.placeholder.com/150'; // Imagem padrão de exemplo
-
-           
+            ? property.images[0] 
+            : 'https://via.placeholder.com/150'; 
 
             return (
               <PropertyItem key={property.id}>

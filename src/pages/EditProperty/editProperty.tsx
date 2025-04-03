@@ -131,12 +131,10 @@ const EditProperty = () => {
       formData.append('latitude', latitude.toString());
       formData.append('longitude', longitude.toString());
       
-      // Envia as URLs das imagens existentes que devem ser mantidas
       formData.append('existingImages', JSON.stringify(existingImages.map(img => img.url)));
 
-      // Adiciona novas imagens (arquivos)
       newImages.forEach((image) => {
-        formData.append('images', image); // Nome do campo deve ser 'images' para match com o backend
+        formData.append('images', image); 
       });
 
       const response = await axios.put(
@@ -211,7 +209,7 @@ const EditProperty = () => {
         placeholder="Descrição"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
-        rows={4}
+        rows={10}
       />
 
       <FormInput
@@ -235,7 +233,7 @@ const EditProperty = () => {
       </ImageUploadButton>
 
       <ImagePreviewContainer>
-        {/* Imagens existentes */}
+       
         {existingImages.map((image, index) => (
           <ImagePreview key={`existing-${index}`}>
             <img 
@@ -246,7 +244,6 @@ const EditProperty = () => {
           </ImagePreview>
         ))}
 
-        {/* Novas imagens */}
         {newImages.map((image, index) => (
           <ImagePreview key={`new-${index}`}>
             <img 

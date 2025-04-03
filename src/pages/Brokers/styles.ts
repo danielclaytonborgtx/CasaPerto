@@ -9,7 +9,7 @@ export const BrokersContainer = styled.div`
   max-width: 800px;
   margin: 0 auto;
   margin-bottom: 30px;
-  margin-top: 80px;
+  margin-top: 50px;
 `;
 
 export const ProfileImage = styled.img`
@@ -102,4 +102,15 @@ export const ErrorMessage = styled.p`
   font-size: 16px;
   color: red;
   margin-top: 20px;
+`;
+
+export const SearchInput = styled.input`
+  width: 90%;
+  max-width: 400px;
+  padding: 10px;
+  margin-bottom: 20px;
+  margin-top: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 `;

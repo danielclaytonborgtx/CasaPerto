@@ -108,20 +108,20 @@ const PropertyDetails: React.FC = () => {
 
   const resolveImageUrl = (img: PropertyImage | string) => {
     if (typeof img === "string") {
-      // Se for uma string, verificar se já é uma URL completa
+      
       if (img.startsWith("http")) {
-        return img;  // Se já for uma URL completa (Cloudinary)
+        return img;  
       }
-      return `https://servercasaperto.onrender.com${img}`;  // Se for uma URL local (antiga forma)
+      return `https://servercasaperto.onrender.com${img}`;  
     } else if (img && typeof img === "object" && "url" in img) {
-      // Se for um objeto de imagem, verificar se a URL é completa
+      
       const imageUrl = img.url;
       if (imageUrl.startsWith("http")) {
-        return imageUrl;  // Se já for uma URL completa (Cloudinary)
+        return imageUrl; 
       }
-      return `https://servercasaperto.onrender.com${imageUrl}`;  // Se for uma URL local (antiga forma)
+      return `https://servercasaperto.onrender.com${imageUrl}`;  
     }
-    return "/fallback-image.jpg";  // Imagem padrão em caso de erro
+    return "/fallback-image.jpg";  
   };  
 
   const handleImageClick = (index: number) => {

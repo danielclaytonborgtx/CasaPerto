@@ -10,7 +10,7 @@ export const Container = styled.div`
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  margin-bottom: 60px
+  margin-bottom: 40px
 `;
 
 export const ContentWrapper = styled.div`
@@ -20,7 +20,7 @@ export const ContentWrapper = styled.div`
   width: 100%;
   max-width: 1200px;
   box-sizing: border-box;
-  margin-top: 80px;
+  margin-top: 40px;
 `;
 
 export const SliderContainer = styled.div`
@@ -49,7 +49,7 @@ export const Title = styled.h1`
   font-size: 24px;
   font-weight: bold;
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 10px;
   word-wrap: break-word; 
 `;
 
@@ -64,6 +64,7 @@ export const Price = styled.p`
 `;
 
 export const Description = styled.p`
+white-space: pre-line;
   font-size: 16px;
   text-align: justify;
   color: #555;

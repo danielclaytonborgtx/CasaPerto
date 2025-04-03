@@ -190,7 +190,7 @@ const AddProperty = () => {
         placeholder="Descrição"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
-        rows={4} 
+        rows={10} 
       />
       <FormInput
         as="textarea"

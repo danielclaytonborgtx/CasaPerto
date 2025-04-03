@@ -10,7 +10,8 @@ import {
   ErrorMessage, 
   ProfileImage,
   ProfileLink,
-  MessageButton // Novo estilo para o botão de mensagem
+  MessageButton,
+  SearchInput
 } from "./styles";
 import { useAuth } from "../../services/authContext"; 
 
@@ -28,14 +29,18 @@ const Brokers: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [profileImages, setProfileImages] = useState<Record<number, string | null>>({});
+  const [searchTerm, setSearchTerm] = useState("");
 
   const fetchBrokers = useCallback(async () => {
     try {
       const response = await fetch("https://servercasaperto.onrender.com/users");
       if (response.ok) {
         const data: User[] = await response.json();
-        const filteredBrokers = data.filter(broker => broker.id !== user?.id);
-        setBrokers(filteredBrokers);
+        
+        const loggedInUser = data.find(broker => broker.id === user?.id);
+        const otherBrokers = data.filter(broker => broker.id !== user?.id);
+      
+        setBrokers(loggedInUser ? [loggedInUser, ...otherBrokers] : otherBrokers);
       } else {
         setError("Erro ao carregar corretores.");
       }
@@ -52,7 +57,7 @@ const Brokers: React.FC = () => {
       
       if (response.ok) {
         const data = await response.json();    
-        // Verifique a estrutura real da resposta
+       
         const imagePath = data.picture || data.user?.picture || data.avatar || data.url;
         
         if (imagePath) {
@@ -90,12 +95,23 @@ const Brokers: React.FC = () => {
   if (loading) return <Loading>Carregando...</Loading>;
   if (error) return <ErrorMessage>{error}</ErrorMessage>;
 
+  const filteredBrokers = brokers.filter(broker =>
+    broker.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    broker.username.toLowerCase().includes(searchTerm.toLowerCase())
+  );  
+
   return (
     <BrokersContainer>
       <h2>Corretores Parceiros</h2>
+      <SearchInput
+        type="text"
+        placeholder="Buscar corretores..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
 
       <BrokerList>
-        {brokers.map((broker) => (
+        {filteredBrokers.map((broker) => (
           <BrokerItem key={broker.id}>
             {profileImages[broker.id] ? (
               <ProfileImage src={profileImages[broker.id]!} />
@@ -110,11 +126,13 @@ const Brokers: React.FC = () => {
                 Ver perfil
               </ProfileLink>
             </BrokerDetails>
-            {/* Botão de Mensagem */}
-            <MessageButton onClick={() => navigate(`/messages/${broker.id}`)}>💬</MessageButton>
-          </BrokerItem>
-        ))}
-      </BrokerList>
+            {broker.id !== user?.id && (
+        <MessageButton onClick={() => navigate(`/messages/${broker.id}`)}>💬</MessageButton>
+      )}
+    </BrokerItem>
+  ))}
+</BrokerList>
+
 
     </BrokersContainer>
   );
