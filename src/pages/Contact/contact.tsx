@@ -64,7 +64,7 @@ const Contato: React.FC = () => {
   return (
     <Container>
       <Title>Contato para cadastro</Title>
-      <Description>Preencha o formulário abaixo e entraremos em contato com você. Certifique-se de colocar informações válidas!</Description>
+      <Description>Formulário para cadastro do usuário <strong> Corretor </strong> preencha abaixo e entraremos em contato com você. Certifique-se de colocar informações válidas!</Description>
       <ContactForm onSubmit={handleSubmit}>
         <label htmlFor="name">Nome completo</label>
         <InputField 
