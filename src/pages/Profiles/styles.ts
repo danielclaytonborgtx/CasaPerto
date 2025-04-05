@@ -176,6 +176,7 @@ export const TitlePriceContainer = styled.div`
 `;
 
 export const PropertyDetails = styled.div`
+  white-space: pre-line; 
   flex-grow: 1;
   display: flex;
   flex-direction: column;

@@ -64,7 +64,7 @@ export const Price = styled.p`
 `;
 
 export const Description = styled.p`
-white-space: pre-line;
+  white-space: pre-line;
   font-size: 16px;
   text-align: justify;
   color: #555;

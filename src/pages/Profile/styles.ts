@@ -174,6 +174,7 @@ export const TitlePriceContainer = styled.div`
 `;
 
 export const PropertyDetails = styled.div`
+  white-space: pre-line;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
@@ -224,7 +225,7 @@ export const EditIcon = styled.div`
   cursor: pointer;
   transition: color 0.3s ease;
   font-size: 18px; 
-  color: black;
+  color: #1E90FF;
 
   &:hover {
     transform: scale(1.2);

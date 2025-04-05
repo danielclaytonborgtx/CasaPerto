@@ -170,19 +170,19 @@ const Profile: React.FC = () => {
 
       <ButtonContainer>
         <StyledButton onClick={() => navigate("/brokers")}>
-          <FaUserTie size={20} />
+          <FaUserTie size={30} />
           <span>Corretores</span>
         </StyledButton>
         <StyledButton onClick={() => navigate("/team")}>
-          <FaUsers size={20} />
+          <FaUsers size={30} />
           <span>Equipes</span>
         </StyledButton>
         <StyledButton onClick={() => navigate("/messages")}>
-          <FaEnvelope size={20} />
+          <FaEnvelope size={30} />
           <span>Mensagens</span>
         </StyledButton>
         <StyledButton onClick={() => navigate("/settings")}>
-          <FaCog size={20} />
+          <FaCog size={30} />
           <span>Configurações</span>
         </StyledButton>
       </ButtonContainer>
@@ -222,7 +222,7 @@ const Profile: React.FC = () => {
                     <FaTrashAlt size={18} color="red" />
                   </TrashIcon>
                   <EditIcon onClick={() => handleEditProperty(property.id)}>
-                    <FaPen size={18} color="#007bff" />
+                    <FaPen size={18} />
                   </EditIcon>
                 </div>
               </PropertyItem>
