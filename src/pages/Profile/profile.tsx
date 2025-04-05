@@ -42,7 +42,7 @@ interface Property {
   title: string;
   description: string;
   description1: string;
-  images: string [];
+  images: string[];
   price: string;
   createdAt: string;
 }
@@ -53,6 +53,7 @@ const Profile: React.FC = () => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [unreadMessages, setUnreadMessages] = useState<number>(0);
   const navigate = useNavigate();
 
   const fetchData = useCallback(async (url: string, options?: RequestInit) => {
@@ -69,19 +70,15 @@ const Profile: React.FC = () => {
   const fetchProfileImage = useCallback(
     async (userId: number) => {
       const data = await fetchData(`https://servercasaperto.onrender.com/users/${userId}/profile-picture`);
-      
       if (data?.user?.picture) {
-      
-        const imageUrl = data.user.picture;  
-        setProfileImage(imageUrl);
-         
+        setProfileImage(data.user.picture);
       } else {
         setProfileImage(null);
       }
     },
     [fetchData]
   );
-  
+
   const fetchProperties = useCallback(
     async (userId: number) => {
       setLoading(true);
@@ -100,6 +97,22 @@ const Profile: React.FC = () => {
         }
       }
       setLoading(false);
+    },
+    [fetchData]
+  );
+
+  const fetchUnreadMessages = useCallback(
+    async (userId: number) => {
+      const sinceStored = localStorage.getItem("lastSeenMessages");
+      const sinceDate = sinceStored || new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  
+      const data = await fetchData(
+        `https://servercasaperto.onrender.com/messages/unread-since?userId=${userId}&since=${sinceDate}`
+      );
+  
+      if (data && typeof data.hasUnread === "boolean") {
+        setUnreadMessages(data.hasUnread ? 1 : 0);
+      }
     },
     [fetchData]
   );
@@ -147,10 +160,11 @@ const Profile: React.FC = () => {
     if (parsedUser?.id) {
       fetchProperties(parsedUser.id);
       fetchProfileImage(parsedUser.id);
+      fetchUnreadMessages(parsedUser.id); // 🔔 chamadas de mensagens não lidas
     } else {
       setError("Usuário inválido");
     }
-  }, [navigate, fetchProperties, fetchProfileImage]);
+  }, [navigate, fetchProperties, fetchProfileImage, fetchUnreadMessages]);
 
   if (loading) return <Loading>Carregando...</Loading>;
 
@@ -177,8 +191,25 @@ const Profile: React.FC = () => {
           <FaUsers size={30} />
           <span>Equipes</span>
         </StyledButton>
-        <StyledButton onClick={() => navigate("/messages")}>
+        <StyledButton onClick={() => navigate("/messages")} style={{ position: 'relative' }}>
           <FaEnvelope size={30} />
+          {unreadMessages > 0 && (
+            <span
+              style={{
+                position: "absolute",
+                top: -4,
+                right: -4,
+                background: "red",
+                color: "white",
+                borderRadius: "50%",
+                padding: "2px 6px",
+                fontSize: "12px",
+                fontWeight: "bold",
+              }}
+            >
+              !
+            </span>
+          )}
           <span>Mensagens</span>
         </StyledButton>
         <StyledButton onClick={() => navigate("/settings")}>
@@ -195,8 +226,8 @@ const Profile: React.FC = () => {
         <UserList>
           {properties.map((property) => {
             const imageUrl = property.images && property.images[0]
-            ? property.images[0] 
-            : 'https://via.placeholder.com/150'; 
+              ? property.images[0]
+              : 'https://via.placeholder.com/150';
 
             return (
               <PropertyItem key={property.id}>

@@ -122,6 +122,12 @@ const Messages: React.FC = () => {
     return () => clearInterval(intervalId);
   }, [activeBrokerId, senderId]);
 
+  useEffect(() => {
+    const now = new Date().toISOString();
+    localStorage.setItem("lastSeenMessages", now);
+  }, []);
+  
+
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !activeBrokerId) return;
 
