@@ -37,8 +37,7 @@ export const ContactItem = styled.div`
 export const MessageList = styled.ul`
   list-style: none;
   padding: 0;
-  margin-bottom: 100px;
-  height: 300px;
+  height: 500px;
   overflow-y: auto;
 `;
 

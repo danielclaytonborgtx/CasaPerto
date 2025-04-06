@@ -197,7 +197,7 @@ const Profile: React.FC = () => {
             <span
               style={{
                 position: "absolute",
-                top: -4,
+                top: -8,
                 right: -4,
                 background: "red",
                 color: "white",
