@@ -160,7 +160,7 @@ const Profile: React.FC = () => {
     if (parsedUser?.id) {
       fetchProperties(parsedUser.id);
       fetchProfileImage(parsedUser.id);
-      fetchUnreadMessages(parsedUser.id); // 🔔 chamadas de mensagens não lidas
+      fetchUnreadMessages(parsedUser.id); 
     } else {
       setError("Usuário inválido");
     }
