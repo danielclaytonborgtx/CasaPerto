@@ -149,7 +149,7 @@ const Profiles: React.FC = () => {
             <UserInfo>Creci-{user.username}</UserInfo>
             <UserInfo>{user.email}</UserInfo>
 
-      <SectionTitle>Imóveis de {user.name}</SectionTitle>
+      <SectionTitle>Imóveis em minha carteira</SectionTitle>
 
       {properties.length === 0 ? (
         <div>Este usuário ainda não tem imóveis postados.</div>
