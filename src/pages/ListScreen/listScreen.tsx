@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Item, Image, Title, Button, Price, SearchInput } from './styles';
 import { usePropertyContext } from "../../contexts/PropertyContext";
@@ -25,7 +25,7 @@ const ListScreen: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
-  const calculateDistance = useCallback((lat1: number, lon1: number, lat2: number, lon2: number) => {
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
     const toRad = (value: number) => value * (Math.PI / 180);
     const R = 6371; 
     const dLat = toRad(lat2 - lat1);
@@ -35,88 +35,70 @@ const ListScreen: React.FC = () => {
       Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
-  }, []);
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchProperties = async () => {
       try {
-        // Carregar localização e propriedades em paralelo
-        const [propertiesResponse, position] = await Promise.all([
-          fetch('https://servercasaperto.onrender.com/property'),
-          new Promise<GeolocationPosition>((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject);
-          })
-        ]);
-
-        if (propertiesResponse.ok) {
-          const data = await propertiesResponse.json();
+        const response = await fetch('https://servercasaperto.onrender.com/property');
+        if (response.ok) {
+          const data = await response.json();
           setProperties(data);
         } else {
           setError('Erro ao carregar os imóveis.');
         }
-
-        const { latitude, longitude } = position.coords;
-        setUserLocation({ latitude, longitude });
-      } catch (error) {
-        if (error instanceof Error && error.name === 'PositionError') {
-          setError('Não foi possível obter a localização do usuário.');
-        } else {
-          setError('Erro ao conectar com o servidor.');
-        }
+      } catch {
+        setError('Erro ao conectar com o servidor.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    fetchProperties();
+
+    const getUserLocation = () => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation({ latitude, longitude });
+        },
+        () => {
+          setError('Não foi possível obter a localização do usuário.');
+          setLoading(false);
+        }
+      );
+    };
+
+    getUserLocation();
   }, []);
 
-  // Memoize filtered properties
-  const filteredProperties = useMemo(() => {
-    return properties
-      .filter((property) => {
-        const category = isRent ? "venda" : "aluguel";
-        return property.category.toLowerCase() === category.toLowerCase();
+  const filteredProperties = properties
+    .filter((property) => {
+      const category = isRent ? "venda" : "aluguel";
+      return property.category.toLowerCase() === category.toLowerCase();
+    })
+    .filter((property) => {
+      const normalizedTitle = property.title.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+      const normalizedSearch = searchTerm.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+      return normalizedTitle.includes(normalizedSearch);
+    });
+
+  const sortedProperties = userLocation
+    ? [...filteredProperties].sort((a, b) => {
+        const distanceA = calculateDistance(userLocation.latitude, userLocation.longitude, a.latitude, a.longitude);
+        const distanceB = calculateDistance(userLocation.latitude, userLocation.longitude, b.latitude, b.longitude);
+        return distanceA - distanceB;
       })
-      .filter((property) => {
-        const normalizedTitle = property.title.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
-        const normalizedSearch = searchTerm.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
-        return normalizedTitle.includes(normalizedSearch);
-      });
-  }, [properties, isRent, searchTerm]);
+    : filteredProperties;
 
-  // Memoize sorted properties with distances
-  const sortedProperties = useMemo(() => {
-    if (!userLocation) return filteredProperties;
-
-    // Calculate distances once and store them
-    const propertiesWithDistance = filteredProperties.map(property => ({
-      ...property,
-      distance: calculateDistance(
-        userLocation.latitude,
-        userLocation.longitude,
-        property.latitude,
-        property.longitude
-      )
-    }));
-
-    // Sort by distance
-    return propertiesWithDistance.sort((a, b) => a.distance - b.distance);
-  }, [filteredProperties, userLocation, calculateDistance]);
-
-  const formatPrice = useCallback((price: string | number) => {
+  const formatPrice = (price: string | number) => {
     const priceString = typeof price === 'string' ? price : String(price);
     const priceNumber = parseFloat(priceString.replace('R$ ', '').replace('.', '').replace(',', '.'));
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
     }).format(priceNumber);
-  }, []);
-
-  const getImageUrl = useCallback((images: string[] | undefined) => {
-    if (!images || images.length === 0) return DEFAULT_IMAGE;
-    return images[0];
-  }, []);
+  };
 
   if (loading) {
     return <div>Carregando...</div>;
@@ -125,6 +107,13 @@ const ListScreen: React.FC = () => {
   if (error) {
     return <div>{error}</div>;
   }
+
+  const getImageUrl = (images: string[] | undefined) => {
+   
+    if (!images || images.length === 0) return DEFAULT_IMAGE;
+    
+    return images[0];
+  };
 
   return (
     <Container>
