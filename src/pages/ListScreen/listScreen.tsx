@@ -24,6 +24,7 @@ const ListScreen: React.FC = () => {
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [distanceCache, setDistanceCache] = useState<Record<number, number>>({});
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const navigate = useNavigate();
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -38,49 +39,63 @@ const ListScreen: React.FC = () => {
     return R * c;
   };
 
+  // Carregar propriedades primeiro, sem esperar pela localização
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchProperties = async () => {
       try {
         setLoading(true);
+        const response = await fetch('https://servercasaperto.onrender.com/property');
         
-        // Carregar propriedades e localização em paralelo
-        const [propertiesResponse, position] = await Promise.all([
-          fetch('https://servercasaperto.onrender.com/property'),
-          new Promise<GeolocationPosition>((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject);
-          })
-        ]);
-
-        if (!propertiesResponse.ok) {
+        if (!response.ok) {
           throw new Error('Erro ao carregar os imóveis.');
         }
-
-        const data = await propertiesResponse.json();
+        
+        const data = await response.json();
         setProperties(data);
-        
-        const { latitude, longitude } = position.coords;
-        setUserLocation({ latitude, longitude });
-        
-        // Pré-calcular distâncias para todas as propriedades
-        const newDistanceCache: Record<number, number> = {};
-        data.forEach((property: Property) => {
-          newDistanceCache[property.id] = calculateDistance(
-            latitude,
-            longitude,
-            property.latitude,
-            property.longitude
-          );
-        });
-        setDistanceCache(newDistanceCache);
+        setLoading(false);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Erro ao carregar dados.');
-      } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    fetchProperties();
   }, []);
+
+  // Carregar localização separadamente
+  useEffect(() => {
+    const getUserLocation = () => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation({ latitude, longitude });
+          
+          // Calcular distâncias em background após obter a localização
+          setTimeout(() => {
+            const newDistanceCache: Record<number, number> = {};
+            properties.forEach((property: Property) => {
+              newDistanceCache[property.id] = calculateDistance(
+                latitude,
+                longitude,
+                property.latitude,
+                property.longitude
+              );
+            });
+            setDistanceCache(newDistanceCache);
+            setIsInitialLoad(false);
+          }, 100);
+        },
+        () => {
+          setError('Não foi possível obter a localização do usuário.');
+          setIsInitialLoad(false);
+        }
+      );
+    };
+
+    if (properties.length > 0) {
+      getUserLocation();
+    }
+  }, [properties]);
 
   const filteredProperties = useMemo(() => {
     return properties
@@ -96,14 +111,14 @@ const ListScreen: React.FC = () => {
   }, [properties, isRent, searchTerm]);
 
   const sortedProperties = useMemo(() => {
-    if (!userLocation) return filteredProperties;
+    if (!userLocation || isInitialLoad) return filteredProperties;
     
     return [...filteredProperties].sort((a, b) => {
       const distanceA = distanceCache[a.id] || 0;
       const distanceB = distanceCache[b.id] || 0;
       return distanceA - distanceB;
     });
-  }, [filteredProperties, userLocation, distanceCache]);
+  }, [filteredProperties, userLocation, distanceCache, isInitialLoad]);
 
   const formatPrice = (price: string | number) => {
     const priceString = typeof price === 'string' ? price : String(price);
