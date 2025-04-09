@@ -24,7 +24,6 @@ const ListScreen: React.FC = () => {
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [distanceCache, setDistanceCache] = useState<Record<number, number>>({});
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const navigate = useNavigate();
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -39,62 +38,51 @@ const ListScreen: React.FC = () => {
     return R * c;
   };
 
-  // Carregar propriedades primeiro, sem esperar pela localização
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        setLoading(true);
         const response = await fetch('https://servercasaperto.onrender.com/property');
-        
-        if (!response.ok) {
-          throw new Error('Erro ao carregar os imóveis.');
+        if (response.ok) {
+          const data = await response.json();
+          setProperties(data);
+        } else {
+          setError('Erro ao carregar os imóveis.');
         }
-        
-        const data = await response.json();
-        setProperties(data);
-        setLoading(false);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Erro ao carregar dados.');
+      } catch {
+        setError('Erro ao conectar com o servidor.');
+      } finally {
         setLoading(false);
       }
     };
 
     fetchProperties();
-  }, []);
 
-  // Carregar localização separadamente
-  useEffect(() => {
     const getUserLocation = () => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
           setUserLocation({ latitude, longitude });
           
-          // Calcular distâncias em background após obter a localização
-          setTimeout(() => {
-            const newDistanceCache: Record<number, number> = {};
-            properties.forEach((property: Property) => {
-              newDistanceCache[property.id] = calculateDistance(
-                latitude,
-                longitude,
-                property.latitude,
-                property.longitude
-              );
-            });
-            setDistanceCache(newDistanceCache);
-            setIsInitialLoad(false);
-          }, 100);
+          // Pré-calcular distâncias para todas as propriedades
+          const newDistanceCache: Record<number, number> = {};
+          properties.forEach((property: Property) => {
+            newDistanceCache[property.id] = calculateDistance(
+              latitude,
+              longitude,
+              property.latitude,
+              property.longitude
+            );
+          });
+          setDistanceCache(newDistanceCache);
         },
         () => {
           setError('Não foi possível obter a localização do usuário.');
-          setIsInitialLoad(false);
+          setLoading(false);
         }
       );
     };
 
-    if (properties.length > 0) {
-      getUserLocation();
-    }
+    getUserLocation();
   }, [properties]);
 
   const filteredProperties = useMemo(() => {
@@ -111,14 +99,14 @@ const ListScreen: React.FC = () => {
   }, [properties, isRent, searchTerm]);
 
   const sortedProperties = useMemo(() => {
-    if (!userLocation || isInitialLoad) return filteredProperties;
+    if (!userLocation) return filteredProperties;
     
     return [...filteredProperties].sort((a, b) => {
       const distanceA = distanceCache[a.id] || 0;
       const distanceB = distanceCache[b.id] || 0;
       return distanceA - distanceB;
     });
-  }, [filteredProperties, userLocation, distanceCache, isInitialLoad]);
+  }, [filteredProperties, userLocation, distanceCache]);
 
   const formatPrice = (price: string | number) => {
     const priceString = typeof price === 'string' ? price : String(price);
