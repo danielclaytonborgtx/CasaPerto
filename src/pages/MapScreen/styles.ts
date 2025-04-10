@@ -46,4 +46,15 @@ export const ErrorMessage = styled.div`
   margin-top: 10px;
 `;
 
+export const LoginMessage = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 18px;
+  color: #666;
+  text-align: center;
+  padding: 20px;
+`;
+
 

@@ -6,6 +6,7 @@ import {
   Container,
   UpdateButton,
   ErrorMessage,
+  LoginMessage,
 } from "./styles";
 
 import LoadingMessage from "../../components/loadingMessage/LoadingMessage";
@@ -15,6 +16,7 @@ import { usePropertyData } from "../../hooks/usePropertyData";
 import { useLocation } from "../../hooks/useLocation";
 import { useMarkers } from "../../hooks/useMarkers";
 import { Property } from "../../types/property";
+import { useAuth } from "../../services/authContext";
 
 const MapScreen: React.FC = () => {
   const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -25,6 +27,7 @@ const MapScreen: React.FC = () => {
   const { location, error: locationError, updateLocation } = useLocation();
   const navigate = useNavigate();
   const { state } = useRouterLocation();
+  const { user } = useAuth();
 
   // Usar o hook de marcadores
   useMarkers({ map, location, properties, setSelectedProperty });
@@ -56,6 +59,16 @@ const MapScreen: React.FC = () => {
   }, [state, properties, map]);
 
   if (!location) return <LoadingMessage />;
+
+  if (!user) {
+    return (
+      <Container>
+        <LoginMessage>
+          Para ter acesso as localizações e mais detalhes do perfil, você precisa estar logado.
+        </LoginMessage>
+      </Container>
+    );
+  }
 
   return (
     <Container>
