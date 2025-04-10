@@ -1,12 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { Container, Image, Title, Description } from "./styles";
+import LoadingMessage from "../../components/loadingMessage/LoadingMessage";
 
 const Home: React.FC = () => {
+  const [imageLoading, setImageLoading] = useState(true);
+
   return (
     <Container>
+      {imageLoading && <LoadingMessage />}
       <Image 
         src="https://deborahcorretora.com.br/wp-content/uploads/2020/04/google_maps_v2.jpg" 
-        alt="Imagem representativa de imóveis próximos" 
+        alt="Imagem representativa de imóveis próximos"
+        onLoad={() => setImageLoading(false)}
       />
       <Title>Bem-vindo ao Casa Perto</Title>
       <Description>
