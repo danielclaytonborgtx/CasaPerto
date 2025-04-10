@@ -43,7 +43,7 @@ const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
     clickableIcons: false,
     maxZoom: 18,
     minZoom: 3,
-    zoomControl: true,
+    zoomControl: false,
     mapTypeControl: false,
     streetViewControl: false,
     fullscreenControl: false,
