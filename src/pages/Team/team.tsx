@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
+import LoadingMessage from '../../components/loadingMessage/LoadingMessage';
 import { 
   TeamContainer, 
   CreateTeamButton, 
@@ -207,7 +208,7 @@ const Team = () => {
 
       <div>
         {loading ? (
-          <p>Carregando equipes...</p>
+          <LoadingMessage />
         ) : Array.isArray(sortedTeams) && sortedTeams.length > 0 ? (
           sortedTeams.map((team) => {
             const isUserInTeam = Array.isArray(team.members) && 
@@ -281,7 +282,7 @@ const Team = () => {
             );
           })
         ) : (
-          <p>Não há equipes para exibir.</p>
+          <p>Nenhuma equipe encontrada.</p>
         )}
       </div>
     </TeamContainer>

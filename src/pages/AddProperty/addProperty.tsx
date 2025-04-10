@@ -3,6 +3,7 @@ import { useAuth } from '../../services/authContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { GoogleMap, Marker } from '@react-google-maps/api';
+import LoadingMessage from '../../components/loadingMessage/LoadingMessage';
 import {
   AddPropertyContainer,
   FormInput,
@@ -254,7 +255,7 @@ const AddProperty = () => {
               <Marker position={mapPosition} icon="http://maps.google.com/mapfiles/ms/icons/blue-dot.png" />
             </GoogleMap>
           ) : (
-            <div>Carregando mapa...</div>
+            <LoadingMessage />
           )}
        
       </MapWrapper>

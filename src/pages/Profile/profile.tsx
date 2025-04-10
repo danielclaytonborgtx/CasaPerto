@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import LoadingMessage from "../../components/loadingMessage/LoadingMessage";
 import {
   ProfileContainer,
   UserName,
   UserList,
-  Loading,
   PropertyItem,
   PropertyImage,
   PropertyDetails,
@@ -166,7 +166,7 @@ const Profile: React.FC = () => {
     }
   }, [navigate, fetchProperties, fetchProfileImage, fetchUnreadMessages]);
 
-  if (loading) return <Loading>Carregando...</Loading>;
+  if (loading) return <LoadingMessage />;
 
   if (!user) return <div>Usuário não encontrado</div>;
 
@@ -218,7 +218,7 @@ const Profile: React.FC = () => {
         </StyledButton>
       </ButtonContainer>
 
-      <SectionTitle>Meus imóveis</SectionTitle>
+      <SectionTitle>Minha carteira imóveis</SectionTitle>
 
       {properties.length === 0 ? (
         <div>{error || "Você ainda não tem imóveis postados."}</div>

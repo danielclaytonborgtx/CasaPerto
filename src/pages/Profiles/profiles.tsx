@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import LoadingMessage from "../../components/loadingMessage/LoadingMessage";
 import { 
   ProfileContainer, 
   UserName, 
   UserInfo, 
   UserList, 
-  Loading, 
   ErrorMessage, 
   PropertyItem, 
   PropertyImage, 
@@ -73,7 +73,7 @@ const Profiles: React.FC = () => {
 
         setUser(userData);
         fetchProperties(userData.id); 
-        fetchProfileImage(userData.id); 
+        fetchProfileImage(userData.id);
       } catch {
         setError("Erro ao buscar usuário.");
       }
@@ -124,7 +124,7 @@ const Profiles: React.FC = () => {
     }
   };
 
-  if (loading) return <Loading>Carregando...</Loading>;
+  if (loading) return <LoadingMessage />;
   if (error) return <ErrorMessage>{error}</ErrorMessage>;
   if (!user) return <div>Usuário não encontrado</div>;
 
@@ -145,9 +145,9 @@ const Profiles: React.FC = () => {
         )}
       </ProfileImageContainer>
 
-            <UserName>{user.name}</UserName>
-            <UserInfo>Creci-{user.username}</UserInfo>
-            <UserInfo>{user.email}</UserInfo>
+      <UserName>{user.name}</UserName>
+      <UserInfo>Creci-{user.username}</UserInfo>
+      <UserInfo>{user.email}</UserInfo>
 
       <SectionTitle>Imóveis em minha carteira</SectionTitle>
 

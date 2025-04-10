@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../services/authContext";
+import LoadingMessage from "../../components/loadingMessage/LoadingMessage";
 import { 
   Container, 
   Title, 
@@ -20,7 +21,6 @@ const SignIn: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
- 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -36,7 +36,6 @@ const SignIn: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-     
       await login(formData.username, formData.password);
       alert("Login bem-sucedido!");
       navigate("/profile");  
@@ -47,6 +46,10 @@ const SignIn: React.FC = () => {
       setIsSubmitting(false);
     }
   };
+
+  if (isSubmitting) {
+    return <LoadingMessage />;
+  }
 
   return (
     <Container>
@@ -68,7 +71,7 @@ const SignIn: React.FC = () => {
         />
         {error && <ErrorMessage>{error}</ErrorMessage>}
         <Button onClick={handleSignIn} disabled={isSubmitting}>
-          <ButtonText>{isSubmitting ? "Entrando..." : "Entrar"}</ButtonText>
+          <ButtonText>Entrar</ButtonText>
         </Button>
       </Form>
       <FooterText>

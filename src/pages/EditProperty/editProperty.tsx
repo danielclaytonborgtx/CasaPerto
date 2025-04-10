@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { GoogleMap, Marker } from '@react-google-maps/api';
+import LoadingMessage from '../../components/loadingMessage/LoadingMessage';
 import {
   EditPropertyContainer,
   FormInput,
@@ -38,12 +39,14 @@ const EditProperty = () => {
   const [longitude, setLongitude] = useState(0);
   const [newImages, setNewImages] = useState<File[]>([]);
   const [existingImages, setExistingImages] = useState<{ url: string }[]>([]);
-  const [mapPosition, setMapPosition] = useState({ lat: 0, lng: 0 });
-  const [selectedMarker, setSelectedMarker] = useState<{ lat: number; lng: number } | null>(null);
+  const [selectedMarker, setSelectedMarker] = useState<google.maps.LatLngLiteral | null>(null);
+  const [mapPosition, setMapPosition] = useState<google.maps.LatLngLiteral>({
+    lat: -23.550520,
+    lng: -46.633308,
+  });
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -63,7 +66,6 @@ const EditProperty = () => {
         setLongitude(data.longitude);
         setMapPosition({ lat: data.latitude, lng: data.longitude });
         setExistingImages(data.images || []);
-        setIsLoaded(true);
       } catch (error) {
         console.error('Erro ao carregar imóvel:', error);
         setErrorMessage('Erro ao carregar os dados do imóvel.');
@@ -160,7 +162,7 @@ const EditProperty = () => {
   };
 
   if (!propertyData) {
-    return <div>Carregando dados do imóvel...</div>;
+    return <LoadingMessage />;
   }
 
   return (
@@ -179,112 +181,105 @@ const EditProperty = () => {
         </p>
       )}
 
-      <FormInput
-        as="select"
-        value={category}
-        onChange={(e) => setCategory(e.target.value as 'venda' | 'aluguel')}
-      >
-        <option value="venda">Venda</option>
-        <option value="aluguel">Aluguel</option>
-      </FormInput>
-
-      <FormInput
-        type="text"
-        placeholder="Título"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
-
-      <FormInput
-        type="number"
-        placeholder="Valor"
-        value={price}
-        onChange={(e) => setPrice(e.target.value)}
-        min="0"
-        step="0.01"
-      />
-
-      <FormInput
-        as="textarea"
-        placeholder="Descrição"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        rows={10}
-      />
-
-      <FormInput
-        as="textarea"
-        placeholder="Detalhes adicionais (opcional)"
-        value={description1}
-        onChange={(e) => setDescription1(e.target.value)}
-        rows={4}
-      />
-
-      <ImageUploadButton>
-        <label htmlFor="image-upload">Adicionar novas imagens</label>
-        <input
-          id="image-upload"
-          type="file"
-          accept="image/*"
-          multiple
-          style={{ display: 'none' }}
-          onChange={handleImageChange}
-        />
-      </ImageUploadButton>
-
-      <ImagePreviewContainer>
-       
-        {existingImages.map((image, index) => (
-          <ImagePreview key={`existing-${index}`}>
-            <img 
-              src={image.url.startsWith('http') ? image.url : `https://servercasaperto.onrender.com${image.url}`} 
-              alt={`Imagem ${index + 1}`} 
-            />
-            <button onClick={() => removeExistingImage(index)}>X</button>
-          </ImagePreview>
-        ))}
-
-        {newImages.map((image, index) => (
-          <ImagePreview key={`new-${index}`}>
-            <img 
-              src={URL.createObjectURL(image)} 
-              alt={`Nova imagem ${index + 1}`} 
-            />
-            <button onClick={() => removeNewImage(index)}>X</button>
-          </ImagePreview>
-        ))}
-      </ImagePreviewContainer>
-
-      <p>Clique no mapa para atualizar a localização do imóvel:</p>
-      
-      <MapWrapper>
-        {isLoaded ? (
-          <GoogleMap
-            mapContainerStyle={{ width: '100%', height: '400px' }}
-            center={mapPosition}
-            zoom={15}
-            onClick={handleMapClick}
-            options={{
-              disableDefaultUI: true,
-              styles: [
-                {
-                  featureType: "poi",
-                  elementType: "all",
-                  stylers: [{ visibility: "off" }],
-                },
-              ],       
-            }}
+      {loading ? (
+        <LoadingMessage />
+      ) : (
+        <>
+          <FormInput
+            as="select"
+            value={category}
+            onChange={(e) => setCategory(e.target.value as 'venda' | 'aluguel')}
           >
-            {selectedMarker && <Marker position={selectedMarker} />}
-          </GoogleMap>
-        ) : (
-          <div>Carregando mapa...</div>
-        )}
-      </MapWrapper>
+            <option value="venda">Venda</option>
+            <option value="aluguel">Aluguel</option>
+          </FormInput>
 
-      <Button onClick={handleUpdateProperty} disabled={loading}>
-        {loading ? 'Atualizando...' : 'Atualizar Imóvel'}
-      </Button>
+          <FormInput
+            type="text"
+            placeholder="Título"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+
+          <FormInput
+            type="number"
+            placeholder="Valor"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            min="0"
+            step="0.01"
+          />
+
+          <FormInput
+            as="textarea"
+            placeholder="Descrição"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={10}
+          />
+
+          <FormInput
+            as="textarea"
+            placeholder="Detalhes adicionais (opcional)"
+            value={description1}
+            onChange={(e) => setDescription1(e.target.value)}
+            rows={4}
+          />
+
+          <ImageUploadButton>
+            <label htmlFor="image-upload">Adicionar novas imagens</label>
+            <input
+              id="image-upload"
+              type="file"
+              accept="image/*"
+              multiple
+              style={{ display: 'none' }}
+              onChange={handleImageChange}
+            />
+          </ImageUploadButton>
+
+          <ImagePreviewContainer>
+            {existingImages.map((image, index) => (
+              <ImagePreview key={`existing-${index}`}>
+                <img 
+                  src={image.url.startsWith('http') ? image.url : `https://servercasaperto.onrender.com${image.url}`} 
+                  alt={`Imagem ${index + 1}`} 
+                />
+                <button onClick={() => removeExistingImage(index)}>X</button>
+              </ImagePreview>
+            ))}
+
+            {newImages.map((image, index) => (
+              <ImagePreview key={`new-${index}`}>
+                <img 
+                  src={URL.createObjectURL(image)} 
+                  alt={`Nova imagem ${index + 1}`} 
+                />
+                <button onClick={() => removeNewImage(index)}>X</button>
+              </ImagePreview>
+            ))}
+          </ImagePreviewContainer>
+
+          <MapWrapper>
+            <GoogleMap
+              mapContainerStyle={{ width: '100%', height: '400px' }}
+              center={mapPosition}
+              zoom={15}
+              onClick={handleMapClick}
+            >
+              {selectedMarker && (
+                <Marker
+                  position={selectedMarker}
+                />
+              )}
+            </GoogleMap>
+          </MapWrapper>
+
+          <Button onClick={handleUpdateProperty} disabled={loading}>
+            {loading ? "Salvando..." : "Salvar Alterações"}
+          </Button>
+        </>
+      )}
     </EditPropertyContainer>
   );
 };

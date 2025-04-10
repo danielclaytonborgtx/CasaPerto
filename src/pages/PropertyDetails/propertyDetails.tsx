@@ -4,6 +4,7 @@ import Slider from "react-slick";
 import { parseISO, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import Modal from "react-modal";
+import LoadingMessage from "../../components/loadingMessage/LoadingMessage";
 import {
   Container,
   ContentWrapper,
@@ -69,7 +70,7 @@ const PropertyDetails: React.FC = () => {
   }, [id, location.state]);
 
   if (loading) {
-    return <p>Carregando imóvel...</p>;
+    return <LoadingMessage />;
   }
 
   if (!property) {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../services/authContext"; 
 import api from "../../services/api";
+import LoadingMessage from "../../components/loadingMessage/LoadingMessage";
 import {
   MessageContainer,
   MessageList,
@@ -31,6 +32,7 @@ const Messages: React.FC = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [newMessage, setNewMessage] = useState<string>(""); 
   const [activeBrokerId, setActiveBrokerId] = useState<string | undefined>(brokerId);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   const { user } = useAuth();
@@ -68,6 +70,8 @@ const Messages: React.FC = () => {
         setConversations(conversationsWithNames);
       } catch (error) {
         console.error("Erro ao carregar conversas", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -173,6 +177,10 @@ const Messages: React.FC = () => {
     setActiveBrokerId(id);
     navigate(`/messages/${id}`);
   };
+
+  if (loading) {
+    return <LoadingMessage />;
+  }
 
   return (
     <MessageContainer>

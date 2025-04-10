@@ -6,9 +6,9 @@ import {
   Container,
   UpdateButton,
   ErrorMessage,
-  LoadingMessage,
 } from "./styles";
 
+import LoadingMessage from "../../components/loadingMessage/LoadingMessage";
 import { usePropertyContext } from "../../contexts/PropertyContext";
 import MapWithMarkers from "../../components/mapWithMarkers/MapWithMarkers";
 import { usePropertyData } from "../../hooks/usePropertyData";
@@ -55,7 +55,7 @@ const MapScreen: React.FC = () => {
     }
   }, [state, properties, map]);
 
-  if (!location) return <LoadingMessage>Carregando mapa...</LoadingMessage>;
+  if (!location) return <LoadingMessage />;
 
   return (
     <Container>
@@ -72,7 +72,7 @@ const MapScreen: React.FC = () => {
           onMapLoad={setMap}
         />
       ) : (
-        <LoadingMessage>Carregando mapa...</LoadingMessage>
+        <LoadingMessage />
       )}
       <UpdateButton onClick={handleUpdateLocation}>
         <FaCrosshairs size={20} />

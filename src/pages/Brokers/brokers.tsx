@@ -6,7 +6,6 @@ import {
   BrokerItem, 
   BrokerDetails, 
   BrokerIcon, 
-  Loading, 
   ErrorMessage, 
   ProfileImage,
   ProfileLink,
@@ -14,6 +13,7 @@ import {
   SearchInput
 } from "./styles";
 import { useAuth } from "../../services/authContext"; 
+import LoadingMessage from "../../components/loadingMessage/LoadingMessage";
 
 interface User {
   id: number;
@@ -92,7 +92,7 @@ const Brokers: React.FC = () => {
     fetchBrokersAndImages();
   }, [fetchBrokers, brokers]); 
 
-  if (loading) return <Loading>Carregando...</Loading>;
+  if (loading) return <LoadingMessage />;
   if (error) return <ErrorMessage>{error}</ErrorMessage>;
 
   const filteredBrokers = brokers.filter(broker =>

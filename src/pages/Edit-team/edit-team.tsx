@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios, { AxiosError } from "axios";
+import LoadingMessage from "../../components/loadingMessage/LoadingMessage";
 import {
   Container,
   Input,
@@ -284,95 +285,101 @@ const EditTeam: React.FC = () => {
 
   return (
     <Container>
-      {teamImage ? (
-        <div style={{ position: "relative", display: "inline-block" }}>
-          <TeamImage
-            src={teamImage}
-            alt="Imagem da equipe"
-          />
-          <EditButton onClick={handleIconClick}>
-            <FiEdit size={16} />
-          </EditButton>
-          <input
-            type="file"
-            ref={setImageInputRef}
-            onChange={handleImageUpload}
-            style={{ display: "none" }}
-          />
-        </div>
+      {loading ? (
+        <LoadingMessage />
       ) : (
-        <TeamIcon>
-          <button type="button" onClick={handleIconClick}>
-            <span>+</span>
-          </button>
-          <input
-            type="file"
-            ref={setImageInputRef}
-            onChange={handleImageUpload}
-            style={{ display: "none" }}
-          />
-        </TeamIcon>
-      )}
+        <>
+          {teamImage ? (
+            <div style={{ position: "relative", display: "inline-block" }}>
+              <TeamImage
+                src={teamImage}
+                alt="Imagem da equipe"
+              />
+              <EditButton onClick={handleIconClick}>
+                <FiEdit size={16} />
+              </EditButton>
+              <input
+                type="file"
+                ref={setImageInputRef}
+                onChange={handleImageUpload}
+                style={{ display: "none" }}
+              />
+            </div>
+          ) : (
+            <TeamIcon>
+              <button type="button" onClick={handleIconClick}>
+                <span>+</span>
+              </button>
+              <input
+                type="file"
+                ref={setImageInputRef}
+                onChange={handleImageUpload}
+                style={{ display: "none" }}
+              />
+            </TeamIcon>
+          )}
 
-      <h2>Editar Equipe</h2>
+          <h2>Editar Equipe</h2>
 
-      <Input
-        type="text"
-        placeholder="Nome da equipe"
-        value={teamName}
-        onChange={(e) => setTeamName(e.target.value)}
-      />
-
-      <ListsContainer>
-        <LeftColumn>
-          <h3>Adicionar Corretores</h3>
           <Input
             type="text"
-            placeholder="Buscar corretor..."
-            value={brokerName}
-            onChange={(e) => setBrokerName(e.target.value)}
+            placeholder="Nome da equipe"
+            value={teamName}
+            onChange={(e) => setTeamName(e.target.value)}
           />
-          <BrokerList>
-            {availableBrokers
-              .filter((broker) => broker.name.toLowerCase().includes(brokerName.toLowerCase()))
-              .map((broker) => (
-                <BrokerItem key={broker.id}>
-                  {broker.name}
-                  <AddBrokerButton onClick={() => handleAddBroker(broker)}>
-                    <FaPlus />
-                  </AddBrokerButton>
-                </BrokerItem>
-              ))}
-          </BrokerList>
-        </LeftColumn>
 
-        <RightColumn>
-          <h3>Corretores Adicionados</h3>
-          <AddedBrokerList>
-            {brokers.map((broker) => (
-              <BrokerItem key={broker.userId}>
-                {broker.name}
-                <AddBrokerButton onClick={() => handleRemoveBroker(broker)}>
-                  <FaMinus />
-                </AddBrokerButton>
-              </BrokerItem>
-            ))}
-            {pendingInvites.map((invite) => (
-              <BrokerItem key={invite.userId}>
-                {invite.name} (Convite Pendente)
-              </BrokerItem>
-            ))}
-          </AddedBrokerList>
-        </RightColumn>
-      </ListsContainer>
+          <ListsContainer>
+            <LeftColumn>
+              <h3>Adicionar Corretores</h3>
+              <Input
+                type="text"
+                placeholder="Buscar corretor..."
+                value={brokerName}
+                onChange={(e) => setBrokerName(e.target.value)}
+              />
+              <BrokerList>
+                {availableBrokers
+                  .filter((broker) => broker.name.toLowerCase().includes(brokerName.toLowerCase()))
+                  .map((broker) => (
+                    <BrokerItem key={broker.id}>
+                      {broker.name}
+                      <AddBrokerButton onClick={() => handleAddBroker(broker)}>
+                        <FaPlus />
+                      </AddBrokerButton>
+                    </BrokerItem>
+                  ))}
+              </BrokerList>
+            </LeftColumn>
 
-      <Button onClick={handleUpdateTeam} disabled={loading}>
-        {loading ? "Salvando..." : "Salvar Alterações"}
-      </Button>
+            <RightColumn>
+              <h3>Corretores Adicionados</h3>
+              <AddedBrokerList>
+                {brokers.map((broker) => (
+                  <BrokerItem key={broker.userId}>
+                    {broker.name}
+                    <AddBrokerButton onClick={() => handleRemoveBroker(broker)}>
+                      <FaMinus />
+                    </AddBrokerButton>
+                  </BrokerItem>
+                ))}
+                {pendingInvites.map((invite) => (
+                  <BrokerItem key={invite.userId}>
+                    {invite.name} (Convite Pendente)
+                  </BrokerItem>
+                ))}
+              </AddedBrokerList>
+            </RightColumn>
+          </ListsContainer>
 
-      <DeleteTeamButton onClick={handleDeleteTeam}>
-        Excluir Equipe
-      </DeleteTeamButton>
+          <Button onClick={handleUpdateTeam} disabled={loading}>
+            {loading ? "Salvando..." : "Salvar Alterações"}
+          </Button>
+
+          <DeleteTeamButton onClick={handleDeleteTeam}>
+            Excluir Equipe
+          </DeleteTeamButton>
+        </>
+      )}
     </Container>
   );
 };

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Item, Image, Title, Button, Price, SearchInput } from './styles';
 import { usePropertyContext } from "../../contexts/PropertyContext";
+import LoadingMessage from "../../components/loadingMessage/LoadingMessage";
 
 const DEFAULT_IMAGE = '/images/default-property.jpg';
 
@@ -109,7 +110,7 @@ const ListScreen: React.FC = () => {
   };
 
   if (loading) {
-    return <div>Carregando...</div>;
+    return <LoadingMessage />;
   }
 
   if (error) {
