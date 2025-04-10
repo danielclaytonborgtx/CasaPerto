@@ -266,12 +266,28 @@ const EditProperty = () => {
               center={mapPosition}
               zoom={15}
               onClick={handleMapClick}
+              options={{
+                disableDefaultUI: true,
+                zoomControl: false,
+                streetViewControl: false,
+                mapTypeControl: false,
+                fullscreenControl: false,
+                gestureHandling: "greedy",
+                styles: [
+                  {
+                    featureType: "poi",
+                    elementType: "all",
+                    stylers: [
+                      {
+                        visibility: "off",
+                      },
+                    ],
+                  },
+                ],
+              }}
             >
-              {selectedMarker && (
-                <Marker
-                  position={selectedMarker}
-                />
-              )}
+              {selectedMarker && <Marker position={selectedMarker} />}
+              <Marker position={mapPosition} icon="http://maps.google.com/mapfiles/ms/icons/blue-dot.png" />
             </GoogleMap>
           </MapWrapper>
 
