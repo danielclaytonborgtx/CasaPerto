@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Item, Image, Title, Button, Price, SearchInput } from './styles';
 import { usePropertyContext } from "../../contexts/PropertyContext";
@@ -23,7 +23,7 @@ const ListScreen: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [distanceCache, setDistanceCache] = useState<Record<number, number>>({});
+  const [sortedProperties, setSortedProperties] = useState<Property[]>([]);
   const navigate = useNavigate();
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -62,18 +62,6 @@ const ListScreen: React.FC = () => {
         (position) => {
           const { latitude, longitude } = position.coords;
           setUserLocation({ latitude, longitude });
-          
-          // Pré-calcular distâncias para todas as propriedades
-          const newDistanceCache: Record<number, number> = {};
-          properties.forEach((property: Property) => {
-            newDistanceCache[property.id] = calculateDistance(
-              latitude,
-              longitude,
-              property.latitude,
-              property.longitude
-            );
-          });
-          setDistanceCache(newDistanceCache);
         },
         () => {
           setError('Não foi possível obter a localização do usuário.');
@@ -83,10 +71,11 @@ const ListScreen: React.FC = () => {
     };
 
     getUserLocation();
-  }, [properties]);
+  }, []);
 
-  const filteredProperties = useMemo(() => {
-    return properties
+  // Filtra e ordena as propriedades quando userLocation ou searchTerm mudam
+  useEffect(() => {
+    const filtered = properties
       .filter((property) => {
         const category = isRent ? "venda" : "aluguel";
         return property.category.toLowerCase() === category.toLowerCase();
@@ -96,17 +85,19 @@ const ListScreen: React.FC = () => {
         const normalizedSearch = searchTerm.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
         return normalizedTitle.includes(normalizedSearch);
       });
-  }, [properties, isRent, searchTerm]);
 
-  const sortedProperties = useMemo(() => {
-    if (!userLocation) return filteredProperties;
-    
-    return [...filteredProperties].sort((a, b) => {
-      const distanceA = distanceCache[a.id] || 0;
-      const distanceB = distanceCache[b.id] || 0;
-      return distanceA - distanceB;
-    });
-  }, [filteredProperties, userLocation, distanceCache]);
+    if (userLocation) {
+      // Ordena por proximidade
+      const sorted = [...filtered].sort((a, b) => {
+        const distanceA = calculateDistance(userLocation.latitude, userLocation.longitude, a.latitude, a.longitude);
+        const distanceB = calculateDistance(userLocation.latitude, userLocation.longitude, b.latitude, b.longitude);
+        return distanceA - distanceB;
+      });
+      setSortedProperties(sorted);
+    } else {
+      setSortedProperties(filtered);
+    }
+  }, [properties, userLocation, searchTerm, isRent]);
 
   const formatPrice = (price: string | number) => {
     const priceString = typeof price === 'string' ? price : String(price);
