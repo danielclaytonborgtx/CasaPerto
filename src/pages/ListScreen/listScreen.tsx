@@ -23,7 +23,6 @@ const ListScreen: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortedProperties, setSortedProperties] = useState<Property[]>([]);
   const navigate = useNavigate();
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -73,31 +72,24 @@ const ListScreen: React.FC = () => {
     getUserLocation();
   }, []);
 
-  // Filtra e ordena as propriedades quando userLocation ou searchTerm mudam
-  useEffect(() => {
-    const filtered = properties
-      .filter((property) => {
-        const category = isRent ? "venda" : "aluguel";
-        return property.category.toLowerCase() === category.toLowerCase();
-      })
-      .filter((property) => {
-        const normalizedTitle = property.title.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
-        const normalizedSearch = searchTerm.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
-        return normalizedTitle.includes(normalizedSearch);
-      });
+  const filteredProperties = properties
+    .filter((property) => {
+      const category = isRent ? "venda" : "aluguel";
+      return property.category.toLowerCase() === category.toLowerCase();
+    })
+    .filter((property) => {
+      const normalizedTitle = property.title.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+      const normalizedSearch = searchTerm.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+      return normalizedTitle.includes(normalizedSearch);
+    });
 
-    if (userLocation) {
-      // Ordena por proximidade
-      const sorted = [...filtered].sort((a, b) => {
+  const sortedProperties = userLocation
+    ? [...filteredProperties].sort((a, b) => {
         const distanceA = calculateDistance(userLocation.latitude, userLocation.longitude, a.latitude, a.longitude);
         const distanceB = calculateDistance(userLocation.latitude, userLocation.longitude, b.latitude, b.longitude);
         return distanceA - distanceB;
-      });
-      setSortedProperties(sorted);
-    } else {
-      setSortedProperties(filtered);
-    }
-  }, [properties, userLocation, searchTerm, isRent]);
+      })
+    : filteredProperties;
 
   const formatPrice = (price: string | number) => {
     const priceString = typeof price === 'string' ? price : String(price);
@@ -117,7 +109,9 @@ const ListScreen: React.FC = () => {
   }
 
   const getImageUrl = (images: string[] | undefined) => {
+   
     if (!images || images.length === 0) return DEFAULT_IMAGE;
+    
     return images[0];
   };
 
