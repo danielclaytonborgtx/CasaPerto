@@ -1,5 +1,5 @@
 // src/components/MapWithMarkers/MapWithMarkers.tsx
-import React, { useRef } from "react";
+import React, { useRef, useMemo } from "react";
 import { GoogleMap } from "@react-google-maps/api";
 import PropertyInfoWindow from "../propertyInfoWindow/PropertyInfoWindow";
 import { Property } from "../../types/property";
@@ -29,6 +29,32 @@ const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
     onMapLoad(map);
   };
 
+  // Memoize as opções do mapa para evitar recriações
+  const mapOptions = useMemo(() => ({
+    disableDefaultUI: true,
+    gestureHandling: "greedy",
+    styles: [
+      {
+        featureType: "poi",
+        elementType: "all",
+        stylers: [{ visibility: "off" }],
+      },
+    ],
+    clickableIcons: false,
+    maxZoom: 18,
+    minZoom: 3,
+    zoomControl: true,
+    mapTypeControl: false,
+    streetViewControl: false,
+    fullscreenControl: false,
+    rotateControl: false,
+    scaleControl: false,
+    disableDoubleClickZoom: true,
+    draggable: true,
+    draggableCursor: 'grab',
+    draggingCursor: 'grabbing',
+  }), []);
+
   // Usar o hook useMarkers para gerenciar os marcadores
   useMarkers({
     map: mapRef.current,
@@ -43,18 +69,7 @@ const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
       center={location}
       zoom={13}
       onLoad={handleMapLoad}
-      options={{
-        disableDefaultUI: true,
-        gestureHandling: "greedy",
-        styles: [
-          {
-            featureType: "poi",
-            elementType: "all",
-            stylers: [{ visibility: "off" }],
-          },
-        ],
-        clickableIcons: false
-      }}
+      options={mapOptions}
       onClick={() => setSelectedProperty(null)}
     >
       {selectedProperty && (

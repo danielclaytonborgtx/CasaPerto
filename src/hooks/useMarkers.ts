@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { Property } from '../types/property';
 
 interface UseMarkersProps {
@@ -10,6 +10,10 @@ interface UseMarkersProps {
 
 export const useMarkers = ({ map, location, properties, setSelectedProperty }: UseMarkersProps) => {
   const markersRef = useRef<google.maps.Marker[]>([]);
+  const currentLocationMarkerRef = useRef<google.maps.Marker | null>(null);
+
+  // Memoize as propriedades para evitar recriações desnecessárias
+  const memoizedProperties = useMemo(() => properties, [properties]);
 
   useEffect(() => {
     if (!map || !location) return;
@@ -21,10 +25,16 @@ export const useMarkers = ({ map, location, properties, setSelectedProperty }: U
     });
     markersRef.current = [];
 
+    // Limpar marcador de localização atual
+    if (currentLocationMarkerRef.current) {
+      currentLocationMarkerRef.current.setMap(null);
+      currentLocationMarkerRef.current = null;
+    }
+
     const newMarkers: google.maps.Marker[] = [];
 
-    // Criar marcadores para as propriedades
-    properties.forEach((p) => {
+    // Criar marcadores para as propriedades com otimização
+    memoizedProperties.forEach((p) => {
       const marker = new google.maps.Marker({
         position: { lat: p.latitude, lng: p.longitude },
         map,
@@ -36,7 +46,8 @@ export const useMarkers = ({ map, location, properties, setSelectedProperty }: U
           strokeColor: "#1E90FF",
           strokeWeight: 2,
           scale: 10,
-        }
+        },
+        optimized: true // Habilita otimização de renderização
       });
 
       marker.addListener('click', () => {
@@ -50,8 +61,8 @@ export const useMarkers = ({ map, location, properties, setSelectedProperty }: U
 
     markersRef.current = newMarkers;
 
-    // Adicionar marcador para a localização atual
-    new google.maps.Marker({
+    // Adicionar marcador para a localização atual com otimização
+    currentLocationMarkerRef.current = new google.maps.Marker({
       position: location,
       map,
       title: "Sua localização",
@@ -63,7 +74,8 @@ export const useMarkers = ({ map, location, properties, setSelectedProperty }: U
         strokeWeight: 2,
         scale: 7,
       },
-      clickable: false
+      clickable: false,
+      optimized: true
     });
 
     // Limpar listeners quando o componente for desmontado
@@ -72,8 +84,11 @@ export const useMarkers = ({ map, location, properties, setSelectedProperty }: U
         google.maps.event.clearInstanceListeners(m);
         m.setMap(null);
       });
+      if (currentLocationMarkerRef.current) {
+        currentLocationMarkerRef.current.setMap(null);
+      }
     };
-  }, [map, location, properties, setSelectedProperty]);
+  }, [map, location, memoizedProperties, setSelectedProperty]);
 
   return markersRef;
 }; 
