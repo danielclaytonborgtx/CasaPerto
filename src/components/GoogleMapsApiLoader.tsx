@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { LoadScript } from "@react-google-maps/api";
+import LoadingMessage from "./loadingMessage/LoadingMessage";
 
 interface GoogleMapsApiLoaderProps {
   children: React.ReactNode;
@@ -19,10 +20,9 @@ const GoogleMapsApiLoader: React.FC<GoogleMapsApiLoaderProps> = ({ children }) =
       googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
       onLoad={() => setIsApiLoaded(true)}
       libraries={["places", "geometry"]}
-      loadingElement={<div>Carregando API do Google Maps...</div>}
-      mapIds={["YOUR_MAP_ID"]} // Adicione seu Map ID aqui se estiver usando um
+      loadingElement={<LoadingMessage />}
     >
-      {isApiLoaded ? children : <div>Carregando API do Google Maps...</div>}
+      {isApiLoaded ? children : <LoadingMessage />}
     </LoadScript>
   );
 };
