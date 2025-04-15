@@ -19,6 +19,8 @@ import {
   ButtonContainer,
   DefaultIcon,
   StyledButton,
+  PriceAndMapContainer,
+  MapLink,
 } from "./styles";
 
 import {
@@ -239,10 +241,19 @@ const Profile: React.FC = () => {
                       onClick={() => handleImageClick(property.id)}
                     />
                   </PropertyImageContainer>
+
                   <TitlePriceContainer>
                     <strong>{property.title}</strong>
-                    <p>{formatPrice(Number(property.price))}</p>
+                    <PriceAndMapContainer>
+                      <p>{formatPrice(Number(property.price))}</p>
+
+                      <MapLink as="button" onClick={() => navigate("/map", { state: { id: property.id } })}>
+                        Ver no mapa
+                      </MapLink>
+                      
+                    </PriceAndMapContainer>
                   </TitlePriceContainer>
+
                 </PropertyItemLayout>
                 <PropertyDetails>
                   <p>{property.description}</p>

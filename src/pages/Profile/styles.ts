@@ -343,4 +343,26 @@ export const DefaultIcon = styled.span`
   }
 `;
 
+export const PriceAndMapContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  p {
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+  }
+`;
+
+export const MapLink = styled.a`
+  color: #007bff;
+  text-decoration: underline;
+  font-size: 0.9rem;
+  white-space: nowrap;
+
+  &:hover {
+    color: #0056b3;
+  }
+`;
 
