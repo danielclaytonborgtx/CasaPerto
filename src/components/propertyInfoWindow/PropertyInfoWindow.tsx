@@ -44,7 +44,7 @@ const PropertyInfoWindow: React.FC<Props> = ({
     <InfoWindow
       position={{ lat: property.latitude, lng: property.longitude }}
       onCloseClick={onClose}
-      options={{ disableAutoPan: false, pixelOffset: new window.google.maps.Size(0, -40) }}
+      options={{ disableAutoPan: false, pixelOffset: new window.google.maps.Size(0, -5) }}
     >
       <InfoWindowContainer>
         <PropertyImage

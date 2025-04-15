@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useNavigate, useLocation as useRouterLocation } from "react-router-dom";
 import { FaCrosshairs } from "react-icons/fa";
 
@@ -21,6 +21,7 @@ import { useAuth } from "../../services/authContext";
 const MapScreen: React.FC = () => {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const [initiallySelectedProperty, setInitiallySelectedProperty] = useState<Property | null>(null);
   
   const { isRent } = usePropertyContext();
   const { properties, error: dataError, isLoaded } = usePropertyData(isRent);
@@ -29,10 +30,32 @@ const MapScreen: React.FC = () => {
   const { state } = useRouterLocation();
   const { user } = useAuth();
 
-  // Usar o hook de marcadores
-  useMarkers({ map, location, properties, setSelectedProperty });
+  useEffect(() => {
+    if (state?.id && properties.length > 0) {
+      const prop = properties.find((p) => p.id === state.id);
+      if (prop) {
+        setInitiallySelectedProperty(prop);
+        navigate('.', { replace: true, state: {} });
+      }
+    }
+  }, [state, properties, navigate]);
 
-  // Navegar para a página de detalhes da propriedade
+  useEffect(() => {
+    if (map && initiallySelectedProperty) {
+      map.panTo({ lat: initiallySelectedProperty.latitude, lng: initiallySelectedProperty.longitude });
+      map.setZoom(15);
+      setSelectedProperty(initiallySelectedProperty);
+      setInitiallySelectedProperty(null);
+    }
+  }, [map, initiallySelectedProperty]);
+
+  useMarkers({ 
+    map, 
+    location, 
+    properties, 
+    setSelectedProperty,
+  });
+
   const handleImageClick = useCallback(
     (id: number) => {
       const property = properties.find((p) => p.id === id);
@@ -41,22 +64,13 @@ const MapScreen: React.FC = () => {
     [properties, navigate]
   );
 
-  // Atualizar localização
   const handleUpdateLocation = useCallback(() => {
     updateLocation(map);
   }, [map, updateLocation]);
 
-  // Selecionar propriedade quando navegando de outra página
-  React.useEffect(() => {
-    if (state?.id && map) {
-      const prop = properties.find((p) => p.id === state.id);
-      if (prop) {
-        setSelectedProperty(prop);
-        map.panTo({ lat: prop.latitude, lng: prop.longitude });
-        map.setZoom(15);
-      }
-    }
-  }, [state, properties, map]);
+  const handleCloseInfoWindow = useCallback(() => {
+    setSelectedProperty(null);
+  }, []);
 
   if (!location) return <LoadingMessage />;
 
@@ -81,6 +95,7 @@ const MapScreen: React.FC = () => {
           properties={properties}
           selectedProperty={selectedProperty}
           setSelectedProperty={setSelectedProperty}
+          onCloseInfoWindow={handleCloseInfoWindow}
           handleImageClick={handleImageClick}
           onMapLoad={setMap}
         />

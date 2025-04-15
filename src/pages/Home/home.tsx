@@ -17,7 +17,7 @@ interface Property {
   images: { url: string }[];
 }
 
-const ListScreen: React.FC = () => {
+const Home: React.FC = () => {
   const { isRent } = usePropertyContext();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
@@ -158,4 +158,4 @@ const ListScreen: React.FC = () => {
   );
 };
 
-export default ListScreen;
+export default Home;

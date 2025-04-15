@@ -12,6 +12,7 @@ interface MapWithMarkersProps {
   setSelectedProperty: (property: Property | null) => void;
   handleImageClick: (id: number) => void;
   onMapLoad: (map: google.maps.Map) => void;
+  onCloseInfoWindow: () => void;
 }
 
 const MapWithMarkers: React.FC<MapWithMarkersProps> = ({
