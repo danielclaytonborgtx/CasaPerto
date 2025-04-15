@@ -346,6 +346,8 @@ export const DefaultIcon = styled.span`
 export const PriceAndMapContainer = styled.div`
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  width: 100%; 
   gap: 12px;
 
   p {
