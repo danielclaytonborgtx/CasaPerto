@@ -151,7 +151,7 @@ const PropertyDetails: React.FC = () => {
   return (
     <Container>
       <ContentWrapper>
-        <Title>{title}</Title>
+        
         <SliderContainer>
           <Slider {...settings}>
             {images.map((img, index) => (
@@ -168,6 +168,7 @@ const PropertyDetails: React.FC = () => {
             ))}
           </Slider>
         </SliderContainer>
+        <Title>{title}</Title>
         <Price>{formatPrice(price)}</Price>
         <Description>{description}</Description>
 

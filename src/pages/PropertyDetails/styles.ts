@@ -5,12 +5,12 @@ export const Container = styled.div`
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  padding: 20px;
+  padding: 10px;
   box-sizing: border-box;
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  margin-bottom: 40px
+  margin-bottom: 10px
 `;
 
 export const ContentWrapper = styled.div`
@@ -20,13 +20,13 @@ export const ContentWrapper = styled.div`
   width: 100%;
   max-width: 1200px;
   box-sizing: border-box;
-  margin-top: 40px;
+  margin-top: 10px;
 `;
 
 export const SliderContainer = styled.div`
   width: 100%;
   height: auto; 
-  margin-bottom: 40px; 
+  margin-bottom: 50px; 
 `;
 
 export const ImageWrapper = styled.div`
@@ -69,7 +69,9 @@ export const Description = styled.p`
   text-align: justify;
   color: #555;
   max-width: 800px;
-  margin-bottom: 30px;
+  margin-left: 15px;
+  margin-right: 15px;
+  margin-bottom: 15px;
   line-height: 1.5;
 `;
 
