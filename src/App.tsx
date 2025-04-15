@@ -31,31 +31,52 @@ const App: React.FC = () => {
     <>
       <GlobalStyles /> 
       <Router>
-        <GoogleMapsApiLoader> 
-          <Routes>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<Home />} />
-              <Route path="signIn" element={<SignIn />} />
-              <Route path="signUp" element={<SignUp />} />
-              <Route path="map" element={<MapScreen />} />
-              <Route path="addProperty" element={<AddProperty />} />
-              <Route path="editProperty/:id" element={<EditProperty />} />
-              <Route path="list" element={<ListScreen />} />
-              <Route path="contact" element={<Contact />} />
-              <Route path="property/:id" element={<PropertyDetails />} />
-              <Route path="profile" element={<Profile />} />
-              <Route path="brokers" element={<Brokers />} />
-              <Route path="messages" element={<Messages />} />
-              <Route path="/messages/:brokerId" element={<Messages />} />
-              <Route path="settings" element={<Settings />} />
-              <Route path="team" element={<Team />} />
-              <Route path="/create-team" element={<CreateTeam />} />
-              <Route path="/edit-team/:id" element={<EditTeam />} />
-              <Route path="/profiles/:userId" element={<Profiles />} />
-            </Route>
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
-        </GoogleMapsApiLoader> 
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="signIn" element={<SignIn />} />
+            <Route path="signUp" element={<SignUp />} />
+
+            <Route
+              path="map"
+              element={
+                <GoogleMapsApiLoader>
+                  <MapScreen />
+                </GoogleMapsApiLoader>
+              }
+            />
+            <Route
+              path="addProperty"
+              element={
+                <GoogleMapsApiLoader>
+                  <AddProperty />
+                </GoogleMapsApiLoader>
+              }
+            />
+            <Route
+              path="editProperty/:id"
+              element={
+                <GoogleMapsApiLoader>
+                  <EditProperty />
+                </GoogleMapsApiLoader>
+              }
+            />
+
+            <Route path="list" element={<ListScreen />} />
+            <Route path="contact" element={<Contact />} />
+            <Route path="property/:id" element={<PropertyDetails />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="brokers" element={<Brokers />} />
+            <Route path="messages" element={<Messages />} />
+            <Route path="/messages/:brokerId" element={<Messages />} />
+            <Route path="settings" element={<Settings />} />
+            <Route path="team" element={<Team />} />
+            <Route path="/create-team" element={<CreateTeam />} />
+            <Route path="/edit-team/:id" element={<EditTeam />} />
+            <Route path="/profiles/:userId" element={<Profiles />} />
+          </Route>
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
       </Router>
     </>
   );
