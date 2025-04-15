@@ -247,10 +247,10 @@ const Profile: React.FC = () => {
                     <PriceAndMapContainer>
                       <p>{formatPrice(Number(property.price))}</p>
 
-                      <MapLink as="button" onClick={() => navigate("/map", { state: { id: property.id } })}>
+                      <MapLink onClick={() => navigate("/map", { state: { id: property.id } })}>
                         Ver no mapa
                       </MapLink>
-                      
+
                     </PriceAndMapContainer>
                   </TitlePriceContainer>
 
