@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Item, Image, Title, Button, Price, SearchInput } from './styles';
 import { usePropertyContext } from "../../contexts/PropertyContext";
+import LoadingMessage from "../../components/loadingMessage/LoadingMessage";
 
 const DEFAULT_IMAGE = '/images/default-property.jpg';
 
@@ -16,9 +17,10 @@ interface Property {
   images: { url: string }[];
 }
 
-const ListScreen: React.FC = () => {
+const Home: React.FC = () => {
   const { isRent } = usePropertyContext();
   const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -49,6 +51,8 @@ const ListScreen: React.FC = () => {
         }
       } catch {
         setError('Erro ao conectar com o servidor.');
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -62,6 +66,7 @@ const ListScreen: React.FC = () => {
         },
         () => {
           setError('Não foi possível obter a localização do usuário.');
+          setLoading(false);
         }
       );
     };
@@ -69,6 +74,7 @@ const ListScreen: React.FC = () => {
     getUserLocation();
   }, []);
 
+  // Filtra e ordena as propriedades quando userLocation ou searchTerm mudam
   useEffect(() => {
     const filtered = properties
       .filter((property) => {
@@ -82,6 +88,7 @@ const ListScreen: React.FC = () => {
       });
 
     if (userLocation) {
+      // Ordena por proximidade
       const sorted = [...filtered].sort((a, b) => {
         const distanceA = calculateDistance(userLocation.latitude, userLocation.longitude, a.latitude, a.longitude);
         const distanceB = calculateDistance(userLocation.latitude, userLocation.longitude, b.latitude, b.longitude);
@@ -101,6 +108,10 @@ const ListScreen: React.FC = () => {
       currency: 'BRL',
     }).format(priceNumber);
   };
+
+  if (loading) {
+    return <LoadingMessage />;
+  }
 
   if (error) {
     return <div>{error}</div>;
@@ -147,4 +158,4 @@ const ListScreen: React.FC = () => {
   );
 };
 
-export default ListScreen;
+export default Home;
