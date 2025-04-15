@@ -1,13 +1,14 @@
-// src/components/PropertyInfoWindow.tsx
 import React from "react";
 import { InfoWindow } from "@react-google-maps/api";
-import { FaMapMarkedAlt } from "react-icons/fa";
+import { FaMapMarkerAlt } from "react-icons/fa";
 import {
   InfoContent,
   InfoWindowContainer,
-  NavigationIconContainer,
+  PriceContainer,
   PropertyImage,
-} from "./styles"; 
+  Title,
+  Price,
+} from "./styles";
 
 interface Property {
   id: number;
@@ -43,26 +44,27 @@ const PropertyInfoWindow: React.FC<Props> = ({
     <InfoWindow
       position={{ lat: property.latitude, lng: property.longitude }}
       onCloseClick={onClose}
+      options={{ disableAutoPan: false, pixelOffset: new window.google.maps.Size(0, -40) }}
     >
       <InfoWindowContainer>
-        <NavigationIconContainer>
-          <FaMapMarkedAlt
-            size={25}
-            onClick={() =>
-              window.open(
-                `https://www.google.com/maps/dir/?api=1&destination=${property.latitude},${property.longitude}`,
-                "_blank"
-              )
-            }
-          />
-        </NavigationIconContainer>
+        <PropertyImage
+          src={property.images?.[0]?.url || "/placeholder.jpg"}
+          onClick={() => onImageClick(property.id)}
+        />
         <InfoContent>
-          <h3>{property.title}</h3>
-          <p>{formatPrice(property.price)}</p>
-          <PropertyImage
-            src={property.images?.[0]?.url || "/placeholder.jpg"}
-            onClick={() => onImageClick(property.id)}
-          />
+          <Title>{property.title}</Title>
+          <PriceContainer>
+            <Price>{formatPrice(property.price)}</Price>
+            <FaMapMarkerAlt
+              size={16}
+              onClick={() =>
+                window.open(
+                  `https://www.google.com/maps/dir/?api=1&destination=${property.latitude},${property.longitude}`,
+                  "_blank"
+                )
+              }
+            />
+          </PriceContainer>
         </InfoContent>
       </InfoWindowContainer>
     </InfoWindow>
