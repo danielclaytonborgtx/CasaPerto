@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Item, Image, Title, Button, Price, SearchInput } from './styles';
 import { usePropertyContext } from "../../contexts/PropertyContext";
+import LoadingMessage from "../../components/loadingMessage/LoadingMessage";
 
 const DEFAULT_IMAGE = '/images/default-property.jpg';
 
@@ -19,6 +20,7 @@ interface Property {
 const Home: React.FC = () => {
   const { isRent } = usePropertyContext();
   const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -49,6 +51,8 @@ const Home: React.FC = () => {
         }
       } catch {
         setError('Erro ao conectar com o servidor.');
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -101,6 +105,10 @@ const Home: React.FC = () => {
       currency: 'BRL',
     }).format(priceNumber);
   };
+
+  if (loading) {
+    return <LoadingMessage />;
+  }
 
   if (error) {
     return <div>{error}</div>;
