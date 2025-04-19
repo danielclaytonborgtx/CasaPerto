@@ -222,12 +222,12 @@ const AddProperty = () => {
         ))}
       </ImagePreviewContainer>
       
-      <p>Agora abaixo, arraste a tela, e com um clique marque o local do imóvel no mapa.</p>
+      <p>Agora abaixo, vamos marcar o local do imóvel, se voce está no imóvel agora, ele já atualiza a localização que voce está, se não, arraste a tela, e com um clique marque o local do imóvel no mapa.</p>
       <MapWrapper>
         
           {isLoaded ? (
             <GoogleMap
-              mapContainerStyle={{ width: '100%', height: '400px' }}
+              mapContainerStyle={{ width: '100%', height: '500px' }}
               center={mapPosition}
               zoom={15}
               onClick={handleMapClick}

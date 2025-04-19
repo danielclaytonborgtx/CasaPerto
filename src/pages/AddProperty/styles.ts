@@ -28,10 +28,9 @@ export const FormInput = styled.input`
     cursor: pointer;
   }
 
-  // Estilo para textarea
   &.textarea {
-    resize: vertical; // Permite que o usuário redimensione o campo verticalmente
-    height: 100px; // Altura inicial, mas pode ser ajustada
+    resize: vertical; 
+    height: 100px;
   }
 `;
 
@@ -44,7 +43,7 @@ export const Button = styled.button`
   border-radius: 4px;
   font-size: 16px;
   cursor: pointer;
-  margin-bottom: 50px;
+  margin-bottom: 10px;
   margin-top: 20px;
 
   &:hover {
@@ -56,8 +55,9 @@ export const Button = styled.button`
     cursor: not-allowed;
   }
 `;
-
+ 
 export const ImageUploadButton = styled.div`
+  margin-top: 10px;
   margin-bottom: 20px;
   label {
     padding: 12px;
@@ -112,8 +112,6 @@ export const ImagePreview = styled.div`
 
 export const MapWrapper = styled.div`
   margin-top: 20px;
-  width: 100%;
-  height: 400px;
   border-radius: 8px;
   overflow: hidden;
 `;
