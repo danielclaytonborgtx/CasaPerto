@@ -293,7 +293,6 @@ export const TrashIcon = styled.div`
   transition: transform 0.3s ease;
   font-size: 18px;
   color: black;
-  z-index: 1;
 
   &:hover {
     transform: scale(1.2);
@@ -313,7 +312,6 @@ export const EditIcon = styled.div`
   transition: transform 0.3s ease;
   font-size: 18px;
   color: #1E90FF;
-  z-index: 1;
 
   &:hover {
     transform: scale(1.2);
