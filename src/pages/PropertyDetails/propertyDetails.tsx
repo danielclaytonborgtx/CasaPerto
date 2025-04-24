@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom"; 
 import Slider from "react-slick";
-import { useSwipeable } from "react-swipeable";
 import { parseISO, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import Modal from "react-modal";
@@ -70,13 +69,6 @@ const PropertyDetails: React.FC = () => {
     fetchProperty();
   }, [id, location.state]);
 
-  const handlers = useSwipeable({
-    onSwipedLeft: () => nextImage(),
-    onSwipedRight: () => prevImage(),
-    preventScrollOnSwipe: true,
-    trackMouse: true,
-  });
-
   if (loading) {
     return <LoadingMessage />;
   }
@@ -95,6 +87,7 @@ const PropertyDetails: React.FC = () => {
     slidesToScroll: 1,
     adaptiveHeight: true,
     arrows: true,
+    initialSlide: currentImageIndex,
   };
 
   const formatPrice = (price: number) => {
@@ -117,13 +110,11 @@ const PropertyDetails: React.FC = () => {
 
   const resolveImageUrl = (img: PropertyImage | string) => {
     if (typeof img === "string") {
-      
       if (img.startsWith("http")) {
         return img;  
       }
       return `https://servercasaperto.onrender.com${img}`;  
     } else if (img && typeof img === "object" && "url" in img) {
-      
       const imageUrl = img.url;
       if (imageUrl.startsWith("http")) {
         return imageUrl; 
@@ -136,30 +127,17 @@ const PropertyDetails: React.FC = () => {
   const handleImageClick = (index: number) => {
     setCurrentImageIndex(index);
     setIsModalOpen(true);
-
     document.body.classList.add("modal-open");
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
-
     document.body.classList.remove("modal-open");
-  };
-
-  const nextImage = () => {
-    setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
-  };
-
-  const prevImage = () => {
-    setCurrentImageIndex((prevIndex) =>
-      prevIndex === 0 ? images.length - 1 : prevIndex - 1
-    );
   };
 
   return (
     <Container>
       <ContentWrapper>
-        
         <SliderContainer>
           <Slider {...settings}>
             {images.map((img, index) => (
@@ -223,73 +201,39 @@ const PropertyDetails: React.FC = () => {
         >
           ✕
         </button>
-        <button
-          onClick={prevImage}
-          style={{
-            position: "absolute",
-            left: "10px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            background: "transparent",
-            border: "none",
-            fontSize: "42px",
-            color: "white",
-            cursor: "pointer",
-            zIndex: 10000,
-          }}
-        >
-          ‹
-        </button>
-        <div
-          {...handlers}
-          style={{
-            display: "flex",
-            width: "100%",
-            overflow: "hidden",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              transform: `translateX(-${currentImageIndex * 100}%)`,
-              transition: "transform 0.5s ease-in-out",
-              width: `${images.length * 100}%`,
+
+        <div style={{ width: "100%", maxWidth: "800px" }}>
+          <Slider
+            {...{
+              dots: true,
+              infinite: images.length > 1,
+              speed: 500,
+              slidesToShow: 1,
+              slidesToScroll: 1,
+              adaptiveHeight: true,
+              arrows: true,
+              initialSlide: currentImageIndex,
             }}
           >
             {images.map((img, idx) => (
-              <img
-                key={idx}
-                src={resolveImageUrl(img)}
-                alt={`Imagem ${idx + 1}`}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "contain",
-                  flexShrink: 0,
-                }}
-              />
+              <div key={idx}>
+                <img
+                  src={resolveImageUrl(img)}
+                  alt={`Imagem ${idx + 1}`}
+                  style={{
+                    width: "100%",
+                    height: "80vh",
+                    objectFit: "contain",
+                    margin: "0 auto",
+                  }}
+                  onError={(e) => {
+                    e.currentTarget.src = "/fallback-image.jpg";
+                  }}
+                />
+              </div>
             ))}
-          </div>
+          </Slider>
         </div>
-        <button
-          onClick={nextImage}
-          style={{
-            position: "absolute",
-            right: "10px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            background: "transparent",
-            border: "none",
-            fontSize: "42px",
-            color: "white",
-            cursor: "pointer",
-            zIndex: 10000,
-          }}
-        >
-          ›
-        </button>
       </Modal>
     </Container>
   );
