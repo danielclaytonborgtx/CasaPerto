@@ -22,7 +22,6 @@ const GlobalStyles = createGlobalStyle`
     min-height: 100vh;
   }
 
-  /* Estilos do InfoWindow do Google Maps */
   .gm-style-iw {
     padding: 0 !important;
     overflow: hidden !important;
@@ -40,19 +39,17 @@ const GlobalStyles = createGlobalStyle`
   background: none !important; 
   border-radius: 8px !important; 
   overflow: hidden !important;
-  box-shadow: none !important; 
-}
+  box-shadow: 0 20px 18px rgba(0, 0, 0, 0.5) !important; 
+  }
 
   .gm-style-iw-t::after {
     display: none !important;
   }
 
-  /* Remove o ícone de fechamento padrão do InfoWindow */
-.gm-ui-hover-effect {
-  display: none !important;
-}
+  .gm-ui-hover-effect {
+    display: none !important;
+  }
 
-  /* Adicionando ajustes responsivos */
   @media (max-width: 360px) {
     body {
       padding: 10px;
