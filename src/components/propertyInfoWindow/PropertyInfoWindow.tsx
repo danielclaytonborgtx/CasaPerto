@@ -1,5 +1,5 @@
 import React from "react";
-import { OverlayView } from "@react-google-maps/api";
+import { InfoWindow } from "@react-google-maps/api";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import {
   InfoContent,
@@ -41,58 +41,33 @@ const PropertyInfoWindow: React.FC<Props> = ({
   };
 
   return (
-    <OverlayView
-  position={{ lat: property.latitude, lng: property.longitude }}
-  mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
->
-  <div style={{
-    position: "absolute",
-    left: "50%",
-    top: "0",
-    transform: "translate(-50%, -105%)",
-  }}>
-    <button
-      onClick={onClose}
-      style={{
-        position: "absolute",
-        top: 4,
-        right: 4,
-        background: "white",
-        border: "none",
-        borderRadius: "50%",
-        cursor: "pointer",
-        padding: "4px 8px",
-        fontWeight: "bold",
-        zIndex: 1,
-      }}
+    <InfoWindow
+      position={{ lat: property.latitude, lng: property.longitude }}
+      onCloseClick={onClose}
+      options={{ disableAutoPan: false, pixelOffset: new window.google.maps.Size(0, -5) }}
     >
-      ×
-    </button>
-
-    <InfoWindowContainer>
-      <PropertyImage
-        src={property.images?.[0]?.url || "/placeholder.jpg"}
-        onClick={() => onImageClick(property.id)}
-      />
-      <InfoContent>
-        <Title>{property.title}</Title>
-        <PriceContainer>
-          <Price>{formatPrice(property.price)}</Price>
-          <FaMapMarkerAlt
-            size={16}
-            onClick={() =>
-              window.open(
-                `https://www.google.com/maps/dir/?api=1&destination=${property.latitude},${property.longitude}`,
-                "_blank"
-              )
-            }
-          />
-        </PriceContainer>
-      </InfoContent>
-    </InfoWindowContainer>
-  </div>
-</OverlayView>
-
+      <InfoWindowContainer>
+        <PropertyImage
+          src={property.images?.[0]?.url || "/placeholder.jpg"}
+          onClick={() => onImageClick(property.id)}
+        />
+        <InfoContent>
+          <Title>{property.title}</Title>
+          <PriceContainer>
+            <Price>{formatPrice(property.price)}</Price>
+            <FaMapMarkerAlt
+              size={16}
+              onClick={() =>
+                window.open(
+                  `https://www.google.com/maps/dir/?api=1&destination=${property.latitude},${property.longitude}`,
+                  "_blank"
+                )
+              }
+            />
+          </PriceContainer>
+        </InfoContent>
+      </InfoWindowContainer>
+    </InfoWindow>
   );
 };
 
