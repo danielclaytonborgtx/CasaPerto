@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom"; 
 import Slider from "react-slick";
+import { useSwipeable } from "react-swipeable";
 import { parseISO, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import Modal from "react-modal";
@@ -68,6 +69,13 @@ const PropertyDetails: React.FC = () => {
 
     fetchProperty();
   }, [id, location.state]);
+
+  const handlers = useSwipeable({
+    onSwipedLeft: () => nextImage(),
+    onSwipedRight: () => prevImage(),
+    preventScrollOnSwipe: true,
+    trackMouse: true,
+  });
 
   if (loading) {
     return <LoadingMessage />;
@@ -232,15 +240,39 @@ const PropertyDetails: React.FC = () => {
         >
           ‹
         </button>
-        <img
-          src={resolveImageUrl(images[currentImageIndex])}
-          alt={`Imagem ${currentImageIndex + 1}`}
+        <div
+          {...handlers}
           style={{
-            maxWidth: "100%",
-            maxHeight: "100%",
-            objectFit: "contain",
+            display: "flex",
+            width: "100%",
+            overflow: "hidden",
+            justifyContent: "center",
+            alignItems: "center",
           }}
-        />
+        >
+          <div
+            style={{
+              display: "flex",
+              transform: `translateX(-${currentImageIndex * 100}%)`,
+              transition: "transform 0.5s ease-in-out",
+              width: `${images.length * 100}%`,
+            }}
+          >
+            {images.map((img, idx) => (
+              <img
+                key={idx}
+                src={resolveImageUrl(img)}
+                alt={`Imagem ${idx + 1}`}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "contain",
+                  flexShrink: 0,
+                }}
+              />
+            ))}
+          </div>
+        </div>
         <button
           onClick={nextImage}
           style={{
