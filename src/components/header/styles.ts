@@ -73,7 +73,7 @@ export const SwitchContainer = styled.div`
   align-items: center;
   justify-content: center;
   border: 1px solid black;
-  padding: 1,5px;         
+  padding: 1.5px;
   border-radius: 20px;      
 `;
 
