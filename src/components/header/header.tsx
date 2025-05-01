@@ -42,7 +42,7 @@ const Header: React.FC = () => {
           onChange={handleSwitchChange}
           offColor="#E0FFFF"
           onColor="#E0FFFF"
-          height={29}
+          height={30}
           width={160}
           uncheckedIcon={<SwitchLabel position="left">Aluguel</SwitchLabel>}
           checkedIcon={<SwitchLabel position="right">Venda</SwitchLabel>}
