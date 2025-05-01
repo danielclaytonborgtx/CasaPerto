@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Container, MenuButton, AddButton, Icon, SwitchContainer } from "./styles";
+import { Container, MenuButton, AddButton, Icon, SwitchContainer, SwitchLabel } from "./styles";
 import SlideMenu from "../../pages/SlideMenu/slideMenu";
 import { useNavigate } from "react-router-dom";
 import { FaBars, FaPlus } from "react-icons/fa";
@@ -37,51 +37,19 @@ const Header: React.FC = () => {
       </MenuButton>
 
       <SwitchContainer>
-          <Switch
-            checked={isRent}
-            onChange={handleSwitchChange}
-            offColor="#E0FFFF"
-            onColor="#E0FFFF"
-            height={30}
-            width={160}
-            uncheckedIcon={
-              <span style={{
-                fontSize: '20px',
-                color: 'black',
-                fontWeight: 'bold',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: '110%',
-                width: '100%',
-                position: 'absolute',
-                left: -58,
-                textAlign: 'center', 
-              }}>
-                Aluguel
-              </span>
-            }
-            checkedIcon={
-              <span style={{
-                fontSize: '20px',
-                color: 'black',
-                fontWeight: 'bold',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: '110%',
-                width: '100%',
-                position: 'absolute',
-                right: -56,
-                textAlign: 'center',
-              }}>
-                Venda
-              </span>
-            }
-            handleDiameter={25}
-            onHandleColor="#00BFFF"
-            offHandleColor="#00BFFF"
-          />
+        <Switch
+          checked={isRent}
+          onChange={handleSwitchChange}
+          offColor="#E0FFFF"
+          onColor="#E0FFFF"
+          height={29}
+          width={160}
+          uncheckedIcon={<SwitchLabel position="left">Aluguel</SwitchLabel>}
+          checkedIcon={<SwitchLabel position="right">Venda</SwitchLabel>}
+          handleDiameter={25}
+          onHandleColor="#00BFFF"
+          offHandleColor="#00BFFF"
+        />
       </SwitchContainer>
 
       <AddButton onClick={handleAddPropertyClick}>

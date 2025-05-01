@@ -26,6 +26,17 @@ export const MenuButton = styled.button`
   width: 45px; 
   margin-right: 15px;
   margin-top: 8px;
+  border-radius: 50%;
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.3); 
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.4); 
+  }
 `;
 
 export const AddButton = styled.button`
@@ -39,6 +50,17 @@ export const AddButton = styled.button`
   width: 45px;  
   margin-left: 15px;
   margin-top: 8px;
+  border-radius: 50%; 
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.4); 
+  }
 `;
 
 export const Icon = styled.span`
@@ -49,7 +71,25 @@ export const Icon = styled.span`
 export const SwitchContainer = styled.div`
   display: flex;
   align-items: center;
-  justify-content: center; 
+  justify-content: center;
+  border: 1px solid black;
+  padding: 1,5px;         
+  border-radius: 20px;      
+`;
+
+export const SwitchLabel = styled.span<{ position: 'left' | 'right' }>`
+  font-size: 20px;
+  color: black;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 110%;
+  width: 100%;
+  position: absolute;
+  ${({ position }) => position === 'left' ? 'left: -58px;' : 'right: -56px;'}
+  top: 2px;
+  text-align: center;
 `;
 
 
