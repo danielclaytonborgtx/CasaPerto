@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../services/authContext';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { GoogleMap, Marker } from '@react-google-maps/api';
 import LoadingMessage from '../../components/loadingMessage/LoadingMessage';
+import { supabaseProperties } from '../../services/supabaseProperties';
+import { supabaseStorage } from '../../services/supabaseStorage';
 import {
   AddPropertyContainer,
   FormInput,
@@ -89,26 +90,27 @@ const AddProperty = () => {
     setSuccessMessage('');
     setLoading(true);
 
-    const formData = new FormData();
-    formData.append('category', category);
-    formData.append('title', name);
-    formData.append('price', price);
-    formData.append('description', description);
-    formData.append('description1', description1);
-    formData.append('userId', user.id.toString());
-    formData.append('username', username); 
-    formData.append('latitude', latitude.toString());
-    formData.append('longitude', longitude.toString());
-
-    images.forEach((image) => formData.append('images[]', image));
-
     try {
-      const response = await axios.post(
-        'https://servercasaperto.onrender.com/property',
-        formData
-      );
+      // Upload das imagens para o Supabase Storage
+      const imageUrls = await supabaseStorage.uploadPropertyImages(0, images); // 0 temporário, será atualizado após criar a propriedade
 
-      if (response.status === 201) {
+      // Criar a propriedade no Supabase
+      const propertyData = {
+        title: name,
+        description: description,
+        description1: description1,
+        price: price,
+        category: category,
+        latitude: latitude,
+        longitude: longitude,
+        user_id: user.id,
+        team_id: user.teamMembers?.[0]?.teamId,
+        images: imageUrls
+      };
+
+      const newProperty = await supabaseProperties.createProperty(propertyData);
+
+      if (newProperty) {
         setSuccessMessage('Imóvel adicionado com sucesso!');
         resetForm();
         navigate('/profile');
@@ -116,12 +118,8 @@ const AddProperty = () => {
         setErrorMessage('Erro ao adicionar imóvel. Tente novamente.');
       }
     } catch (error) {
-      console.error(error);
-      if (axios.isAxiosError(error)) {
-        setErrorMessage(`Erro: ${error.response?.data.message || 'Tente novamente.'}`);
-      } else {
-        setErrorMessage('Erro ao adicionar imóvel. Tente novamente.');
-      }
+      console.error('Erro ao adicionar imóvel:', error);
+      setErrorMessage('Erro ao adicionar imóvel. Tente novamente.');
     } finally {
       setLoading(false);
     }

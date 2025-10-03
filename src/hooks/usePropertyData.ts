@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../services/authContext';
-import api from '../services/api';
+import { supabaseProperties } from '../services/supabaseProperties';
 import { User, Property } from '../types/property';
 
 export const usePropertyData = (isRent: boolean) => {
@@ -16,11 +16,11 @@ export const usePropertyData = (isRent: boolean) => {
     if (!authUser) return;
     const fetchUser = async () => {
       try {
-        const res = await api.get(`/users/${authUser.id}`);
+        // O usuário já vem com os dados necessários do authContext
         setUser({
-          id: res.data.id,
-          name: res.data.name,
-          teamMember: res.data.teamMembers,
+          id: authUser.id,
+          name: authUser.name,
+          teamMember: authUser.teamMembers || [],
         });
       } catch (err) {
         console.error("Erro ao carregar usuário", err);
@@ -49,15 +49,11 @@ export const usePropertyData = (isRent: boolean) => {
     if (!user) return;
     try {
       const teamId = user.teamMember[0]?.teamId;
-      const queryParams = new URLSearchParams({
-        userId: user.id.toString(),
-        ...(teamId && { teamId: teamId.toString() }),
+      const data = await supabaseProperties.getFilteredProperties({
+        userId: user.id,
+        teamId: teamId,
+        category: isRent ? "Venda" : "Aluguel"
       });
-      const res = await fetch(
-        `https://servercasaperto.onrender.com/properties/filter?${queryParams}`
-      );
-      if (!res.ok) throw new Error();
-      const data = await res.json();
       setProperties(data);
     } catch (err) {
       console.error("Erro ao carregar propriedades", err);
@@ -65,7 +61,7 @@ export const usePropertyData = (isRent: boolean) => {
     } finally {
       setIsLoaded(true);
     }
-  }, [user]);
+  }, [user, isRent]);
 
   // Carregar dados quando o usuário estiver disponível
   useEffect(() => {

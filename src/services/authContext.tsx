@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { loginService, logoutService } from './authService';
+import { supabaseAuth } from './supabaseAuth';
 
 export interface TeamMember {
   id: number;
@@ -99,13 +99,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (email: string, password: string) => {
     try {
-      const userData = await loginService(email, password);
+      const userData = await supabaseAuth.login(email, password);
       if (userData) {
         console.log("Login bem-sucedido. Dados do usuário:", userData);
         setUser(userData);
         localStorage.setItem('user', JSON.stringify(userData));
 
-        // Correção aqui também
+        // Buscar equipe do usuário se existir
         if (userData.teamMembers?.length && !team) {
           fetchTeamById(userData.teamMembers[0].teamId)
             .then((teamData) => {
@@ -126,13 +126,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
 // ... rest of the code remains the same ...
 
-  const logout = () => {
-    logoutService();
-    setUser(null);
-    setTeam(null);
-    localStorage.removeItem('user');
-    localStorage.removeItem('team');
-    console.log("Usuário deslogado");
+  const logout = async () => {
+    try {
+      await supabaseAuth.logout();
+      setUser(null);
+      setTeam(null);
+      localStorage.removeItem('user');
+      localStorage.removeItem('team');
+      console.log("Usuário deslogado");
+    } catch (error) {
+      console.error("Erro no logout:", error);
+      // Mesmo com erro, limpar dados locais
+      setUser(null);
+      setTeam(null);
+      localStorage.removeItem('user');
+      localStorage.removeItem('team');
+    }
   };
 
   const createTeam = (teamData: Team) => {
