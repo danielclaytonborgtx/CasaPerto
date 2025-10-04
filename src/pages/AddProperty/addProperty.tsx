@@ -5,6 +5,7 @@ import { GoogleMap, Marker } from '@react-google-maps/api';
 import LoadingMessage from '../../components/loadingMessage/LoadingMessage';
 import { supabaseProperties } from '../../services/supabaseProperties';
 import { supabaseStorage } from '../../services/supabaseStorage';
+import { supabase } from '../../lib/supabase';
 import {
   AddPropertyContainer,
   FormInput,
@@ -16,7 +17,7 @@ import {
 } from './styles';
 
 const AddProperty = () => {
-  const { user } = useAuth(); 
+  const { user, setUser } = useAuth(); 
   const navigate = useNavigate();
 
   const [username, setUsername] = useState<string>('');
@@ -94,6 +95,37 @@ const AddProperty = () => {
       // Upload das imagens para o Supabase Storage
       const imageUrls = await supabaseStorage.uploadPropertyImages(0, images); // 0 temporário, será atualizado após criar a propriedade
 
+      // Verificar se a equipe existe antes de usar o team_id
+      let validTeamId = null;
+      if (user.teamMembers?.[0]?.teamId) {
+        try {
+          console.log('🔍 Verificando se a equipe existe...', user.teamMembers[0].teamId);
+          const { data: teamExists, error: teamError } = await supabase
+            .from('teams')
+            .select('id')
+            .eq('id', user.teamMembers[0].teamId)
+            .single();
+          
+          if (teamError || !teamExists) {
+            console.log('⚠️ Equipe não existe mais, limpando team_id do usuário');
+            // Limpar team_id do usuário se a equipe não existe
+            const updatedUser = {
+              ...user,
+              teamMembers: undefined
+            };
+            setUser(updatedUser);
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            validTeamId = null;
+          } else {
+            console.log('✅ Equipe existe, usando team_id:', user.teamMembers[0].teamId);
+            validTeamId = user.teamMembers[0].teamId;
+          }
+        } catch (error) {
+          console.error('❌ Erro ao verificar equipe:', error);
+          validTeamId = null;
+        }
+      }
+
       // Criar a propriedade no Supabase
       const propertyData = {
         title: name,
@@ -104,7 +136,7 @@ const AddProperty = () => {
         latitude: latitude,
         longitude: longitude,
         user_id: user.id,
-        team_id: user.teamMembers?.[0]?.teamId,
+        team_id: validTeamId || undefined,
         images: imageUrls
       };
 

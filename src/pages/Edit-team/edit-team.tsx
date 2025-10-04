@@ -327,6 +327,20 @@ const EditTeam: React.FC = () => {
         console.log('🔍 EditTeam: Excluindo equipe', id);
         setIsDeleted(true);
         
+        // Primeiro, limpar team_id de todas as propriedades dos membros da equipe
+        console.log('🧹 EditTeam: Limpando team_id das propriedades dos membros da equipe...');
+        const { error: updatePropertiesError } = await supabase
+          .from('properties')
+          .update({ team_id: null })
+          .eq('team_id', Number(id));
+
+        if (updatePropertiesError) {
+          console.error('❌ EditTeam: Erro ao limpar team_id das propriedades:', updatePropertiesError);
+          // Não falhar o processo por causa disso, apenas logar o erro
+        } else {
+          console.log('✅ EditTeam: team_id das propriedades limpo com sucesso');
+        }
+        
         // Deletar equipe
         await supabaseTeams.deleteTeam(Number(id));
 

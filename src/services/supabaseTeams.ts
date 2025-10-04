@@ -178,17 +178,21 @@ export const supabaseTeams = {
   // Deletar equipe
   async deleteTeam(id: number): Promise<void> {
     try {
+      console.log('🔍 supabaseTeams.deleteTeam: Deletando equipe', id);
+      
       const { error } = await supabase
         .from('teams')
         .delete()
         .eq('id', id)
 
       if (error) {
-        console.error('Erro ao deletar equipe:', error.message)
+        console.error('❌ Erro ao deletar equipe:', error.message)
         throw new Error(error.message)
       }
+      
+      console.log('✅ Equipe deletada com sucesso');
     } catch (error) {
-      console.error('Erro ao deletar equipe:', error)
+      console.error('❌ Erro ao deletar equipe:', error)
       throw error
     }
   },
@@ -222,6 +226,40 @@ export const supabaseTeams = {
   // Remover membro da equipe
   async removeTeamMember(teamId: number, userId: string): Promise<void> {
     try {
+      console.log('🔍 supabaseTeams.removeTeamMember: Removendo membro', { teamId, userId });
+      
+      // Primeiro, buscar propriedades do usuário que serão afetadas
+      console.log('🔍 Buscando propriedades do usuário na equipe...', { userId, teamId });
+      const { data: userProperties, error: fetchError } = await supabase
+        .from('properties')
+        .select('id, user_id, title')
+        .eq('user_id', String(userId))
+        .eq('team_id', teamId);
+
+      if (fetchError) {
+        console.error('❌ Erro ao buscar propriedades do usuário:', fetchError.message);
+        throw new Error(`Erro ao buscar propriedades do usuário: ${fetchError.message}`);
+      }
+
+      console.log('📊 Propriedades do usuário encontradas:', userProperties?.length || 0, userProperties);
+
+      // Limpar team_id das propriedades do usuário que está sendo removido
+      console.log('🔄 Limpando team_id das propriedades do usuário...', { userId, teamId });
+      const { error: updatePropertiesError, count: updatedCount } = await supabase
+        .from('properties')
+        .update({ team_id: null })
+        .eq('user_id', String(userId))
+        .eq('team_id', teamId);
+
+      if (updatePropertiesError) {
+        console.error('❌ Erro ao limpar team_id das propriedades do usuário:', updatePropertiesError.message);
+        throw new Error(`Erro ao limpar propriedades do usuário: ${updatePropertiesError.message}`);
+      }
+      
+      console.log('✅ Team_id das propriedades do usuário limpo com sucesso. Propriedades atualizadas:', updatedCount);
+
+      // Depois, remover o membro da equipe
+      console.log('🔄 Removendo membro da equipe...');
       const { error } = await supabase
         .from('team_members')
         .delete()
@@ -229,11 +267,13 @@ export const supabaseTeams = {
         .eq('user_id', userId)
 
       if (error) {
-        console.error('Erro ao remover membro:', error.message)
+        console.error('❌ Erro ao remover membro:', error.message)
         throw new Error(error.message)
       }
+      
+      console.log('✅ Membro removido da equipe com sucesso');
     } catch (error) {
-      console.error('Erro ao remover membro:', error)
+      console.error('❌ Erro ao remover membro:', error)
       throw error
     }
   },
@@ -375,6 +415,56 @@ export const supabaseTeams = {
     } catch (error) {
       console.error('Erro ao rejeitar convite:', error)
       throw error
+    }
+  },
+
+  // Função utilitária para limpar propriedades órfãs (team_id que não existe mais)
+  async cleanupOrphanedProperties(): Promise<void> {
+    try {
+      console.log('🔍 supabaseTeams.cleanupOrphanedProperties: Limpando propriedades órfãs...');
+      
+      // Buscar propriedades com team_id que não existe mais na tabela teams
+      const { data: orphanedProperties, error: fetchError } = await supabase
+        .from('properties')
+        .select(`
+          id,
+          user_id,
+          title,
+          team_id,
+          team:teams(id)
+        `)
+        .not('team_id', 'is', null);
+
+      if (fetchError) {
+        console.error('❌ Erro ao buscar propriedades órfãs:', fetchError.message);
+        throw new Error(fetchError.message);
+      }
+
+      // Filtrar propriedades onde team é null (equipe não existe mais)
+      const propertiesToClean = orphanedProperties?.filter(prop => !prop.team) || [];
+      
+      console.log('📊 Propriedades órfãs encontradas:', propertiesToClean.length, propertiesToClean);
+
+      if (propertiesToClean.length === 0) {
+        console.log('✅ Nenhuma propriedade órfã encontrada');
+        return;
+      }
+
+      // Limpar team_id das propriedades órfãs
+      const { error: updateError, count } = await supabase
+        .from('properties')
+        .update({ team_id: null })
+        .in('id', propertiesToClean.map(p => p.id));
+
+      if (updateError) {
+        console.error('❌ Erro ao limpar propriedades órfãs:', updateError.message);
+        throw new Error(updateError.message);
+      }
+
+      console.log('✅ Propriedades órfãs limpas com sucesso. Propriedades atualizadas:', count);
+    } catch (error) {
+      console.error('❌ Erro ao limpar propriedades órfãs:', error);
+      throw error;
     }
   }
 }

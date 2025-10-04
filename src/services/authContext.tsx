@@ -184,6 +184,43 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       if (userData) {
         console.log("✅ AUTHCONTEXT: Login bem-sucedido. Dados do usuário:", userData);
+        
+        // Verificar se as equipes do usuário ainda existem
+        if (userData.teamMembers?.length) {
+          console.log("🔍 AUTHCONTEXT: Verificando se as equipes do usuário ainda existem...");
+          const validTeamMembers = [];
+          
+          for (const teamMember of userData.teamMembers) {
+            try {
+              const { data: teamExists, error: teamError } = await supabase
+                .from('teams')
+                .select('id')
+                .eq('id', teamMember.teamId)
+                .single();
+              
+              if (teamError || !teamExists) {
+                console.log("⚠️ AUTHCONTEXT: Equipe não existe mais:", teamMember.teamId);
+                // Limpar team_id das propriedades do usuário
+                await supabase
+                  .from('properties')
+                  .update({ team_id: null })
+                  .eq('user_id', userData.id)
+                  .eq('team_id', teamMember.teamId);
+                console.log("🧹 AUTHCONTEXT: Team_id das propriedades limpo para equipe:", teamMember.teamId);
+              } else {
+                console.log("✅ AUTHCONTEXT: Equipe existe:", teamMember.teamId);
+                validTeamMembers.push(teamMember);
+              }
+            } catch (error) {
+              console.error("❌ AUTHCONTEXT: Erro ao verificar equipe:", teamMember.teamId, error);
+            }
+          }
+          
+          // Atualizar teamMembers apenas com equipes válidas
+          userData.teamMembers = validTeamMembers.length > 0 ? validTeamMembers : undefined;
+          console.log("📊 AUTHCONTEXT: TeamMembers atualizados:", userData.teamMembers);
+        }
+        
         console.log("🔄 AUTHCONTEXT: Definindo usuário no estado...");
         setUser(userData);
         console.log("🔄 AUTHCONTEXT: Salvando usuário no localStorage...");
