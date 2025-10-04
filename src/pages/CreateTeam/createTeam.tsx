@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
+import { supabaseTeams } from "../../services/supabaseTeams";
 import {
   Container,
   Input,
@@ -193,33 +194,89 @@ const CreateTeam: React.FC = () => {
         }
       }
 
-      // 3. Adicionar membros à equipe
-      const teamMembers = brokers.map(broker => ({
-        team_id: team.id,
-        user_id: broker.id,
-        role: 'MEMBER'
-      }));
-
-      const { error: membersError } = await supabase
+      // 3. Adicionar apenas o criador da equipe como membro
+      const { error: creatorError } = await supabase
         .from('team_members')
-        .insert(teamMembers);
+        .insert({
+          team_id: team.id,
+          user_id: String(user?.id),
+          role: 'ADMIN'
+        });
 
-      if (membersError) {
-        console.error('❌ Erro ao adicionar membros:', membersError);
-        alert("Erro ao adicionar membros à equipe.");
+      if (creatorError) {
+        console.error('❌ Erro ao adicionar criador:', creatorError);
+        alert("Erro ao adicionar criador à equipe.");
         return;
       }
 
-      console.log('✅ CreateTeam: Membros adicionados à equipe');
+      console.log('✅ CreateTeam: Criador adicionado à equipe');
 
-      // 4. Atualizar o usuário atual
+      // 3.1. Atualizar team_id das propriedades do criador
+      console.log('🔄 CreateTeam: Atualizando team_id das propriedades do criador...');
+      const { error: updatePropertiesError } = await supabase
+        .from('properties')
+        .update({ team_id: team.id })
+        .eq('user_id', user?.id)
+        .is('team_id', null);
+
+      if (updatePropertiesError) {
+        console.error('❌ Erro ao atualizar team_id das propriedades:', updatePropertiesError);
+      } else {
+        console.log('✅ CreateTeam: Team_id das propriedades atualizado');
+      }
+
+      // 4. Enviar convites para outros membros
+      const otherBrokers = brokers.filter(broker => broker.id !== user?.id);
+      if (otherBrokers.length > 0) {
+        console.log('📧 CreateTeam: Enviando convites para', otherBrokers.length, 'membros');
+        
+        for (const broker of otherBrokers) {
+          try {
+            await supabaseTeams.createTeamInvitation(team.id, broker.id);
+            console.log('✅ CreateTeam: Convite enviado para', broker.name);
+          } catch (inviteError) {
+            console.error('❌ CreateTeam: Erro ao enviar convite para', broker.name, inviteError);
+          }
+        }
+      }
+
+      // 4. Atualizar o usuário atual com dados da equipe
       if (setUser && user) {
-        const updatedUser = {
-          ...user,
-          team: team
-        };
-        setUser(updatedUser);
-        localStorage.setItem("user", JSON.stringify(updatedUser));
+        console.log('🔄 CreateTeam: Atualizando dados do usuário com equipe...');
+        
+        // Buscar dados atualizados do usuário com equipe
+        const { data: updatedUser, error: userError } = await supabase
+          .from('users')
+          .select(`
+            *,
+            team_members:team_members(
+              *,
+              team:teams(*)
+            )
+          `)
+          .eq('id', user.id)
+          .single();
+        
+        if (userError) {
+          console.error('❌ CreateTeam: Erro ao buscar dados atualizados:', userError);
+        } else if (updatedUser) {
+          // Converter team_members para o formato esperado
+          if (updatedUser.team_members) {
+            updatedUser.teamMembers = updatedUser.team_members.map((tm: any) => ({
+              id: tm.id,
+              userId: tm.user_id,
+              teamId: tm.team_id
+            }));
+            delete updatedUser.team_members;
+          }
+          
+          console.log('✅ CreateTeam: Dados atualizados do usuário:', updatedUser);
+          
+          // Atualizar o usuário no contexto
+          setUser(updatedUser);
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+          console.log('✅ CreateTeam: Usuário atualizado no contexto e localStorage');
+        }
       }
 
       // Limpeza dos dados

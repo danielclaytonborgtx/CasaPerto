@@ -132,9 +132,11 @@ export const supabaseProperties = {
       // Filtro por usuário ou equipe
       if (filters.teamId) {
         console.log('🔍 Aplicando filtro de usuário/equipe:', `user_id.eq.${filters.userId},team_id.eq.${filters.teamId}`);
+        // Buscar propriedades do usuário OU da equipe
         query = query.or(`user_id.eq.${filters.userId},team_id.eq.${filters.teamId}`)
       } else {
         console.log('🔍 Aplicando filtro de usuário:', filters.userId);
+        // Buscar apenas propriedades do usuário
         query = query.eq('user_id', filters.userId)
       }
 
@@ -151,10 +153,62 @@ export const supabaseProperties = {
         throw new Error(error.message)
       }
 
-      console.log('✅ supabaseProperties.getFilteredProperties: Resultado', data);
+      console.log('✅ supabaseProperties.getFilteredProperties: Resultado', {
+        total: data?.length || 0,
+        properties: data?.map(p => ({
+          id: p.id,
+          title: p.title,
+          user_id: p.user_id,
+          team_id: p.team_id,
+          category: p.category
+        })) || []
+      });
       return data || []
     } catch (error) {
       console.error('❌ Erro ao filtrar propriedades:', error)
+      throw error
+    }
+  },
+
+  // Buscar propriedades da equipe (nova função específica)
+  async getTeamProperties(teamId: number, category?: string): Promise<Property[]> {
+    try {
+      console.log('🔍 supabaseProperties.getTeamProperties: Buscando propriedades da equipe', { teamId, category });
+      
+      let query = supabase
+        .from('properties')
+        .select(`
+          *,
+          user:users(id, name, username)
+        `)
+        .eq('team_id', teamId)
+
+      // Filtro por categoria
+      if (category) {
+        console.log('🔍 Aplicando filtro de categoria:', category);
+        query = query.eq('category', category)
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('❌ Erro ao buscar propriedades da equipe:', error.message)
+        throw new Error(error.message)
+      }
+
+      console.log('✅ supabaseProperties.getTeamProperties: Resultado', {
+        total: data?.length || 0,
+        properties: data?.map(p => ({
+          id: p.id,
+          title: p.title,
+          user_id: p.user_id,
+          team_id: p.team_id,
+          category: p.category
+        })) || []
+      });
+      return data || []
+    } catch (error) {
+      console.error('❌ Erro ao buscar propriedades da equipe:', error)
       throw error
     }
   },

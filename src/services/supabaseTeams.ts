@@ -26,12 +26,12 @@ export interface TeamMember {
 export interface TeamInvitation {
   id: number
   team_id: number
-  user_id: number
+  user_id: string  // Changed from number to string to match database schema
   status: 'PENDING' | 'ACCEPTED' | 'REJECTED'
   created_at: string
   team?: Team
   user?: {
-    id: number
+    id: string  // Changed from number to string to match database schema
     name: string
     email: string
   }
@@ -138,7 +138,7 @@ export const supabaseTeams = {
       }
 
       // Adicionar o criador como membro da equipe
-      await this.addTeamMember(data.id, teamData.creator_id)
+      await this.addTeamMember(data.id, String(teamData.creator_id))
 
       return data
     } catch (error) {
@@ -239,7 +239,7 @@ export const supabaseTeams = {
   },
 
   // Buscar convites de equipe por usuário
-  async getTeamInvitationsByUser(userId: number): Promise<TeamInvitation[]> {
+  async getTeamInvitationsByUser(userId: string): Promise<TeamInvitation[]> {
     try {
       const { data, error } = await supabase
         .from('team_invitations')
@@ -265,13 +265,19 @@ export const supabaseTeams = {
   },
 
   // Criar convite para equipe
-  async createTeamInvitation(teamId: number, userId: number): Promise<TeamInvitation> {
+  async createTeamInvitation(teamId: number, userId: string): Promise<TeamInvitation> {
     try {
+      console.log('🔍 supabaseTeams: Criando convite', { teamId, userId, userIdType: typeof userId });
+      
+      // Verificar se o usuário está autenticado
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      console.log('🔍 supabaseTeams: Usuário autenticado:', authUser?.id);
+      
       const { data, error } = await supabase
         .from('team_invitations')
         .insert({
           team_id: teamId,
-          user_id: userId,
+          user_id: String(userId), // Garantir que seja string
           status: 'PENDING',
           created_at: new Date().toISOString(),
         })
@@ -284,9 +290,11 @@ export const supabaseTeams = {
 
       if (error) {
         console.error('Erro ao criar convite:', error.message)
+        console.error('Detalhes do erro:', error);
         throw new Error(error.message)
       }
 
+      console.log('✅ supabaseTeams: Convite criado com sucesso:', data);
       return data
     } catch (error) {
       console.error('Erro ao criar convite:', error)
@@ -295,8 +303,10 @@ export const supabaseTeams = {
   },
 
   // Aceitar convite de equipe
-  async acceptTeamInvitation(invitationId: number, userId: number): Promise<void> {
+  async acceptTeamInvitation(invitationId: number, userId: string): Promise<void> {
     try {
+      console.log('🔍 supabaseTeams.acceptTeamInvitation: Aceitando convite', { invitationId, userId });
+      
       // Buscar o convite
       const { data: invitation, error: fetchError } = await supabase
         .from('team_invitations')
@@ -306,8 +316,11 @@ export const supabaseTeams = {
         .single()
 
       if (fetchError || !invitation) {
+        console.error('❌ Convite não encontrado:', fetchError);
         throw new Error('Convite não encontrado')
       }
+
+      console.log('✅ Convite encontrado:', invitation);
 
       // Atualizar status do convite
       const { error: updateError } = await supabase
@@ -316,20 +329,38 @@ export const supabaseTeams = {
         .eq('id', invitationId)
 
       if (updateError) {
-        console.error('Erro ao aceitar convite:', updateError.message)
+        console.error('❌ Erro ao aceitar convite:', updateError.message)
         throw new Error(updateError.message)
       }
 
+      console.log('✅ Status do convite atualizado para ACCEPTED');
+
       // Adicionar usuário à equipe
       await this.addTeamMember(invitation.team_id, userId)
+      
+      console.log('✅ Usuário adicionado à equipe:', invitation.team_id);
+
+      // Atualizar team_id das propriedades do usuário
+      console.log('🔄 Atualizando team_id das propriedades do usuário...');
+      const { error: updatePropertiesError } = await supabase
+        .from('properties')
+        .update({ team_id: invitation.team_id })
+        .eq('user_id', userId)
+        .is('team_id', null);
+
+      if (updatePropertiesError) {
+        console.error('❌ Erro ao atualizar team_id das propriedades:', updatePropertiesError);
+      } else {
+        console.log('✅ Team_id das propriedades atualizado para o usuário');
+      }
     } catch (error) {
-      console.error('Erro ao aceitar convite:', error)
+      console.error('❌ Erro ao aceitar convite:', error)
       throw error
     }
   },
 
   // Rejeitar convite de equipe
-  async rejectTeamInvitation(invitationId: number, userId: number): Promise<void> {
+  async rejectTeamInvitation(invitationId: number, userId: string): Promise<void> {
     try {
       const { error } = await supabase
         .from('team_invitations')

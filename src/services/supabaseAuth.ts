@@ -22,7 +22,13 @@ export const supabaseAuth = {
       console.log('🔍 ETAPA 1: Verificando se usuário existe na tabela users...')
       const { data: existingUsers, error: checkError } = await supabase
         .from('users')
-        .select('*')
+        .select(`
+          *,
+          team_members:team_members(
+            *,
+            team:teams(*)
+          )
+        `)
         .eq('email', email)
       
       const existingUser = existingUsers && existingUsers.length > 0 ? existingUsers[0] : null
@@ -33,10 +39,21 @@ export const supabaseAuth = {
           id: existingUser.id,
           name: existingUser.name,
           email: existingUser.email,
-          username: existingUser.username
+          username: existingUser.username,
+          teamMembers: existingUser.team_members || []
         } : null,
         error: checkError ? checkError.message : 'Nenhum erro'
       })
+
+      // Converter team_members para o formato esperado pelo authContext
+      if (existingUser && existingUser.team_members) {
+        existingUser.teamMembers = existingUser.team_members.map((tm: any) => ({
+          id: tm.id,
+          userId: tm.user_id,
+          teamId: tm.team_id
+        }));
+        delete existingUser.team_members; // Remover o campo antigo
+      }
 
       if (checkError) {
         console.error('❌ ETAPA 1 - Erro ao verificar usuário na tabela:', checkError.message)

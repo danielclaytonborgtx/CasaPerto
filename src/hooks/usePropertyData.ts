@@ -51,23 +51,85 @@ export const usePropertyData = (isRent: boolean) => {
   const loadProperties = useCallback(async () => {
     if (!user) return;
     try {
-      const teamId = user.teamMember[0]?.teamId;
+      const teamId = user.teamMember?.[0]?.teamId;
       const category = isRent ? "venda" : "aluguel";
+      const hasTeam = !!teamId;
+      
       console.log('🔍 usePropertyData: Carregando propriedades', {
         userId: user.id,
         teamId,
         category,
-        isRent
+        isRent,
+        hasTeam
       });
       
-      const data = await supabaseProperties.getFilteredProperties({
-        userId: user.id,
-        teamId: teamId,
-        category: category
-      });
+      let allProperties: Property[] = [];
       
-      console.log('✅ usePropertyData: Propriedades carregadas', data);
-      setProperties(data);
+      if (hasTeam) {
+        // USUÁRIO COM EQUIPE: Buscar propriedades do usuário + da equipe
+        console.log('🔍 usePropertyData: Usuário COM equipe - buscando propriedades da equipe');
+        console.log('🔍 usePropertyData: Detalhes da equipe:', {
+          teamId,
+          teamIdType: typeof teamId,
+          userTeamMembers: user.teamMember
+        });
+        
+        // Buscar propriedades do usuário
+        const userProperties = await supabaseProperties.getPropertiesByUser(user.id);
+        console.log('✅ usePropertyData: Propriedades do usuário carregadas', {
+          count: userProperties.length,
+          properties: userProperties.map(p => ({ id: p.id, title: p.title, user_id: p.user_id, team_id: p.team_id }))
+        });
+        
+        // Buscar propriedades da equipe
+        console.log('🔍 usePropertyData: Buscando propriedades da equipe com teamId:', teamId);
+        const teamProperties = await supabaseProperties.getTeamProperties(teamId, category);
+        console.log('✅ usePropertyData: Propriedades da equipe carregadas', {
+          count: teamProperties.length,
+          properties: teamProperties.map(p => ({ id: p.id, title: p.title, user_id: p.user_id, team_id: p.team_id }))
+        });
+        
+        // Combinar propriedades do usuário e da equipe
+        allProperties = [...userProperties, ...teamProperties];
+        
+        // Remover duplicatas (caso o usuário tenha propriedades que também estão na equipe)
+        const uniqueProperties = allProperties.filter((property, index, self) => 
+          index === self.findIndex(p => p.id === property.id)
+        );
+        allProperties = uniqueProperties;
+        
+        console.log('✅ usePropertyData: Usuário COM equipe - propriedades combinadas', {
+          userProperties: userProperties.length,
+          teamProperties: teamProperties.length,
+          total: allProperties.length,
+          finalProperties: allProperties.map(p => ({ id: p.id, title: p.title, user_id: p.user_id, team_id: p.team_id }))
+        });
+        
+      } else {
+        // USUÁRIO SEM EQUIPE: Buscar apenas suas próprias propriedades
+        console.log('🔍 usePropertyData: Usuário SEM equipe - buscando apenas suas propriedades');
+        
+        allProperties = await supabaseProperties.getPropertiesByUser(user.id);
+        console.log('✅ usePropertyData: Usuário SEM equipe - apenas suas propriedades', allProperties.length);
+      }
+      
+      // Aplicar filtro de categoria se necessário
+      if (category) {
+        allProperties = allProperties.filter(p => p.category === category);
+      }
+      
+      console.log('✅ usePropertyData: Propriedades finais carregadas', {
+        hasTeam,
+        total: allProperties.length,
+        properties: allProperties.map(p => ({ 
+          id: p.id, 
+          title: p.title, 
+          user_id: p.user_id,
+          team_id: p.team_id,
+          category: p.category 
+        }))
+      });
+      setProperties(allProperties);
     } catch (err) {
       console.error("❌ usePropertyData: Erro ao carregar propriedades", err);
       setError("Erro ao carregar propriedades");
@@ -79,6 +141,12 @@ export const usePropertyData = (isRent: boolean) => {
   // Carregar dados quando o usuário estiver disponível
   useEffect(() => {
     if (user) {
+      console.log('🔍 usePropertyData: Usuário disponível, carregando propriedades', {
+        userId: user.id,
+        userName: user.name,
+        hasTeam: !!user.teamMember?.length,
+        teamMembers: user.teamMember
+      });
       loadProperties();
       // loadTeamMembers();
     }

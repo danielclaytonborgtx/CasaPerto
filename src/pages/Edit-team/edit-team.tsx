@@ -125,31 +125,47 @@ const EditTeam: React.FC = () => {
     fetchBrokers();
   }, [id, isDeleted, fetchBrokers, fetchTeam]);
 
-  const handleAddBroker = async (user: User) => {
-    try {
-      console.log('🔍 EditTeam: Adicionando membro à equipe', { userId: user.id, teamId: id });
-      
-      // Adicionar membro diretamente à equipe
-      await supabaseTeams.addTeamMember(Number(id), user.id);
-      
-      // Adicionar à lista de membros
-      const newMember = {
-        id: user.id,
-        userId: user.id,
-        name: user.name,
-        email: user.email,
-        role: 'MEMBER'
-      };
-      setBrokers((prev) => [...prev, newMember]);
+  const handleAddBroker = (user: User) => {
+    console.log('🔍 EditTeam: Adicionando usuário à lista de convites pendentes', { userId: user.id, name: user.name });
+    
+    // Adicionar à lista de convites pendentes (sem enviar ainda)
+    const newInvite = {
+      id: Date.now(), // ID temporário
+      userId: user.id,
+      name: user.name,
+      email: user.email,
+      status: 'PENDING'
+    };
+    setPendingInvites((prev) => [...prev, newInvite]);
 
-      // Remover da lista de corretores disponíveis
-      setAvailableBrokers((prev) => prev.filter((b) => b.id !== user.id));
-      
-      console.log('✅ EditTeam: Membro adicionado com sucesso');
-    } catch (error) {
-      console.error("❌ EditTeam: Erro ao adicionar membro:", error);
-      alert("Erro ao adicionar membro à equipe.");
+    // Remover da lista de corretores disponíveis
+    setAvailableBrokers((prev) => prev.filter((b) => b.id !== user.id));
+    
+    console.log('✅ EditTeam: Usuário adicionado à lista de convites pendentes');
+  };
+
+  const handleRemovePendingInvite = (userId: string) => {
+    console.log('🔍 EditTeam: Removendo convite pendente', { userId });
+    
+    // Remover da lista de convites pendentes
+    setPendingInvites((prev) => prev.filter((invite) => invite.userId !== userId));
+    
+    // Adicionar de volta à lista de corretores disponíveis
+    const removedInvite = pendingInvites.find(invite => invite.userId === userId);
+    if (removedInvite) {
+      const brokerAsUser: User = {
+        id: removedInvite.userId,
+        name: removedInvite.name,
+        email: removedInvite.email,
+        username: '',
+        password: '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      setAvailableBrokers((prev) => [...prev, brokerAsUser]);
     }
+    
+    console.log('✅ EditTeam: Convite pendente removido');
   };
 
   const handleRemoveBroker = async (broker: TeamMember) => {
@@ -236,6 +252,20 @@ const EditTeam: React.FC = () => {
         await supabaseTeams.updateTeam(Number(id), {
           image_url: imageUrl
         });
+      }
+
+      // Enviar convites pendentes
+      if (pendingInvites.length > 0) {
+        console.log('📧 EditTeam: Enviando convites pendentes', pendingInvites.length);
+        
+        for (const invite of pendingInvites) {
+          try {
+            await supabaseTeams.createTeamInvitation(Number(id), invite.userId);
+            console.log('✅ EditTeam: Convite enviado para', invite.name);
+          } catch (inviteError) {
+            console.error('❌ EditTeam: Erro ao enviar convite para', invite.name, inviteError);
+          }
+        }
       }
 
       console.log('✅ EditTeam: Equipe atualizada com sucesso');
@@ -402,6 +432,9 @@ const EditTeam: React.FC = () => {
                 {pendingInvites.map((invite) => (
                   <BrokerItem key={invite.userId}>
                     {invite.name} (Convite Pendente)
+                    <AddBrokerButton onClick={() => handleRemovePendingInvite(invite.userId)}>
+                      <FaMinus />
+                    </AddBrokerButton>
                   </BrokerItem>
                 ))}
               </AddedBrokerList>

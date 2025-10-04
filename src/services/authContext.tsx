@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabaseAuth } from './supabaseAuth';
+import { supabase } from '../lib/supabase';
 
 export interface TeamMember {
   id: number;
@@ -33,6 +34,7 @@ interface AuthContextType {
   createTeam: (teamData: Team) => void;
   setUser: (user: User | null) => void;
   updateTeamId: (teamId: number) => void;
+  refreshUserData: () => Promise<void>;
 }
 
 interface AuthProviderProps {
@@ -68,34 +70,100 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         const parsedUser = JSON.parse(storedUser) as User;
         if (parsedUser.id && parsedUser.email) {
-          // console.log("Usuário carregado do localStorage:", parsedUser);
+          console.log("🔄 AUTHCONTEXT: Usuário carregado do localStorage:", parsedUser);
           setUser(parsedUser);
 
-          // Correção aqui
+          // Verificar se o usuário tem dados de equipe atualizados
           if (parsedUser.teamMembers?.length && !storedTeam) {
+            console.log("🔄 AUTHCONTEXT: Buscando equipe do usuário...");
             fetchTeamById(parsedUser.teamMembers[0].teamId)
               .then((teamData) => {
+                console.log("✅ AUTHCONTEXT: Equipe encontrada:", teamData);
                 setTeam(teamData);
                 localStorage.setItem('team', JSON.stringify(teamData));
               })
-              .catch((error) => console.error("Erro ao carregar equipe", error));
+              .catch((error) => console.error("❌ AUTHCONTEXT: Erro ao carregar equipe", error));
           } else if (storedTeam) {
             try {
               const parsedTeam = JSON.parse(storedTeam) as Team;
               if (parsedTeam.id && parsedTeam.name) {
-                console.log("Equipe carregada do localStorage:", parsedTeam);
+                console.log("✅ AUTHCONTEXT: Equipe carregada do localStorage:", parsedTeam);
                 setTeam(parsedTeam);
               }
             } catch (error) {
-              console.error("Erro ao analisar equipe do localStorage:", error);
+              console.error("❌ AUTHCONTEXT: Erro ao analisar equipe do localStorage:", error);
             }
+          } else {
+            // Se o usuário não tem dados de equipe, verificar se ele está em alguma equipe
+            console.log("🔍 AUTHCONTEXT: Verificando se usuário está em alguma equipe...");
+            checkAndUpdateUserTeamData(parsedUser);
           }
         }
       } catch (error) {
-        console.error("Erro ao analisar usuário do localStorage:", error);
+        console.error("❌ AUTHCONTEXT: Erro ao analisar usuário do localStorage:", error);
       }
     }
   }, []);
+
+  // Função para verificar e atualizar dados da equipe do usuário
+  const checkAndUpdateUserTeamData = async (user: User) => {
+    try {
+      console.log('🔍 AUTHCONTEXT: Verificando dados da equipe do usuário...');
+      
+      const { data: updatedUser, error: userError } = await supabase
+        .from('users')
+        .select(`
+          *,
+          team_members:team_members(
+            *,
+            team:teams(*)
+          )
+        `)
+        .eq('id', user.id)
+        .single();
+      
+      if (userError) {
+        console.error('❌ AUTHCONTEXT: Erro ao buscar dados atualizados:', userError);
+        return;
+      }
+
+      // Converter team_members para o formato esperado
+      if (updatedUser && updatedUser.team_members) {
+        updatedUser.teamMembers = updatedUser.team_members.map((tm: any) => ({
+          id: tm.id,
+          userId: tm.user_id,
+          teamId: tm.team_id
+        }));
+        delete updatedUser.team_members;
+      }
+
+      console.log('✅ AUTHCONTEXT: Dados atualizados do usuário:', updatedUser);
+      
+      // Sempre atualizar os dados do usuário, independente de ter equipe ou não
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      console.log('✅ AUTHCONTEXT: Dados do usuário atualizados no contexto');
+      
+      // Se o usuário tem equipe, carregar dados da equipe
+      if (updatedUser.teamMembers?.length) {
+        console.log('✅ AUTHCONTEXT: Usuário tem equipe, carregando dados da equipe...');
+        const teamId = updatedUser.teamMembers[0].teamId;
+        try {
+          const teamData = await fetchTeamById(teamId);
+          setTeam(teamData);
+          localStorage.setItem('team', JSON.stringify(teamData));
+          console.log('✅ AUTHCONTEXT: Equipe carregada automaticamente:', teamData);
+        } catch (error) {
+          console.error('❌ AUTHCONTEXT: Erro ao carregar equipe:', error);
+        }
+      } else {
+        console.log('ℹ️ AUTHCONTEXT: Usuário não tem equipe');
+      }
+      
+    } catch (error) {
+      console.error('❌ AUTHCONTEXT: Erro ao verificar dados da equipe:', error);
+    }
+  };
 
   const login = async (email: string, password: string) => {
     try {
@@ -196,8 +264,69 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const refreshUserData = async () => {
+    if (!user) {
+      console.error("Usuário não encontrado para atualizar dados");
+      return;
+    }
+
+    try {
+      console.log('🔄 AUTHCONTEXT: Atualizando dados do usuário...');
+      
+      // Buscar dados atualizados do usuário com equipe
+      const { data: updatedUser, error: userError } = await supabase
+        .from('users')
+        .select(`
+          *,
+          team_members:team_members(
+            *,
+            team:teams(*)
+          )
+        `)
+        .eq('id', user.id)
+        .single();
+      
+      if (userError) {
+        console.error('❌ AUTHCONTEXT: Erro ao buscar dados atualizados:', userError);
+        return;
+      }
+
+      // Converter team_members para o formato esperado
+      if (updatedUser && updatedUser.team_members) {
+        updatedUser.teamMembers = updatedUser.team_members.map((tm: any) => ({
+          id: tm.id,
+          userId: tm.user_id,
+          teamId: tm.team_id
+        }));
+        delete updatedUser.team_members;
+      }
+
+      console.log('✅ AUTHCONTEXT: Dados atualizados do usuário:', updatedUser);
+      
+      // Atualizar o usuário no contexto
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      // Se o usuário tem equipe, carregar dados da equipe
+      if (updatedUser.teamMembers?.length) {
+        const teamId = updatedUser.teamMembers[0].teamId;
+        try {
+          const teamData = await fetchTeamById(teamId);
+          setTeam(teamData);
+          localStorage.setItem('team', JSON.stringify(teamData));
+          console.log('✅ AUTHCONTEXT: Equipe atualizada:', teamData);
+        } catch (error) {
+          console.error('❌ AUTHCONTEXT: Erro ao carregar equipe:', error);
+        }
+      }
+      
+    } catch (error) {
+      console.error('❌ AUTHCONTEXT: Erro ao atualizar dados do usuário:', error);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, team, login, logout, createTeam, setUser, updateTeamId }}>
+    <AuthContext.Provider value={{ user, team, login, logout, createTeam, setUser, updateTeamId, refreshUserData }}>
       {children}
     </AuthContext.Provider>
   );

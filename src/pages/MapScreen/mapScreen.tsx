@@ -37,7 +37,15 @@ const MapScreen: React.FC = () => {
       isLoaded,
       isRent,
       user: user?.id,
-      properties: properties.map(p => ({ id: p.id, title: p.title, category: p.category }))
+      hasTeam: !!user?.teamMember?.length,
+      teamId: user?.teamMember?.[0]?.teamId,
+      properties: properties.map(p => ({ 
+        id: p.id, 
+        title: p.title, 
+        category: p.category,
+        user_id: p.user_id,
+        team_id: p.team_id
+      }))
     });
   }, [properties, isLoaded, isRent, user]);
 
@@ -79,30 +87,6 @@ const MapScreen: React.FC = () => {
     updateLocation(map);
   }, [map, updateLocation]);
 
-  const handleRefreshProperties = useCallback(() => {
-    if (reloadProperties) {
-      reloadProperties();
-    }
-  }, [reloadProperties]);
-
-  const handleTestDatabase = useCallback(async () => {
-    try {
-      console.log('🧪 Testando banco de dados...');
-      const { supabaseProperties } = await import('../../services/supabaseProperties');
-      
-      // Testar busca sem filtros
-      const allProperties = await supabaseProperties.getAllProperties();
-      console.log('🧪 Todas as propriedades no banco:', allProperties);
-      
-      // Testar busca do usuário atual
-      if (user) {
-        const userProperties = await supabaseProperties.getPropertiesByUser(user.id);
-        console.log('🧪 Propriedades do usuário:', userProperties);
-      }
-    } catch (error) {
-      console.error('❌ Erro ao testar banco:', error);
-    }
-  }, [user]);
 
   const handleCloseInfoWindow = useCallback(() => {
     setSelectedProperty(null);
@@ -125,6 +109,8 @@ const MapScreen: React.FC = () => {
       {(dataError || locationError) && (
         <ErrorMessage>{dataError || locationError}</ErrorMessage>
       )}
+      
+      
       {isLoaded ? (
         <MapWithMarkers
           location={location}
@@ -141,18 +127,7 @@ const MapScreen: React.FC = () => {
       <UpdateButton onClick={handleUpdateLocation}>
         <FaCrosshairs size={20} />
       </UpdateButton>
-      <UpdateButton 
-        onClick={handleRefreshProperties}
-        style={{ bottom: '80px', right: '20px' }}
-      >
-        🔄
-      </UpdateButton>
-      <UpdateButton 
-        onClick={handleTestDatabase}
-        style={{ bottom: '140px', right: '20px' }}
-      >
-        🧪
-      </UpdateButton>
+      
     </Container>
   );
 };
