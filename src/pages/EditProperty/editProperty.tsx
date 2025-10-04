@@ -51,9 +51,8 @@ const EditProperty = () => {
   useEffect(() => {
     const fetchProperty = async () => {
       try {
-        const response = await axios.get(
-          `https://servercasaperto.onrender.com/property/${id}`
-        );
+        const { supabaseProperties } = await import('../../services/supabaseProperties');
+        const response = await supabaseProperties.getPropertyById(Number(id));
 
         const data = response.data;
         setPropertyData(data);
@@ -139,17 +138,19 @@ const EditProperty = () => {
         formData.append('images', image); 
       });
 
-      const response = await axios.put(
-        `https://servercasaperto.onrender.com/property/${id}`,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
+      const { supabaseProperties } = await import('../../services/supabaseProperties');
+      const response = await supabaseProperties.updateProperty(Number(id), {
+        title,
+        description,
+        description1,
+        price,
+        category,
+        latitude,
+        longitude,
+        images: newImages
+      });
 
-      if (response.status === 200) {
+      if (response) {
         setSuccessMessage('Imóvel atualizado com sucesso!');
         setTimeout(() => navigate('/profile'), 1500);
       }
@@ -242,7 +243,7 @@ const EditProperty = () => {
             {existingImages.map((image, index) => (
               <ImagePreview key={`existing-${index}`}>
                 <img 
-                  src={image.url.startsWith('http') ? image.url : `https://servercasaperto.onrender.com${image.url}`} 
+                  src={image.url.startsWith('http') ? image.url : image.url} 
                   alt={`Imagem ${index + 1}`} 
                 />
                 <button onClick={() => removeExistingImage(index)}>X</button>

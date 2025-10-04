@@ -42,15 +42,14 @@ const Home: React.FC = () => {
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        const response = await fetch('https://servercasaperto.onrender.com/property');
-        if (response.ok) {
-          const data = await response.json();
-          setProperties(data);
-        } else {
-          setError('Erro ao carregar os imóveis.');
-        }
-      } catch {
-        setError('Erro ao conectar com o servidor.');
+        console.log('🔄 ListScreen: Carregando propriedades...');
+        const { supabaseProperties } = await import('../../services/supabaseProperties');
+        const data = await supabaseProperties.getAllProperties();
+        console.log('✅ ListScreen: Propriedades carregadas:', data);
+        setProperties(data);
+      } catch (error) {
+        console.error('❌ ListScreen: Erro ao carregar propriedades:', error);
+        setError('Erro ao carregar os imóveis.');
       } finally {
         setLoading(false);
       }

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../services/authContext";
 import LoadingMessage from "../../components/loadingMessage/LoadingMessage";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { 
   Container, 
   Title, 
@@ -18,6 +19,7 @@ const SignIn: React.FC = () => {
   const [formData, setFormData] = useState({ username: "", password: "" });
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -62,13 +64,37 @@ const SignIn: React.FC = () => {
           value={formData.username} 
           onChange={handleInputChange} 
         />
-        <Input 
-          type="password" 
-          name="password" 
-          placeholder="Senha" 
-          value={formData.password} 
-          onChange={handleInputChange} 
-        />
+        <div style={{ position: 'relative' }}>
+          <Input 
+            type={showPassword ? "text" : "password"} 
+            name="password" 
+            placeholder="Senha" 
+            value={formData.password} 
+            onChange={handleInputChange}
+            style={{ paddingRight: '40px' }}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            style={{
+              position: 'absolute',
+              right: '10px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: '#666',
+              fontSize: '16px',
+              padding: '5px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            {showPassword ? <FaEye /> : <FaEyeSlash />}
+          </button>
+        </div>
         {error && <ErrorMessage>{error}</ErrorMessage>}
         <Button onClick={handleSignIn} disabled={isSubmitting}>
           <ButtonText>Entrar</ButtonText>

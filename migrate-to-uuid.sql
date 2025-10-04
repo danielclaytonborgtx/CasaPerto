@@ -1,8 +1,14 @@
--- Schema do banco de dados para o CasaPerto
+-- Script para migrar tabela users de SERIAL para UUID
 -- Execute este script no SQL Editor do Supabase
 
--- Tabela de usuários
-CREATE TABLE IF NOT EXISTS users (
+-- 1. Desabilitar RLS temporariamente
+ALTER TABLE users DISABLE ROW LEVEL SECURITY;
+
+-- 2. Deletar tabela users existente (CUIDADO: isso apaga todos os dados!)
+DROP TABLE IF EXISTS users CASCADE;
+
+-- 3. Recriar tabela users com UUID
+CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name VARCHAR(255) NOT NULL,
   email VARCHAR(255) UNIQUE NOT NULL,
@@ -12,18 +18,9 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Tabela de equipes
-CREATE TABLE IF NOT EXISTS teams (
-  id SERIAL PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,
-  image_url TEXT,
-  creator_id UUID REFERENCES users(id) ON DELETE CASCADE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Tabela de membros das equipes
-CREATE TABLE IF NOT EXISTS team_members (
+-- 4. Recriar tabelas dependentes com UUID
+DROP TABLE IF EXISTS team_members CASCADE;
+CREATE TABLE team_members (
   id SERIAL PRIMARY KEY,
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
   team_id INTEGER REFERENCES teams(id) ON DELETE CASCADE,
@@ -31,8 +28,8 @@ CREATE TABLE IF NOT EXISTS team_members (
   UNIQUE(user_id, team_id)
 );
 
--- Tabela de convites para equipes
-CREATE TABLE IF NOT EXISTS team_invitations (
+DROP TABLE IF EXISTS team_invitations CASCADE;
+CREATE TABLE team_invitations (
   id SERIAL PRIMARY KEY,
   team_id INTEGER REFERENCES teams(id) ON DELETE CASCADE,
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
@@ -40,8 +37,8 @@ CREATE TABLE IF NOT EXISTS team_invitations (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Tabela de propriedades
-CREATE TABLE IF NOT EXISTS properties (
+DROP TABLE IF EXISTS properties CASCADE;
+CREATE TABLE properties (
   id SERIAL PRIMARY KEY,
   title VARCHAR(255) NOT NULL,
   description TEXT NOT NULL,
@@ -57,8 +54,8 @@ CREATE TABLE IF NOT EXISTS properties (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Tabela de mensagens
-CREATE TABLE IF NOT EXISTS messages (
+DROP TABLE IF EXISTS messages CASCADE;
+CREATE TABLE messages (
   id SERIAL PRIMARY KEY,
   sender_id UUID REFERENCES users(id) ON DELETE CASCADE,
   receiver_id UUID REFERENCES users(id) ON DELETE CASCADE,
@@ -67,11 +64,13 @@ CREATE TABLE IF NOT EXISTS messages (
   read_at TIMESTAMP WITH TIME ZONE
 );
 
--- Índices para melhor performance
+-- 5. Atualizar tabela teams para usar UUID
+ALTER TABLE teams ALTER COLUMN creator_id TYPE UUID USING creator_id::text::UUID;
+
+-- 6. Recriar índices
 CREATE INDEX IF NOT EXISTS idx_properties_user_id ON properties(user_id);
 CREATE INDEX IF NOT EXISTS idx_properties_team_id ON properties(team_id);
 CREATE INDEX IF NOT EXISTS idx_properties_category ON properties(category);
-CREATE INDEX IF NOT EXISTS idx_properties_location ON properties(latitude, longitude);
 CREATE INDEX IF NOT EXISTS idx_messages_sender_receiver ON messages(sender_id, receiver_id);
 CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at);
 CREATE INDEX IF NOT EXISTS idx_team_members_user_id ON team_members(user_id);
@@ -79,26 +78,7 @@ CREATE INDEX IF NOT EXISTS idx_team_members_team_id ON team_members(team_id);
 CREATE INDEX IF NOT EXISTS idx_team_invitations_user_id ON team_invitations(user_id);
 CREATE INDEX IF NOT EXISTS idx_team_invitations_team_id ON team_invitations(team_id);
 
--- Função para atualizar updated_at automaticamente
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = NOW();
-    RETURN NEW;
-END;
-$$ language 'plpgsql';
-
--- Triggers para atualizar updated_at
-CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_teams_updated_at BEFORE UPDATE ON teams
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_properties_updated_at BEFORE UPDATE ON properties
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
--- Políticas de RLS (Row Level Security)
+-- 7. Recriar políticas RLS
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE teams ENABLE ROW LEVEL SECURITY;
 ALTER TABLE team_members ENABLE ROW LEVEL SECURITY;
@@ -144,17 +124,23 @@ CREATE POLICY "Users can view their messages" ON messages FOR SELECT USING (
 CREATE POLICY "Users can create messages" ON messages FOR INSERT WITH CHECK (sender_id = auth.uid());
 CREATE POLICY "Users can update their received messages" ON messages FOR UPDATE USING (receiver_id = auth.uid());
 
--- Criar bucket para imagens no Storage
-INSERT INTO storage.buckets (id, name, public) VALUES ('images', 'images', true);
+-- 8. Recriar triggers
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
 
--- Políticas para o Storage
-CREATE POLICY "Public read access for images" ON storage.objects FOR SELECT USING (bucket_id = 'images');
-CREATE POLICY "Authenticated users can upload images" ON storage.objects FOR INSERT WITH CHECK (
-  bucket_id = 'images' AND auth.role() = 'authenticated'
-);
-CREATE POLICY "Users can update their own images" ON storage.objects FOR UPDATE USING (
-  bucket_id = 'images' AND auth.uid()::text = (storage.foldername(name))[1]
-);
-CREATE POLICY "Users can delete their own images" ON storage.objects FOR DELETE USING (
-  bucket_id = 'images' AND auth.uid()::text = (storage.foldername(name))[1]
-);
+CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_teams_updated_at BEFORE UPDATE ON teams
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_properties_updated_at BEFORE UPDATE ON properties
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- 9. Verificar se tudo está funcionando
+SELECT 'Migration completed successfully!' as status;

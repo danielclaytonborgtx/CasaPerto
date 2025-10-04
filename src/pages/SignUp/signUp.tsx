@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabaseAuth } from "../../services/supabaseAuth";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { 
   Container, 
   Title, 
@@ -22,6 +24,8 @@ const SignUp: React.FC = () => {
   });
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,54 +35,65 @@ const SignUp: React.FC = () => {
   };
 
   const handleSignUp = async () => {
+    console.log('🎯 Iniciando processo de cadastro...')
+    console.log('📋 Dados do formulário:', formData)
+
     const { name, email, username, password, confirmPassword } = formData;
 
+    // Validações
     if (!name || !email || !username || !password || !confirmPassword) {
+      console.log('❌ Campos obrigatórios não preenchidos')
       setError("Por favor, preencha todos os campos.");
       return;
     }
 
     if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+      console.log('❌ Username inválido:', username)
       setError("O nome de usuário deve ter entre 3 e 20 caracteres, sem espaços ou caracteres especiais.");
       return;
     }
 
     if (password !== confirmPassword) {
+      console.log('❌ Senhas não coincidem')
       setError("As senhas não correspondem.");
       return;
     }
 
     if (password.length < 8) {
+      console.log('❌ Senha muito curta:', password.length)
       setError("A senha deve ter pelo menos 8 caracteres.");
       return;
     }
 
+    console.log('✅ Validações passaram, iniciando cadastro...')
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("https://servercasaperto.onrender.com/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          username,
-          password,
-        }),
+      console.log('🔄 Chamando supabaseAuth.signUp...')
+      const userData = await supabaseAuth.signUp({
+        name,
+        email,
+        username,
+        password,
       });
 
-      if (response.ok) {
+      console.log('📊 Resultado do signUp:', userData)
+
+      if (userData) {
+        console.log('✅ Usuário criado com sucesso!')
         alert("Conta criada com sucesso!");
         navigate("/signin"); 
       } else {
-        const data = await response.json();
-        setError(data.error || "Erro ao criar conta.");
+        console.log('⚠️ SignUp retornou null/undefined')
+        setError("Erro ao criar conta. Tente novamente.");
       }
-    } catch {
-      setError("Erro ao conectar com o servidor.");
+    } catch (error: unknown) {
+      console.error("💥 Erro ao criar conta:", error);
+      const errorMessage = error instanceof Error ? error.message : "Erro ao conectar com o servidor.";
+      console.log('📝 Mensagem de erro para o usuário:', errorMessage)
+      setError(errorMessage);
     } finally {
+      console.log('🏁 Finalizando processo de cadastro...')
       setIsSubmitting(false);
     }
   };
@@ -121,22 +136,70 @@ const SignUp: React.FC = () => {
           onChange={handleInputChange}
           onKeyPress={(e) => handleKeyPress(e, "password")}
         />
-        <Input
-          type="password"
-          name="password"
-          placeholder="Senha"
-          value={formData.password}
-          onChange={handleInputChange}
-          onKeyPress={(e) => handleKeyPress(e, "confirmPassword")}
-        />
-        <Input
-          type="password"
-          name="confirmPassword"
-          placeholder="Confirmar Senha"
-          value={formData.confirmPassword}
-          onChange={handleInputChange}
-          onKeyPress={(e) => handleKeyPress(e)}
-        />
+        <div style={{ position: 'relative' }}>
+          <Input
+            type={showPassword ? "text" : "password"}
+            name="password"
+            placeholder="Senha"
+            value={formData.password}
+            onChange={handleInputChange}
+            onKeyPress={(e) => handleKeyPress(e, "confirmPassword")}
+            style={{ paddingRight: '40px' }}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            style={{
+              position: 'absolute',
+              right: '10px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: '#666',
+              fontSize: '16px',
+              padding: '5px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            {showPassword ? <FaEye /> : <FaEyeSlash />}
+          </button>
+        </div>
+        <div style={{ position: 'relative' }}>
+          <Input
+            type={showConfirmPassword ? "text" : "password"}
+            name="confirmPassword"
+            placeholder="Confirmar Senha"
+            value={formData.confirmPassword}
+            onChange={handleInputChange}
+            onKeyPress={(e) => handleKeyPress(e)}
+            style={{ paddingRight: '40px' }}
+          />
+          <button
+            type="button"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            style={{
+              position: 'absolute',
+              right: '10px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: '#666',
+              fontSize: '16px',
+              padding: '5px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            {showConfirmPassword ? <FaEye /> : <FaEyeSlash />}
+          </button>
+        </div>
 
         {error && <ErrorMessage>{error}</ErrorMessage>}
      

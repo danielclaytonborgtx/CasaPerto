@@ -99,27 +99,50 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (email: string, password: string) => {
     try {
+      console.log('🔄 AUTHCONTEXT: Iniciando processo de login...')
+      console.log('🔄 AUTHCONTEXT: Chamando supabaseAuth.login...')
+      
       const userData = await supabaseAuth.login(email, password);
+      
+      console.log('📊 AUTHCONTEXT: Resposta do supabaseAuth.login:', {
+        userData: userData ? 'Dados recebidos' : 'Nenhum dado',
+        userDataDetails: userData ? {
+          id: userData.id,
+          name: userData.name,
+          email: userData.email,
+          username: userData.username
+        } : null
+      })
+      
       if (userData) {
-        console.log("Login bem-sucedido. Dados do usuário:", userData);
+        console.log("✅ AUTHCONTEXT: Login bem-sucedido. Dados do usuário:", userData);
+        console.log("🔄 AUTHCONTEXT: Definindo usuário no estado...");
         setUser(userData);
+        console.log("🔄 AUTHCONTEXT: Salvando usuário no localStorage...");
         localStorage.setItem('user', JSON.stringify(userData));
+        console.log("✅ AUTHCONTEXT: Usuário salvo no localStorage");
 
         // Buscar equipe do usuário se existir
         if (userData.teamMembers?.length && !team) {
+          console.log("🔄 AUTHCONTEXT: Buscando equipe do usuário...");
           fetchTeamById(userData.teamMembers[0].teamId)
             .then((teamData) => {
-              console.log("Equipe encontrada após login:", teamData);
+              console.log("✅ AUTHCONTEXT: Equipe encontrada após login:", teamData);
               setTeam(teamData);
               localStorage.setItem('team', JSON.stringify(teamData));
             })
             .catch((error) => {
-              console.error("Erro ao buscar equipe após login", error);
+              console.error("❌ AUTHCONTEXT: Erro ao buscar equipe após login", error);
             });
+        } else {
+          console.log("ℹ️ AUTHCONTEXT: Usuário não tem equipe ou equipe já carregada");
         }
+      } else {
+        console.log("⚠️ AUTHCONTEXT: Nenhum dado de usuário retornado");
       }
     } catch (error) {
-      console.error("Erro no login:", error);
+      console.error("💥 AUTHCONTEXT: Erro no login:", error);
+      console.error("💥 AUTHCONTEXT: Stack trace:", error instanceof Error ? error.stack : 'N/A');
       alert("Erro no login. Verifique suas credenciais e tente novamente.");
     }
   };

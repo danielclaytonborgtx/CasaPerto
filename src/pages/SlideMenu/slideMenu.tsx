@@ -39,21 +39,22 @@ const SlideMenu: React.FC<{ onClose: () => void; isVisible: boolean }> = ({ onCl
     }
   }, [user]);
 
-  const fetchProfileImage = async (userId: number) => {
+  const fetchProfileImage = async (userId: string) => {
     try {
-      const response = await fetch(`https://servercasaperto.onrender.com/users/${userId}/profile-picture`);
-      if (response.ok) {
-        const data = await response.json();
-        if (data.user?.picture) {
-          setProfileImage(data.user.picture);
-        } else {
-          setProfileImage(null); 
-        }
+      console.log('🔄 SlideMenu: Buscando imagem do perfil para usuário:', userId);
+      const { supabaseAuth } = await import('../../services/supabaseAuth');
+      const userData = await supabaseAuth.getCurrentUser();
+      
+      if (userData?.picture) {
+        console.log('✅ SlideMenu: Imagem encontrada:', userData.picture);
+        setProfileImage(userData.picture);
       } else {
+        console.log('ℹ️ SlideMenu: Usuário não tem imagem de perfil');
         setProfileImage(null);
       }
-    } catch {
-      setProfileImage(null); 
+    } catch (error) {
+      console.error('❌ SlideMenu: Erro ao buscar imagem do perfil:', error);
+      setProfileImage(null);
     }
   };
 

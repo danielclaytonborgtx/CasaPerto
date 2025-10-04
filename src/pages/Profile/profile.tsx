@@ -1,6 +1,9 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import LoadingMessage from "../../components/loadingMessage/LoadingMessage";
+import { supabaseProperties } from "../../services/supabaseProperties";
+import { supabaseAuth } from "../../services/supabaseAuth";
+import { supabaseMessages } from "../../services/supabaseMessages";
 import {
   ProfileContainer,
   UserName,
@@ -71,63 +74,69 @@ const Profile: React.FC = () => {
 
   const fetchProfileImage = useCallback(
     async (userId: number) => {
-      const data = await fetchData(`https://servercasaperto.onrender.com/users/${userId}/profile-picture`);
-      if (data?.user?.picture) {
-        setProfileImage(data.user.picture);
-      } else {
+      try {
+        const userData = await supabaseAuth.getCurrentUser();
+        if (userData?.picture) {
+          setProfileImage(userData.picture);
+        } else {
+          setProfileImage(null);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar imagem de perfil:", error);
         setProfileImage(null);
       }
     },
-    [fetchData]
+    []
   );
 
   const fetchProperties = useCallback(
     async (userId: number) => {
       setLoading(true);
-      const data = await fetchData(`https://servercasaperto.onrender.com/property/user?userId=${userId}`);
-      if (data) {
-        if (data.message) {
-          setProperties([]);
-          setError(data.message);
-        } else {
-          const sortedProperties = data.sort((a: Property, b: Property) => {
-            const dateA = new Date(a.createdAt);
-            const dateB = new Date(b.createdAt);
-            return dateB.getTime() - dateA.getTime();
-          });
-          setProperties(sortedProperties);
-        }
+      try {
+        const data = await supabaseProperties.getPropertiesByUser(userId);
+        const sortedProperties = data.sort((a: Property, b: Property) => {
+          const dateA = new Date(a.created_at);
+          const dateB = new Date(b.created_at);
+          return dateB.getTime() - dateA.getTime();
+        });
+        setProperties(sortedProperties);
+      } catch (error) {
+        console.error("Erro ao buscar propriedades:", error);
+        setProperties([]);
+        setError("Erro ao carregar propriedades");
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     },
-    [fetchData]
+    []
   );
 
   const fetchUnreadMessages = useCallback(
     async (userId: number) => {
-      const sinceStored = localStorage.getItem("lastSeenMessages");
-      const sinceDate = sinceStored || new Date(Date.now() - 60 * 60 * 1000).toISOString();
-  
-      const data = await fetchData(
-        `https://servercasaperto.onrender.com/messages/unread-since?userId=${userId}&since=${sinceDate}`
-      );
-  
-      if (data && typeof data.hasUnread === "boolean") {
+      try {
+        const sinceStored = localStorage.getItem("lastSeenMessages");
+        const sinceDate = sinceStored || new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    
+        const data = await supabaseMessages.getUnreadMessagesSince(userId, sinceDate);
         setUnreadMessages(data.hasUnread ? 1 : 0);
+      } catch (error) {
+        console.error("Erro ao buscar mensagens não lidas:", error);
+        setUnreadMessages(0);
       }
     },
-    [fetchData]
+    []
   );
 
   const handleDeleteProperty = async (propertyId: number) => {
     const confirmDelete = window.confirm("Deseja excluir este imóvel?");
     if (!confirmDelete) return;
 
-    const data = await fetchData(`https://servercasaperto.onrender.com/property/${propertyId}`, {
-      method: "DELETE",
-    });
-    if (data) {
+    try {
+      await supabaseProperties.deleteProperty(propertyId);
       setProperties(properties.filter((property) => property.id !== propertyId));
+    } catch (error) {
+      console.error("Erro ao deletar propriedade:", error);
+      alert("Erro ao deletar propriedade. Tente novamente.");
     }
   };
 

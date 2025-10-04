@@ -47,14 +47,13 @@ const PropertyDetails: React.FC = () => {
     const fetchProperty = async () => {
       if (!location.state) {
         try {
-          const response = await fetch(
-            `https://servercasaperto.onrender.com/property/${id}`
-          );
-          if (!response.ok) {
-            throw new Error("Erro ao buscar imóvel");
+          const { supabaseProperties } = await import('../../services/supabaseProperties');
+          const data = await supabaseProperties.getPropertyById(Number(id));
+          if (data) {
+            setProperty(data);
+          } else {
+            console.error("Imóvel não encontrado");
           }
-          const data = await response.json();
-          setProperty(data);
         } catch (error) {
           console.error("Erro ao carregar imóvel:", error);
         } finally {
@@ -113,13 +112,13 @@ const PropertyDetails: React.FC = () => {
       if (img.startsWith("http")) {
         return img;  
       }
-      return `https://servercasaperto.onrender.com${img}`;  
+      return img; // Imagem já está no formato correto do Supabase  
     } else if (img && typeof img === "object" && "url" in img) {
       const imageUrl = img.url;
       if (imageUrl.startsWith("http")) {
         return imageUrl; 
       }
-      return `https://servercasaperto.onrender.com${imageUrl}`;  
+      return imageUrl; // Imagem já está no formato correto do Supabase  
     }
     return "/fallback-image.jpg";  
   };  

@@ -3,6 +3,18 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
+// Logs para debug
+console.log('🔧 Configuração do Supabase:')
+console.log('📍 URL:', supabaseUrl ? '✅ Configurada' : '❌ Não configurada')
+console.log('🔑 Anon Key:', supabaseAnonKey ? '✅ Configurada' : '❌ Não configurada')
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('❌ Variáveis de ambiente do Supabase não configuradas!')
+  console.error('📝 Verifique se o arquivo .env existe e contém:')
+  console.error('   VITE_SUPABASE_URL=sua_url_aqui')
+  console.error('   VITE_SUPABASE_ANON_KEY=sua_chave_aqui')
+}
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Tipos para o banco de dados
@@ -11,7 +23,7 @@ export interface Database {
     Tables: {
       users: {
         Row: {
-          id: number
+          id: string
           name: string
           email: string
           username: string
@@ -20,7 +32,7 @@ export interface Database {
           updated_at: string
         }
         Insert: {
-          id?: number
+          id?: string
           name: string
           email: string
           username: string
@@ -29,7 +41,7 @@ export interface Database {
           updated_at?: string
         }
         Update: {
-          id?: number
+          id?: string
           name?: string
           email?: string
           username?: string
@@ -47,7 +59,7 @@ export interface Database {
           category: string
           latitude: number
           longitude: number
-          user_id: number
+          user_id: string
           team_id?: number
           images: string[]
           created_at: string
@@ -62,7 +74,7 @@ export interface Database {
           category: string
           latitude: number
           longitude: number
-          user_id: number
+          user_id: string
           team_id?: number
           images?: string[]
           created_at?: string
@@ -77,7 +89,7 @@ export interface Database {
           category?: string
           latitude?: number
           longitude?: number
-          user_id?: number
+          user_id?: string
           team_id?: number
           images?: string[]
           updated_at?: string
