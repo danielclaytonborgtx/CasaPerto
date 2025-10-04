@@ -2,18 +2,18 @@ import { supabase } from '../lib/supabase'
 
 export interface Message {
   id: number
-  sender_id: number
-  receiver_id: number
+  sender_id: string
+  receiver_id: string
   content: string
   created_at: string
   read_at?: string
   sender?: {
-    id: number
+    id: string
     name: string
     username: string
   }
   receiver?: {
-    id: number
+    id: string
     name: string
     username: string
   }
@@ -21,7 +21,7 @@ export interface Message {
 
 export const supabaseMessages = {
   // Buscar mensagens entre dois usuários
-  async getMessagesBetweenUsers(userId1: number, userId2: number): Promise<Message[]> {
+  async getMessagesBetweenUsers(userId1: string, userId2: string): Promise<Message[]> {
     try {
       const { data, error } = await supabase
         .from('messages')
@@ -46,9 +46,9 @@ export const supabaseMessages = {
   },
 
   // Buscar conversas do usuário
-  async getUserConversations(userId: number): Promise<{
+  async getUserConversations(userId: string): Promise<{
     user: {
-      id: number
+      id: string
       name: string
       username: string
     }
@@ -73,8 +73,8 @@ export const supabaseMessages = {
       }
 
       // Agrupar por usuário
-      const conversations = new Map<number, {
-        user: { id: number; name: string; username: string }
+      const conversations = new Map<string, {
+        user: { id: string; name: string; username: string }
         lastMessage?: Message
         unreadCount: number
       }>()
@@ -113,8 +113,8 @@ export const supabaseMessages = {
 
   // Enviar mensagem
   async sendMessage(messageData: {
-    sender_id: number
-    receiver_id: number
+    sender_id: string
+    receiver_id: string
     content: string
   }): Promise<Message> {
     try {
@@ -144,7 +144,7 @@ export const supabaseMessages = {
   },
 
   // Marcar mensagens como lidas
-  async markMessagesAsRead(senderId: number, receiverId: number): Promise<void> {
+  async markMessagesAsRead(senderId: string, receiverId: string): Promise<void> {
     try {
       const { error } = await supabase
         .from('messages')
@@ -164,7 +164,7 @@ export const supabaseMessages = {
   },
 
   // Buscar mensagens não lidas desde uma data
-  async getUnreadMessagesSince(userId: number, since: string): Promise<{
+  async getUnreadMessagesSince(userId: string, since: string): Promise<{
     hasUnread: boolean
     count: number
   }> {
@@ -192,7 +192,7 @@ export const supabaseMessages = {
   },
 
   // Deletar mensagem
-  async deleteMessage(messageId: number, userId: number): Promise<void> {
+  async deleteMessage(messageId: number, userId: string): Promise<void> {
     try {
       const { error } = await supabase
         .from('messages')
