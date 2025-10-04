@@ -51,10 +51,12 @@ const Team = () => {
 
   const fetchTeams = async () => {
     try {
+      console.log('🔍 Team: Buscando equipes...');
       const data = await supabaseTeams.getAllTeams();
+      console.log('✅ Team: Equipes carregadas:', data);
       setTeams(data || []);
     } catch (error) {
-      console.error('Erro ao buscar equipes:', error);
+      console.error('❌ Team: Erro ao buscar equipes:', error);
     } finally {
       setLoading(false);
     }
@@ -198,10 +200,26 @@ const Team = () => {
           <LoadingMessage />
         ) : Array.isArray(sortedTeams) && sortedTeams.length > 0 ? (
           sortedTeams.map((team) => {
-            const isUserInTeam = Array.isArray(team.members) && 
-              team.members.some((member: any) => member.userId === user?.id);
+            console.log('🔍 Team: Dados da equipe:', {
+              id: team.id,
+              name: team.name,
+              image_url: team.image_url,
+              created_by: team.created_by,
+              members: team.members,
+              user_id: user?.id
+            });
             
-            const isTeamOwner = team.creatorId === user?.id;
+            const isUserInTeam = Array.isArray(team.members) && 
+              team.members.some((member: any) => member.user_id === user?.id);
+            
+            const isTeamOwner = team.created_by === user?.id;
+            
+            console.log('🔍 Team: Verificações:', {
+              isUserInTeam,
+              isTeamOwner,
+              user_id: user?.id,
+              created_by: team.created_by
+            });
             
             const pendingInvitation = invitations.find(
               inv => inv.teamId === team.id && inv.status === 'PENDING'
@@ -209,9 +227,9 @@ const Team = () => {
 
             return (
               <TeamCard key={team.id}>
-                {team.imageUrl && (
+                {team.image_url && (
                   <TeamImage 
-                    src={team.imageUrl}
+                    src={team.image_url}
                     alt={`Imagem da equipe ${team.name}`} 
                   />
                 )}
@@ -251,11 +269,11 @@ const Team = () => {
                     {Array.isArray(team.members) && team.members.length > 0 ? (
                       <ul>
                         {team.members
-                          .sort((a: any, b: any) => a.userId.localeCompare(b.userId)) 
-                          .map((member: any) => (
-                            <li key={member.userId}>
-                              {member.name}
-                              {pendingInvitation && member.userId === user?.id && 
+                          .sort((a: any, b: any) => a.user?.name?.localeCompare(b.user?.name) || 0) 
+                          .map((member: any, index: number) => (
+                            <li key={member.id || member.user_id || index}>
+                              {member.user?.name || member.name}
+                              {pendingInvitation && member.user_id === user?.id && 
                                 " (Convite Pendente)"}
                             </li>
                           ))}

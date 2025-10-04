@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios, { AxiosError } from "axios";
+import { supabase } from "../../lib/supabase";
+import { supabaseStorage } from "../../services/supabaseStorage";
+import { supabaseTeams } from "../../services/supabaseTeams";
 import LoadingMessage from "../../components/loadingMessage/LoadingMessage";
 import {
   Container,
@@ -61,29 +63,58 @@ const EditTeam: React.FC = () => {
   const fetchTeam = useCallback(async () => {
     if (isDeleted) return;
     try {
-      const response = await axios.get<TeamData>(`https://servercasaperto.onrender.com/team/${id}`);
-      const teamData = response.data;
-      setTeamName(teamData.name);
-      setBrokers(teamData.members);
-      setTeamImage(teamData.imageUrl);
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.status === 404) {
+      console.log('🔍 EditTeam: Buscando dados da equipe', id);
+      const team = await supabaseTeams.getTeamById(Number(id));
+      
+      if (!team) {
+        console.log('❌ EditTeam: Equipe não encontrada');
         navigate("/team");
         return;
       }
-      console.error("Erro ao buscar dados da equipe:", error);
-      alert("Houve um erro ao carregar a equipe. Tente novamente.");
+      
+      console.log('✅ EditTeam: Equipe carregada', team);
+      setTeamName(team.name);
+      setTeamImage(team.image_url || null);
+      
+      // Buscar membros da equipe
+      console.log('🔍 EditTeam: Verificando se getTeamMembers existe:', typeof supabaseTeams.getTeamMembers);
+      const members = await supabaseTeams.getTeamMembers(Number(id));
+      console.log('✅ EditTeam: Membros carregados', members);
+      
+      // Converter para o formato esperado
+      const brokers = members.map(member => ({
+        id: member.user_id,
+        userId: member.user_id,
+        name: member.user?.name || 'Nome não encontrado',
+        email: member.user?.email || '',
+        role: member.role
+      }));
+      
+      setBrokers(brokers);
+    } catch (error) {
+      console.error("❌ EditTeam: Erro ao buscar dados da equipe:", error);
+      navigate("/team");
     }
   }, [id, navigate, isDeleted]);
 
   const fetchBrokers = useCallback(async () => {
     try {
-      const response = await axios.get<User[]>("https://servercasaperto.onrender.com/users/no-team");
-      const validBrokers = response.data.filter((broker) => broker.id && broker.name);
+      console.log('🔍 EditTeam: Buscando usuários disponíveis');
+      const { data: users, error } = await supabase
+        .from('users')
+        .select('id, name, username, email')
+        .order('name', { ascending: true });
+
+      if (error) {
+        console.error('❌ EditTeam: Erro ao buscar usuários:', error);
+        return;
+      }
+
+      console.log('✅ EditTeam: Usuários carregados', users);
+      const validBrokers = (users || []).filter((broker) => broker.id && broker.name);
       setAvailableBrokers(validBrokers);
     } catch (error) {
-      console.error("Erro ao buscar corretores:", error);
-      alert("Erro ao carregar corretores. Tente novamente.");
+      console.error("❌ EditTeam: Erro ao buscar corretores:", error);
     }
   }, []);
 
@@ -96,40 +127,43 @@ const EditTeam: React.FC = () => {
 
   const handleAddBroker = async (user: User) => {
     try {
-      // Enviar convite
-      await axios.post(`https://servercasaperto.onrender.com/teams/${id}/member`, {
+      console.log('🔍 EditTeam: Adicionando membro à equipe', { userId: user.id, teamId: id });
+      
+      // Adicionar membro diretamente à equipe
+      await supabaseTeams.addTeamMember(Number(id), user.id);
+      
+      // Adicionar à lista de membros
+      const newMember = {
+        id: user.id,
         userId: user.id,
-      });
-
-      // Adicionar à lista de convites pendentes
-      const newInvite: PendingInvite = {
-        userId: user.id.toString(),
         name: user.name,
         email: user.email,
+        role: 'MEMBER'
       };
-      setPendingInvites((prev) => [...prev, newInvite]);
+      setBrokers((prev) => [...prev, newMember]);
 
       // Remover da lista de corretores disponíveis
       setAvailableBrokers((prev) => prev.filter((b) => b.id !== user.id));
+      
+      console.log('✅ EditTeam: Membro adicionado com sucesso');
     } catch (error) {
-      console.error("Erro ao enviar convite:", error);
-      if (error instanceof AxiosError) {
-        const errorMessage = error.response?.data?.error || "Erro ao enviar convite.";
-        alert(errorMessage);
-      }
+      console.error("❌ EditTeam: Erro ao adicionar membro:", error);
+      alert("Erro ao adicionar membro à equipe.");
     }
   };
 
   const handleRemoveBroker = async (broker: TeamMember) => {
     try {
-      await axios.post(`https://servercasaperto.onrender.com/teams/${id}/leave`, {
-        userId: broker.userId,
-      });
+      console.log('🔍 EditTeam: Removendo membro da equipe', { userId: broker.userId, teamId: id });
+      
+      // Remover membro da equipe
+      await supabaseTeams.removeTeamMember(Number(id), broker.userId);
 
+      // Atualizar listas
       setBrokers((prev) => prev.filter((b) => b.userId !== broker.userId));
 
       const brokerAsUser: User = {
-        id: Number(broker.userId),
+        id: broker.userId,
         name: broker.name,
         email: broker.email,
         username: '',
@@ -185,26 +219,30 @@ const EditTeam: React.FC = () => {
     }
 
     try {
-      const response = await axios.put(`https://servercasaperto.onrender.com/team/${id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+      console.log('🔍 EditTeam: Atualizando equipe', { teamId: id, name: teamName });
+      
+      // Atualizar dados básicos da equipe
+      await supabaseTeams.updateTeam(Number(id), {
+        name: teamName
       });
-
-      if (setUser && user) {
-        const updatedUser = {
-          ...user,
-          team: response.data,
-        };
-        setUser(updatedUser);
-        localStorage.setItem("user", JSON.stringify(updatedUser));
+      
+      // Fazer upload da imagem se houver
+      if (teamImage && teamImage.startsWith("data:image")) {
+        console.log('🖼️ EditTeam: Fazendo upload da nova imagem');
+        const imageBlob = dataURItoBlob(teamImage);
+        const imageUrl = await supabaseStorage.uploadTeamImage(Number(id), imageBlob);
+        
+        // Atualizar URL da imagem
+        await supabaseTeams.updateTeam(Number(id), {
+          image_url: imageUrl
+        });
       }
 
+      console.log('✅ EditTeam: Equipe atualizada com sucesso');
       navigate("/team");
     } catch (error) {
-      console.error("Erro ao editar equipe:", error);
-      if (error instanceof AxiosError) {
-        const errorMessage = error.response?.data?.error || "Erro ao editar equipe. Tente novamente.";
-        alert(errorMessage);
-      }
+      console.error("❌ EditTeam: Erro ao editar equipe:", error);
+      alert("Erro ao editar equipe. Tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -256,8 +294,11 @@ const EditTeam: React.FC = () => {
     const confirmDelete = window.confirm("Você tem certeza que deseja excluir esta equipe?");
     if (confirmDelete) {
       try {
+        console.log('🔍 EditTeam: Excluindo equipe', id);
         setIsDeleted(true);
-        await axios.delete(`https://servercasaperto.onrender.com/team/${id}`);
+        
+        // Deletar equipe
+        await supabaseTeams.deleteTeam(Number(id));
 
         if (setUser && user) {
           const updatedUser = {
@@ -269,16 +310,12 @@ const EditTeam: React.FC = () => {
           localStorage.setItem("user", JSON.stringify(updatedUser));
         }
 
+        console.log('✅ EditTeam: Equipe excluída com sucesso');
         navigate("/team");
       } catch (error) {
         setIsDeleted(false);
-        console.error("Erro ao excluir equipe:", error);
-        if (axios.isAxiosError(error)) {
-          const errorMessage = error.response?.data?.error || "Erro ao excluir equipe. Tente novamente.";
-          alert(errorMessage);
-        } else {
-          alert("Erro ao excluir equipe. Tente novamente.");
-        }
+        console.error("❌ EditTeam: Erro ao excluir equipe:", error);
+        alert("Erro ao excluir equipe. Tente novamente.");
       }
     }
   };

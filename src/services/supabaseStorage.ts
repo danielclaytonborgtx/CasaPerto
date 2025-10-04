@@ -71,7 +71,7 @@ export const supabaseStorage = {
   // Upload de imagem de equipe
   async uploadTeamImage(teamId: number, file: File): Promise<string> {
     try {
-      const fileExt = file.name.split('.').pop()
+      const fileExt = file.name ? file.name.split('.').pop() : 'jpg'
       const fileName = `${teamId}-${Date.now()}.${fileExt}`
       const filePath = `teams/${fileName}`
 

@@ -4,7 +4,7 @@ export interface Team {
   id: number
   name: string
   image_url?: string
-  creator_id: number
+  created_by: string
   created_at: string
   updated_at: string
   members?: TeamMember[]
@@ -12,11 +12,12 @@ export interface Team {
 
 export interface TeamMember {
   id: number
-  user_id: number
+  user_id: string
   team_id: number
+  role: string
   created_at: string
   user?: {
-    id: number
+    id: string
     name: string
     email: string
   }
@@ -87,6 +88,30 @@ export const supabaseTeams = {
     } catch (error) {
       console.error('Erro ao buscar equipe:', error)
       return null
+    }
+  },
+
+  // Buscar membros de uma equipe
+  async getTeamMembers(teamId: number): Promise<TeamMember[]> {
+    try {
+      const { data, error } = await supabase
+        .from('team_members')
+        .select(`
+          *,
+          user:users(id, name, email)
+        `)
+        .eq('team_id', teamId)
+        .order('created_at', { ascending: true })
+
+      if (error) {
+        console.error('Erro ao buscar membros da equipe:', error.message)
+        throw new Error(error.message)
+      }
+
+      return data || []
+    } catch (error) {
+      console.error('Erro ao buscar membros da equipe:', error)
+      throw error
     }
   },
 
@@ -169,13 +194,14 @@ export const supabaseTeams = {
   },
 
   // Adicionar membro à equipe
-  async addTeamMember(teamId: number, userId: number): Promise<TeamMember> {
+  async addTeamMember(teamId: number, userId: string): Promise<TeamMember> {
     try {
       const { data, error } = await supabase
         .from('team_members')
         .insert({
           team_id: teamId,
           user_id: userId,
+          role: 'MEMBER',
           created_at: new Date().toISOString(),
         })
         .select()
@@ -194,7 +220,7 @@ export const supabaseTeams = {
   },
 
   // Remover membro da equipe
-  async removeTeamMember(teamId: number, userId: number): Promise<void> {
+  async removeTeamMember(teamId: number, userId: string): Promise<void> {
     try {
       const { error } = await supabase
         .from('team_members')

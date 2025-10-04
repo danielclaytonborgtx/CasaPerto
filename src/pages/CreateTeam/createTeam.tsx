@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import axios, { AxiosError } from "axios";
+import { supabase } from "../../lib/supabase";
 import {
   Container,
   Input,
@@ -43,10 +43,23 @@ const CreateTeam: React.FC = () => {
 
   const fetchBrokers = useCallback(async () => {
     try {
-      const response = await axios.get("https://servercasaperto.onrender.com/users/no-team");
-      setAvailableBrokers(response.data);
+      console.log('🔍 CreateTeam: Buscando usuários sem equipe');
+      
+      const { data, error } = await supabase
+        .from('users')
+        .select('id, name, username, email')
+        .order('name', { ascending: true });
+
+      if (error) {
+        console.error('❌ Erro ao buscar usuários:', error);
+        alert("Erro ao carregar corretores. Tente novamente.");
+        return;
+      }
+
+      console.log('✅ CreateTeam: Usuários carregados', data);
+      setAvailableBrokers(data || []);
     } catch (error) {
-      console.error("Erro ao buscar corretores:", error);
+      console.error("❌ Erro ao buscar corretores:", error);
       alert("Erro ao carregar corretores. Tente novamente.");
     }
   }, []);
@@ -137,39 +150,77 @@ const CreateTeam: React.FC = () => {
 
     setLoading(true);
 
-    const formData = new FormData();
-    formData.append("name", teamName);
-    formData.append(
-      "members",
-      JSON.stringify(brokers.map((broker) => broker.id))
-    );
-
-    if (teamImage) {
-      const imageBlob = dataURItoBlob(teamImage);
-      formData.append("image", imageBlob);
-      console.log("Imagem adicionada ao FormData:", imageBlob);
-    }
-
     try {
-      const response = await axios.post(
-        "https://servercasaperto.onrender.com/team",
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
+      console.log('🔍 CreateTeam: Criando equipe', { teamName, brokers: brokers.length });
+      
+      // 1. Criar a equipe
+      const { data: team, error: teamError } = await supabase
+        .from('teams')
+        .insert({
+          name: teamName,
+          created_by: String(user?.id)
+        })
+        .select()
+        .single();
 
-      // Atualizando o state global de usuário
+      if (teamError) {
+        console.error('❌ Erro ao criar equipe:', teamError);
+        alert("Erro ao criar equipe. Tente novamente.");
+        return;
+      }
+
+      console.log('✅ CreateTeam: Equipe criada', team);
+
+      // 2. Fazer upload da imagem se houver
+      let imageUrl = null;
+      if (teamImage) {
+        try {
+          console.log('🖼️ CreateTeam: Fazendo upload da imagem da equipe');
+          const { supabaseStorage } = await import('../../services/supabaseStorage');
+          const imageBlob = dataURItoBlob(teamImage);
+          imageUrl = await supabaseStorage.uploadTeamImage(team.id, imageBlob);
+          
+          console.log('✅ CreateTeam: Imagem carregada com sucesso', imageUrl);
+          
+          // Atualizar a equipe com a URL da imagem
+          await supabase
+            .from('teams')
+            .update({ image_url: imageUrl })
+            .eq('id', team.id);
+        } catch (imageError) {
+          console.error('❌ Erro ao fazer upload da imagem:', imageError);
+          // Continua sem a imagem
+        }
+      }
+
+      // 3. Adicionar membros à equipe
+      const teamMembers = brokers.map(broker => ({
+        team_id: team.id,
+        user_id: broker.id,
+        role: 'MEMBER'
+      }));
+
+      const { error: membersError } = await supabase
+        .from('team_members')
+        .insert(teamMembers);
+
+      if (membersError) {
+        console.error('❌ Erro ao adicionar membros:', membersError);
+        alert("Erro ao adicionar membros à equipe.");
+        return;
+      }
+
+      console.log('✅ CreateTeam: Membros adicionados à equipe');
+
+      // 4. Atualizar o usuário atual
       if (setUser && user) {
         const updatedUser = {
           ...user,
-          team: response.data.team, // Se você tiver a equipe com mais dados, pode incluir aqui
+          team: team
         };
         setUser(updatedUser);
-        localStorage.setItem("user", JSON.stringify(updatedUser)); // Atualiza no localStorage
+        localStorage.setItem("user", JSON.stringify(updatedUser));
       }
-
-      setPendingInvites(response.data.invitations || []);
 
       // Limpeza dos dados
       setTeamName("");
@@ -177,18 +228,11 @@ const CreateTeam: React.FC = () => {
       setBrokers([]);
       setAvailableBrokers([]);
 
-      // Redirecionando para outra página, se necessário
+      alert("Equipe criada com sucesso!");
       navigate("/team");
     } catch (error) {
-      console.error("Erro ao criar equipe:", error);
-      if (error instanceof AxiosError) {
-        const errorMessage =
-          error.response?.data?.error ||
-          "Erro ao criar equipe. Tente novamente.";
-        alert(errorMessage);
-      } else {
-        alert("Erro ao criar equipe. Tente novamente.");
-      }
+      console.error("❌ Erro ao criar equipe:", error);
+      alert("Erro ao criar equipe. Tente novamente.");
     } finally {
       setLoading(false);
     }
