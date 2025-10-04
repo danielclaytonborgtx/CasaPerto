@@ -2,8 +2,8 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import LoadingMessage from "../../components/loadingMessage/LoadingMessage";
 import { supabaseProperties } from "../../services/supabaseProperties";
-import { supabaseAuth } from "../../services/supabaseAuth";
 import { supabaseMessages } from "../../services/supabaseMessages";
+import { supabaseProfile } from "../../services/supabaseProfile";
 import {
   ProfileContainer,
   UserName,
@@ -61,23 +61,13 @@ const Profile: React.FC = () => {
   const [unreadMessages, setUnreadMessages] = useState<number>(0);
   const navigate = useNavigate();
 
-  const fetchData = useCallback(async (url: string, options?: RequestInit) => {
-    try {
-      const response = await fetch(url, options);
-      if (!response.ok) throw new Error(`Erro: ${response.status}`);
-      return await response.json();
-    } catch {
-      setError("Erro ao conectar com o servidor.");
-      return null;
-    }
-  }, []);
 
   const fetchProfileImage = useCallback(
     async (userId: number) => {
       try {
-        const userData = await supabaseAuth.getCurrentUser();
-        if (userData?.picture) {
-          setProfileImage(userData.picture);
+        const profile = await supabaseProfile.getProfile(String(userId));
+        if (profile?.profile_picture) {
+          setProfileImage(profile.profile_picture);
         } else {
           setProfileImage(null);
         }
@@ -94,12 +84,7 @@ const Profile: React.FC = () => {
       setLoading(true);
       try {
         const data = await supabaseProperties.getPropertiesByUser(userId);
-        const sortedProperties = data.sort((a: Property, b: Property) => {
-          const dateA = new Date(a.created_at);
-          const dateB = new Date(b.created_at);
-          return dateB.getTime() - dateA.getTime();
-        });
-        setProperties(sortedProperties);
+        setProperties(data as unknown as Property[]);
       } catch (error) {
         console.error("Erro ao buscar propriedades:", error);
         setProperties([]);

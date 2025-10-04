@@ -13,7 +13,7 @@ export const MainContent = styled.main`
   overflow-y: auto; /* Habilita rolagem caso o conteúdo ultrapasse o limite da tela */
   display: flex;
   flex-direction: column;
-  align-items: center; /* Centraliza o conteúdo horizontalmente */
+  align-items: stretch; /* Permite que o conteúdo use toda a largura disponível */
   justify-content: flex-start; /* Alinha o conteúdo no topo da área disponível */
 
   height: calc(100vh - 80px - 80px); /* Subtrai as alturas do Header e Footer */

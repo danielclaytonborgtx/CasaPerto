@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../services/authContext';
+import { supabaseProfile } from '../../services/supabaseProfile';
 import { SlideMenuContainer, MenuItem, MenuContent, UserNameSpan, ProfileImage, DefaultIcon } from './styles';
 
 const SlideMenu: React.FC<{ onClose: () => void; isVisible: boolean }> = ({ onClose, isVisible }) => {
@@ -35,19 +36,19 @@ const SlideMenu: React.FC<{ onClose: () => void; isVisible: boolean }> = ({ onCl
 
   useEffect(() => {
     if (user?.id) {
-      fetchProfileImage(user.id); 
+      fetchProfileImage(String(user.id)); 
     }
   }, [user]);
 
   const fetchProfileImage = async (userId: string) => {
     try {
       console.log('🔄 SlideMenu: Buscando imagem do perfil para usuário:', userId);
-      const { supabaseAuth } = await import('../../services/supabaseAuth');
-      const userData = await supabaseAuth.getCurrentUser();
       
-      if (userData?.picture) {
-        console.log('✅ SlideMenu: Imagem encontrada:', userData.picture);
-        setProfileImage(userData.picture);
+      const profile = await supabaseProfile.getProfile(userId);
+      
+      if (profile?.profile_picture) {
+        console.log('✅ SlideMenu: Imagem encontrada:', profile.profile_picture);
+        setProfileImage(profile.profile_picture);
       } else {
         console.log('ℹ️ SlideMenu: Usuário não tem imagem de perfil');
         setProfileImage(null);

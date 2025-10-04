@@ -44,8 +44,8 @@ const Header: React.FC = () => {
           onColor="#E0FFFF"
           height={30}
           width={160}
-          uncheckedIcon={<SwitchLabel position="left">Aluguel</SwitchLabel>}
-          checkedIcon={<SwitchLabel position="right">Venda</SwitchLabel>}
+          uncheckedIcon={<SwitchLabel $position="left">Aluguel</SwitchLabel>}
+          checkedIcon={<SwitchLabel $position="right">Venda</SwitchLabel>}
           handleDiameter={25}
           onHandleColor="#00BFFF"
           offHandleColor="#00BFFF"

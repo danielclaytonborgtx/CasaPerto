@@ -120,6 +120,8 @@ export const supabaseProperties = {
     category?: string
   }): Promise<Property[]> {
     try {
+      console.log('🔍 supabaseProperties.getFilteredProperties: Iniciando busca', filters);
+      
       let query = supabase
         .from('properties')
         .select(`
@@ -129,26 +131,30 @@ export const supabaseProperties = {
 
       // Filtro por usuário ou equipe
       if (filters.teamId) {
+        console.log('🔍 Aplicando filtro de usuário/equipe:', `user_id.eq.${filters.userId},team_id.eq.${filters.teamId}`);
         query = query.or(`user_id.eq.${filters.userId},team_id.eq.${filters.teamId}`)
       } else {
+        console.log('🔍 Aplicando filtro de usuário:', filters.userId);
         query = query.eq('user_id', filters.userId)
       }
 
       // Filtro por categoria
       if (filters.category) {
+        console.log('🔍 Aplicando filtro de categoria:', filters.category);
         query = query.eq('category', filters.category)
       }
 
       const { data, error } = await query.order('created_at', { ascending: false })
 
       if (error) {
-        console.error('Erro ao filtrar propriedades:', error.message)
+        console.error('❌ Erro ao filtrar propriedades:', error.message)
         throw new Error(error.message)
       }
 
+      console.log('✅ supabaseProperties.getFilteredProperties: Resultado', data);
       return data || []
     } catch (error) {
-      console.error('Erro ao filtrar propriedades:', error)
+      console.error('❌ Erro ao filtrar propriedades:', error)
       throw error
     }
   },
@@ -156,6 +162,8 @@ export const supabaseProperties = {
   // Criar nova propriedade
   async createProperty(propertyData: PropertyData): Promise<Property> {
     try {
+      console.log('🔍 supabaseProperties.createProperty: Criando propriedade', propertyData);
+      
       const { data, error } = await supabase
         .from('properties')
         .insert({
@@ -170,13 +178,14 @@ export const supabaseProperties = {
         .single()
 
       if (error) {
-        console.error('Erro ao criar propriedade:', error.message)
+        console.error('❌ Erro ao criar propriedade:', error.message)
         throw new Error(error.message)
       }
 
+      console.log('✅ supabaseProperties.createProperty: Propriedade criada com sucesso', data);
       return data
     } catch (error) {
-      console.error('Erro ao criar propriedade:', error)
+      console.error('❌ Erro ao criar propriedade:', error)
       throw error
     }
   },
@@ -184,6 +193,8 @@ export const supabaseProperties = {
   // Atualizar propriedade
   async updateProperty(id: number, updates: Partial<PropertyData>): Promise<Property> {
     try {
+      console.log('🔍 supabaseProperties.updateProperty: Atualizando propriedade', { id, updates });
+      
       const { data, error } = await supabase
         .from('properties')
         .update({
@@ -198,13 +209,14 @@ export const supabaseProperties = {
         .single()
 
       if (error) {
-        console.error('Erro ao atualizar propriedade:', error.message)
+        console.error('❌ Erro ao atualizar propriedade:', error.message)
         throw new Error(error.message)
       }
 
+      console.log('✅ supabaseProperties.updateProperty: Propriedade atualizada com sucesso', data);
       return data
     } catch (error) {
-      console.error('Erro ao atualizar propriedade:', error)
+      console.error('❌ Erro ao atualizar propriedade:', error)
       throw error
     }
   },

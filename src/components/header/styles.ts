@@ -77,7 +77,7 @@ export const SwitchContainer = styled.div`
   border-radius: 20px;      
 `;
 
-export const SwitchLabel = styled.span<{ position: 'left' | 'right' }>`
+export const SwitchLabel = styled.span<{ $position: 'left' | 'right' }>`
   font-size: 20px;
   color: black;
   font-weight: bold;
@@ -87,7 +87,7 @@ export const SwitchLabel = styled.span<{ position: 'left' | 'right' }>`
   height: 110%;
   width: 100%;
   position: absolute;
-  ${({ position }) => position === 'left' ? 'left: -58px;' : 'right: -56px;'}
+  ${({ $position }) => $position === 'left' ? 'left: -58px;' : 'right: -56px;'}
   top: 2px;
   text-align: center;
 `;

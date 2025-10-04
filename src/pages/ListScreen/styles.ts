@@ -12,7 +12,7 @@ export const Container = styled.div`
 `;
 
 export const SearchInput = styled.input`
-  width: 90%;
+  width: 95%;
   max-width: 400px;
   padding: 10px;
   margin-bottom: 20px;
@@ -25,7 +25,7 @@ export const Item = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 90%;
+  width: 95%;
   max-width: 1200px;
   margin-bottom: 20px;
   border: 1px solid #ddd;

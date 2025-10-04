@@ -24,11 +24,22 @@ const MapScreen: React.FC = () => {
   const [initiallySelectedProperty, setInitiallySelectedProperty] = useState<Property | null>(null);
   
   const { isRent } = usePropertyContext();
-  const { properties, error: dataError, isLoaded } = usePropertyData(isRent);
+  const { properties, error: dataError, isLoaded, reloadProperties } = usePropertyData(isRent);
   const { location, error: locationError, updateLocation } = useLocation();
   const navigate = useNavigate();
   const { state } = useRouterLocation();
   const { user } = useAuth();
+
+  // Log para debug
+  useEffect(() => {
+    console.log('🗺️ MapScreen: Estado atual', {
+      propertiesCount: properties.length,
+      isLoaded,
+      isRent,
+      user: user?.id,
+      properties: properties.map(p => ({ id: p.id, title: p.title, category: p.category }))
+    });
+  }, [properties, isLoaded, isRent, user]);
 
   useEffect(() => {
     if (state?.id && properties.length > 0) {
@@ -68,6 +79,31 @@ const MapScreen: React.FC = () => {
     updateLocation(map);
   }, [map, updateLocation]);
 
+  const handleRefreshProperties = useCallback(() => {
+    if (reloadProperties) {
+      reloadProperties();
+    }
+  }, [reloadProperties]);
+
+  const handleTestDatabase = useCallback(async () => {
+    try {
+      console.log('🧪 Testando banco de dados...');
+      const { supabaseProperties } = await import('../../services/supabaseProperties');
+      
+      // Testar busca sem filtros
+      const allProperties = await supabaseProperties.getAllProperties();
+      console.log('🧪 Todas as propriedades no banco:', allProperties);
+      
+      // Testar busca do usuário atual
+      if (user) {
+        const userProperties = await supabaseProperties.getPropertiesByUser(user.id);
+        console.log('🧪 Propriedades do usuário:', userProperties);
+      }
+    } catch (error) {
+      console.error('❌ Erro ao testar banco:', error);
+    }
+  }, [user]);
+
   const handleCloseInfoWindow = useCallback(() => {
     setSelectedProperty(null);
   }, []);
@@ -104,6 +140,18 @@ const MapScreen: React.FC = () => {
       )}
       <UpdateButton onClick={handleUpdateLocation}>
         <FaCrosshairs size={20} />
+      </UpdateButton>
+      <UpdateButton 
+        onClick={handleRefreshProperties}
+        style={{ bottom: '80px', right: '20px' }}
+      >
+        🔄
+      </UpdateButton>
+      <UpdateButton 
+        onClick={handleTestDatabase}
+        style={{ bottom: '140px', right: '20px' }}
+      >
+        🧪
       </UpdateButton>
     </Container>
   );

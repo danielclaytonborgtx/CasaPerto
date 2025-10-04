@@ -20,6 +20,8 @@ const GlobalStyles = createGlobalStyle`
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    width: 100%;
+    max-width: 100%;
   }
 
   .gm-style-iw {
@@ -52,12 +54,12 @@ const GlobalStyles = createGlobalStyle`
 
   @media (max-width: 360px) {
     body {
-      padding: 10px;
+      padding: 0;
     }
 
     #root {
-      max-width: 360px;
-      margin: 0 auto;
+      max-width: 100%;
+      margin: 0;
       overflow: hidden;
     }
   }

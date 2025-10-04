@@ -18,6 +18,11 @@ export const useMarkers = ({ map, location, properties, setSelectedProperty }: U
   useEffect(() => {
     if (!map || !location) return;
 
+    console.log('🗺️ useMarkers: Criando marcadores', {
+      propertiesCount: memoizedProperties.length,
+      properties: memoizedProperties.map(p => ({ id: p.id, title: p.title, category: p.category }))
+    });
+
     // Limpar marcadores existentes e listeners
     markersRef.current.forEach((m) => {
       google.maps.event.clearInstanceListeners(m);

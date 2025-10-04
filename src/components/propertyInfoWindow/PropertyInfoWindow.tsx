@@ -16,7 +16,7 @@ interface Property {
   price: string;
   latitude: number;
   longitude: number;
-  images: { url: string }[];
+  images: string[] | { url: string }[];
 }
 
 interface Props {
@@ -40,6 +40,26 @@ const PropertyInfoWindow: React.FC<Props> = ({
     }).format(num);
   };
 
+  const getImageUrl = (images: string[] | { url: string }[] | undefined) => {
+    console.log('🖼️ PropertyInfoWindow: Imagens recebidas', images);
+    
+    if (!images || images.length === 0) {
+      console.log('🖼️ Nenhuma imagem encontrada, usando placeholder');
+      return "/placeholder.jpg";
+    }
+    
+    // Se é array de strings
+    if (typeof images[0] === 'string') {
+      console.log('🖼️ Usando primeira imagem (string):', images[0]);
+      return images[0] as string;
+    }
+    
+    // Se é array de objetos com url
+    const url = (images[0] as { url: string }).url;
+    console.log('🖼️ Usando primeira imagem (objeto):', url);
+    return url;
+  };
+
   return (
     <InfoWindow
       position={{ lat: property.latitude, lng: property.longitude }}
@@ -48,7 +68,7 @@ const PropertyInfoWindow: React.FC<Props> = ({
     >
       <InfoWindowContainer>
         <PropertyImage
-          src={property.images?.[0]?.url || "/placeholder.jpg"}
+          src={getImageUrl(property.images)}
           onClick={() => onImageClick(property.id)}
         />
         <InfoContent>

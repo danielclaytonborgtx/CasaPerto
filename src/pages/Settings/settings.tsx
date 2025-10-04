@@ -3,36 +3,38 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../services/authContext';
 import { OptionsContainer, OptionItem, UserNameSpan, ProfileImage, ProfileIcon, ErrorMessage, EditButton } from './styles';
 import { FiEdit } from 'react-icons/fi'; // Ícone de edição
+import { supabaseProfile } from '../../services/supabaseProfile';
+import { supabaseStorage } from '../../services/supabaseStorage';
 
 const Settings: React.FC = () => {
   const { user } = useAuth();
   const [error, setError] = useState<string | null>(null); 
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [imageInputRef, setImageInputRef] = useState<HTMLInputElement | null>(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (user?.id) {
-      fetchProfileImage(user.id);
+      fetchProfileImage(String(user.id));
     }
   }, [user]);
 
-  const fetchProfileImage = async (userId: number) => {
+  const fetchProfileImage = async (userId: string) => {
     try {
-      const response = await fetch(`https://servercasaperto.onrender.com/users/${userId}/profile-picture`);
-      if (response.ok) {
-        const data = await response.json();
-        if (data?.user?.picture) {
-          // Aqui, você deve usar diretamente a URL fornecida pela API (sem tentar concatenar com o Cloudinary)
-          const imageUrl = data.user.picture;  // Usar a URL completa da imagem fornecida pela API
-          setProfileImage(imageUrl);
-        } else {
-          setProfileImage(null);
-        }
+      console.log('🖼️ Settings: Carregando foto de perfil do usuário', userId);
+      
+      const profile = await supabaseProfile.getProfile(userId);
+      
+      if (profile?.profile_picture) {
+        console.log('✅ Settings: Foto de perfil encontrada', profile.profile_picture);
+        setProfileImage(profile.profile_picture);
       } else {
+        console.log('🖼️ Settings: Nenhuma foto de perfil encontrada');
         setProfileImage(null);
       }
-    } catch {
+    } catch (error) {
+      console.error('❌ Settings: Erro ao carregar foto de perfil', error);
       setProfileImage(null);
     }
   };
@@ -41,34 +43,35 @@ const Settings: React.FC = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append("profileImage", file);
-
     const userId = user?.id;
     if (!userId) {
       setError("Usuário não autenticado.");
       return;
     }
 
-    try {
-      const response = await fetch(`https://servercasaperto.onrender.com/users/${userId}/profile-picture`, {
-        method: "POST",
-        body: formData,
-      });
+    setLoading(true);
+    setError(null);
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.user?.picture) {
-          setProfileImage(`https://servercasaperto.onrender.com${data.user.picture}`);
-        } else {
-          setError("Caminho da imagem não encontrado na resposta da API.");
-        }
-      } else {
-        setError("Erro ao enviar imagem de perfil.");
-      }
+    try {
+      console.log('🖼️ Settings: Fazendo upload da nova foto de perfil');
+      
+      // Fazer upload da imagem para o Supabase Storage
+      const imageUrl = await supabaseStorage.uploadProfilePicture(Number(userId), file);
+      
+      console.log('✅ Settings: Imagem carregada com sucesso', imageUrl);
+      
+      // Atualizar o perfil do usuário com a nova URL
+      await supabaseProfile.updateProfilePicture(String(userId), imageUrl);
+      
+      // Atualizar a imagem local
+      setProfileImage(imageUrl);
+      
+      console.log('✅ Settings: Foto de perfil atualizada com sucesso');
     } catch (error) {
-      console.error("Erro ao conectar com o servidor:", error);
-      setError("Erro ao conectar com o servidor.");
+      console.error('❌ Settings: Erro ao atualizar foto de perfil', error);
+      setError("Erro ao atualizar foto de perfil. Tente novamente.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -92,26 +95,28 @@ const Settings: React.FC = () => {
           <div style={{ position: "relative", display: "inline-block" }}>
             <ProfileImage src={profileImage} alt="Foto de perfil" />
             {/* Botão pequeno para trocar a imagem */}
-            <EditButton onClick={handleIconClick}>
-              <FiEdit size={16} />
+            <EditButton onClick={handleIconClick} disabled={loading}>
+              {loading ? '⏳' : <FiEdit size={16} />}
             </EditButton>
             <input 
               type="file" 
               ref={setImageInputRef} 
               onChange={handleImageUpload} 
-              style={{ display: "none" }} 
+              style={{ display: "none" }}
+              disabled={loading}
             />
           </div>
         ) : (
           <ProfileIcon>
-            <button type="button" onClick={handleIconClick}>
-              <span>+</span>
+            <button type="button" onClick={handleIconClick} disabled={loading}>
+              <span>{loading ? '⏳' : '+'}</span>
             </button>
             <input 
               type="file" 
               ref={setImageInputRef} 
               onChange={handleImageUpload} 
-              style={{ display: "none" }} 
+              style={{ display: "none" }}
+              disabled={loading}
             />
           </ProfileIcon>
         )}

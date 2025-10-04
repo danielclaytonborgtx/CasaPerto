@@ -14,12 +14,14 @@ import {
 } from "./styles";
 import { useAuth } from "../../services/authContext"; 
 import LoadingMessage from "../../components/loadingMessage/LoadingMessage";
+import { supabase } from "../../lib/supabase";
 
 interface User {
-  id: number;
+  id: string;
   name: string;
   username: string;
   email: string;
+  profile_picture?: string;
 }
 
 const Brokers: React.FC = () => {
@@ -28,52 +30,54 @@ const Brokers: React.FC = () => {
   const [brokers, setBrokers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [profileImages, setProfileImages] = useState<Record<number, string | null>>({});
+  const [profileImages, setProfileImages] = useState<Record<string, string | null>>({});
   const [searchTerm, setSearchTerm] = useState("");
 
   const fetchBrokers = useCallback(async () => {
     try {
-      const response = await fetch("https://servercasaperto.onrender.com/users");
-      if (response.ok) {
-        const data: User[] = await response.json();
-        
-        const loggedInUser = data.find(broker => broker.id === user?.id);
-        const otherBrokers = data.filter(broker => broker.id !== user?.id);
+      console.log('🔍 Brokers: Carregando usuários do Supabase');
+      
+      const { data, error } = await supabase
+        .from('users')
+        .select('id, name, username, email, profile_picture')
+        .order('name', { ascending: true });
+
+      if (error) {
+        console.error('❌ Erro ao carregar usuários:', error);
+        setError("Erro ao carregar corretores.");
+        return;
+      }
+
+      console.log('✅ Brokers: Usuários carregados', data);
+      
+      if (data) {
+        const loggedInUser = data.find(broker => broker.id === String(user?.id));
+        const otherBrokers = data.filter(broker => broker.id !== String(user?.id));
       
         setBrokers(loggedInUser ? [loggedInUser, ...otherBrokers] : otherBrokers);
-      } else {
-        setError("Erro ao carregar corretores.");
       }
-    } catch {
+    } catch (err) {
+      console.error('❌ Erro ao conectar com Supabase:', err);
       setError("Erro ao conectar com o servidor.");
     } finally {
       setLoading(false);
     }
   }, [user?.id]); 
 
-  const fetchProfileImage = async (brokerId: number) => {
+  const fetchProfileImage = async (brokerId: string, profilePicture?: string) => {
     try {
-      const response = await fetch(`https://servercasaperto.onrender.com/users/${brokerId}/profile-picture`);
-      
-      if (response.ok) {
-        const data = await response.json();    
-       
-        const imagePath = data.picture || data.user?.picture || data.avatar || data.url;
-        
-        if (imagePath) {
-          const fullUrl = imagePath.startsWith('http') ? imagePath : `https://servercasaperto.onrender.com${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
-          
-          setProfileImages((prev) => ({
-            ...prev,
-            [brokerId]: fullUrl
-          }));
-        } else {
-          console.warn(`No image path found in response for broker ${brokerId}`);
-          setProfileImages((prev) => ({ ...prev, [brokerId]: null }));
-        }
+      if (profilePicture) {
+        console.log('🖼️ Brokers: Usando imagem do perfil do Supabase', profilePicture);
+        setProfileImages((prev) => ({
+          ...prev,
+          [brokerId]: profilePicture
+        }));
+      } else {
+        console.log('🖼️ Brokers: Nenhuma imagem de perfil encontrada para', brokerId);
+        setProfileImages((prev) => ({ ...prev, [brokerId]: null }));
       }
     } catch (error) {
-      console.error("Error loading image:", error);
+      console.error("❌ Erro ao carregar imagem:", error);
       setProfileImages((prev) => ({ ...prev, [brokerId]: null }));
     }
   };
@@ -81,16 +85,21 @@ const Brokers: React.FC = () => {
   useEffect(() => {
     const fetchBrokersAndImages = async () => {
       await fetchBrokers();
-  
-      const profilePromises = brokers.map((broker) => 
-        fetchProfileImage(broker.id)
-      );
-
-      await Promise.all(profilePromises);
     };
   
     fetchBrokersAndImages();
-  }, [fetchBrokers, brokers]); 
+  }, [fetchBrokers]);
+
+  // Carregar imagens quando os brokers mudarem
+  useEffect(() => {
+    if (brokers.length > 0) {
+      const profilePromises = brokers.map((broker) => 
+        fetchProfileImage(broker.id, broker.profile_picture)
+      );
+
+      Promise.all(profilePromises);
+    }
+  }, [brokers]); 
 
   if (loading) return <LoadingMessage />;
   if (error) return <ErrorMessage>{error}</ErrorMessage>;
@@ -126,7 +135,7 @@ const Brokers: React.FC = () => {
                 Ver perfil
               </ProfileLink>
             </BrokerDetails>
-            {broker.id !== user?.id && (
+            {broker.id !== String(user?.id) && (
         <MessageButton onClick={() => navigate(`/messages/${broker.id}`)}>💬</MessageButton>
       )}
     </BrokerItem>
