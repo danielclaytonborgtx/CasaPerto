@@ -222,6 +222,23 @@ const Team = () => {
         
         console.log('✅ Team: Usuário removido da equipe com sucesso');
 
+        // NOVA FUNCIONALIDADE: Limpar team_id das propriedades do usuário
+        console.log('🧹 Team: Limpando team_id das propriedades do usuário...');
+        const { supabase } = await import('../../lib/supabase');
+        
+        const { error: updatePropertiesError } = await supabase
+          .from('properties')
+          .update({ team_id: null })
+          .eq('user_id', userId)
+          .eq('team_id', teamId);
+
+        if (updatePropertiesError) {
+          console.error('❌ Team: Erro ao limpar team_id das propriedades:', updatePropertiesError);
+          // Não falhar o processo por causa disso, apenas logar o erro
+        } else {
+          console.log('✅ Team: team_id das propriedades limpo com sucesso');
+        }
+
         // Atualizar estado local
         setTeams(prevTeams =>
           prevTeams.map(team =>
@@ -297,43 +314,12 @@ const Team = () => {
 
   return (
     <TeamContainer>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2>Equipes</h2>
-        <button 
-          onClick={() => {
-            console.log('🔄 Team: Atualização manual solicitada');
-            fetchTeams();
-          }}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontSize: '14px'
-          }}
-        >
-          🔄 Atualizar
-        </button>
-      </div>
+      <h2>Equipes</h2>
 
       {!loading && !userHasTeam && (
         <CreateTeamButton onClick={handleCreateTeam}>Criar Equipe</CreateTeamButton>
       )}
       
-      {!loading && userHasTeam && (
-        <div style={{ 
-          padding: '20px', 
-          textAlign: 'center', 
-          color: '#666',
-          backgroundColor: '#f5f5f5',
-          borderRadius: '8px',
-          margin: '20px 0'
-        }}>
-          <p>Você já participa de uma equipe. Saia da equipe atual para criar uma nova.</p>
-        </div>
-      )}
 
       {/* Convites Pendentes */}
       {!loading && invitations.length > 0 && (

@@ -2,12 +2,22 @@ import styled from 'styled-components';
 
 export const TeamContainer = styled.div`
   padding: 20px;
-  margin-top: 50px;
+  margin-top: 80px;
 
   h2 {
     font-size: 24px;
     margin-bottom: 20px;
     text-align: center;
+  }
+
+  @media (max-width: 768px) {
+    padding: 10px;
+    margin-top: 70px;
+
+    h2 {
+      font-size: 20px;
+      margin-bottom: 15px;
+    }
   }
 `;
 
@@ -41,9 +51,15 @@ export const TeamCard = styled.div`
   padding: 15px;
   margin-bottom: 20px;
   position: relative;
-  width: 95vw; 
-  max-width: 100%; 
+  width: 100%;
+  max-width: 100%;
   box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    padding: 10px;
+    margin-bottom: 15px;
+  }
 `;
 
 export const TeamImage = styled.img`
@@ -52,6 +68,14 @@ export const TeamImage = styled.img`
   object-fit: cover;
   border-radius: 8px;
   margin-right: 20px;
+
+  @media (max-width: 768px) {
+    width: 100px;
+    height: 100px;
+    margin-right: 0;
+    margin-bottom: 15px;
+    align-self: center;
+  }
 `;
 
 export const TeamDetails = styled.div`
@@ -65,11 +89,22 @@ export const TeamHeader = styled.div`
   align-items: flex-start;
   margin-bottom: 15px;
   width: 100%;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
 `;
 
 export const TeamNameSection = styled.div`
-margin-top: 25px;
+  margin-top: 25px;
   flex: 1;
+
+  @media (max-width: 768px) {
+    margin-top: 0;
+    margin-bottom: 15px;
+  }
 `;
 
 export const ButtonsSection = styled.div`
@@ -77,6 +112,12 @@ export const ButtonsSection = styled.div`
   gap: 10px;
   align-items: center;
   margin-left: 15px;
+
+  @media (max-width: 768px) {
+    margin-left: 0;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
 `;
 
 export const TeamMembers = styled.div`
@@ -96,6 +137,11 @@ export const TeamName = styled.h1`
   font-size: 28px;
   font-weight: bold;
   margin-bottom: 10px;
+
+  @media (max-width: 768px) {
+    font-size: 22px;
+    text-align: center;
+  }
 `;
 
 export const UserTag = styled.strong`
@@ -121,9 +167,13 @@ export const InviteButtons = styled.div`
   gap: 8px;
   flex-shrink: 0; 
   margin-left: auto; 
-  position: absolute; 
-  right: 10px; 
-  top: 15px; 
+
+  @media (max-width: 768px) {
+    position: static;
+    margin-left: 0;
+    justify-content: center;
+    margin-top: 10px;
+  }
 `;
 
 export const AcceptButton = styled.button`
@@ -138,6 +188,11 @@ export const AcceptButton = styled.button`
   &:hover {
     background-color: #45a049;
   }
+
+  @media (max-width: 768px) {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
 `;
 
 export const RejectButton = styled.button`
@@ -151,6 +206,11 @@ export const RejectButton = styled.button`
 
   &:hover {
     background-color: #da190b;
+  }
+
+  @media (max-width: 768px) {
+    padding: 8px 12px;
+    font-size: 14px;
   }
 `;
 
@@ -169,6 +229,14 @@ export const LeaveButton = styled.div`
 
   svg {
     font-size: 20px;
+  }
+
+  @media (max-width: 768px) {
+    justify-content: center;
+    padding: 8px 12px;
+    border: 1px solid #f44336;
+    border-radius: 4px;
+    background-color: rgba(244, 67, 54, 0.1);
   }
 `;
 

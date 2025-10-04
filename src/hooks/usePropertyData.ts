@@ -78,7 +78,7 @@ export const usePropertyData = (isRent: boolean) => {
         const userProperties = await supabaseProperties.getPropertiesByUser(user.id);
         console.log('✅ usePropertyData: Propriedades do usuário carregadas', {
           count: userProperties.length,
-          properties: userProperties.map(p => ({ id: p.id, title: p.title, user_id: p.user_id, team_id: p.team_id }))
+          properties: userProperties.map(p => ({ id: p.id, title: p.title, userId: p.userId, teamId: p.teamId }))
         });
         
         // Buscar propriedades da equipe
@@ -86,7 +86,7 @@ export const usePropertyData = (isRent: boolean) => {
         const teamProperties = await supabaseProperties.getTeamProperties(teamId, category);
         console.log('✅ usePropertyData: Propriedades da equipe carregadas', {
           count: teamProperties.length,
-          properties: teamProperties.map(p => ({ id: p.id, title: p.title, user_id: p.user_id, team_id: p.team_id }))
+          properties: teamProperties.map(p => ({ id: p.id, title: p.title, userId: p.userId, teamId: p.teamId }))
         });
         
         // Combinar propriedades do usuário e da equipe
@@ -102,7 +102,7 @@ export const usePropertyData = (isRent: boolean) => {
           userProperties: userProperties.length,
           teamProperties: teamProperties.length,
           total: allProperties.length,
-          finalProperties: allProperties.map(p => ({ id: p.id, title: p.title, user_id: p.user_id, team_id: p.team_id }))
+          finalProperties: allProperties.map(p => ({ id: p.id, title: p.title, userId: p.userId, teamId: p.teamId }))
         });
         
       } else {
@@ -124,8 +124,8 @@ export const usePropertyData = (isRent: boolean) => {
         properties: allProperties.map(p => ({ 
           id: p.id, 
           title: p.title, 
-          user_id: p.user_id,
-          team_id: p.team_id,
+          userId: p.userId,
+          teamId: p.teamId,
           category: p.category 
         }))
       });
