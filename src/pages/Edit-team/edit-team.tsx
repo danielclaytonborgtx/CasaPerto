@@ -37,6 +37,17 @@ interface LocalUser {
   updatedAt: string;
 }
 
+interface TeamMemberData {
+  id: string;
+  user_id: string;
+  team_id: number;
+  role?: string;
+  team?: {
+    id: number;
+    name: string;
+  };
+}
+
 interface TeamMember {
   id: string;
   userId: string;
@@ -393,7 +404,7 @@ const EditTeam: React.FC = () => {
           if (!userError && updatedUser) {
             // Converter team_members para o formato esperado
             if (updatedUser.team_members) {
-              updatedUser.teamMembers = updatedUser.team_members.map((tm: any) => ({
+              updatedUser.teamMembers = updatedUser.team_members.map((tm: TeamMemberData) => ({
                 id: tm.id,
                 userId: tm.user_id,
                 teamId: tm.team_id
