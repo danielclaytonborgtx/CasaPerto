@@ -102,7 +102,7 @@ const Profile: React.FC = () => {
         const sinceStored = localStorage.getItem("lastSeenMessages");
         const sinceDate = sinceStored || new Date(Date.now() - 60 * 60 * 1000).toISOString();
     
-        const data = await supabaseMessages.getUnreadMessagesSince(userId, sinceDate);
+        const data = await supabaseMessages.getUnreadMessagesSince(String(userId), sinceDate);
         setUnreadMessages(data.hasUnread ? 1 : 0);
       } catch (error) {
         console.error("Erro ao buscar mensagens não lidas:", error);

@@ -9,6 +9,7 @@ export interface AuthUser {
   picture?: string
   created_at: string
   updated_at: string
+  teamMembers?: { id: number; userId: string; teamId: number }[]
 }
 
 export const supabaseAuth = {

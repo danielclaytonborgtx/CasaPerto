@@ -64,7 +64,7 @@ const Messages: React.FC = () => {
         console.log('🔍 Messages: Buscando conversas do usuário:', senderId);
         
         // Usar supabaseMessages para buscar conversas
-        const conversationsData = await supabaseMessages.getUserConversations(senderId);
+        const conversationsData = await supabaseMessages.getUserConversations(String(senderId));
         
         console.log('✅ Messages: Conversas carregadas:', conversationsData);
 
@@ -101,7 +101,7 @@ const Messages: React.FC = () => {
       
       try {
         // Buscar conversas atualizadas
-        const conversationsData = await supabaseMessages.getUserConversations(senderId);
+        const conversationsData = await supabaseMessages.getUserConversations(String(senderId));
         
         const conversations = conversationsData.map(conv => ({
           userId: conv.user.id.toString(),
@@ -124,7 +124,7 @@ const Messages: React.FC = () => {
 
         // Se há uma conversa ativa, também verificar mensagens dela
         if (activeBrokerId) {
-          const messages = await supabaseMessages.getMessagesBetweenUsers(senderId, activeBrokerId);
+          const messages = await supabaseMessages.getMessagesBetweenUsers(String(senderId), String(activeBrokerId));
           
           setConversations((prevConversations) => {
             const existingIndex = prevConversations.findIndex(
@@ -173,7 +173,7 @@ const Messages: React.FC = () => {
         
         // Buscar mensagens e nome do usuário em paralelo
         const [messages, userInfo] = await Promise.all([
-          supabaseMessages.getMessagesBetweenUsers(senderId, activeBrokerId),
+          supabaseMessages.getMessagesBetweenUsers(String(senderId), String(activeBrokerId)),
           fetchUserName(activeBrokerId)
         ]);
         
@@ -254,7 +254,7 @@ const Messages: React.FC = () => {
 
       // Usar supabaseMessages para enviar mensagem
       await supabaseMessages.sendMessage({
-        sender_id: senderId,
+        sender_id: String(senderId),
         receiver_id: activeBrokerId,
         content: newMessage,
       });
@@ -263,8 +263,8 @@ const Messages: React.FC = () => {
 
       // Buscar mensagens atualizadas
       const messages = await supabaseMessages.getMessagesBetweenUsers(
-        senderId, 
-        activeBrokerId
+        String(senderId), 
+        String(activeBrokerId)
       );
 
       setConversations((prevConversations) => {
@@ -339,7 +339,7 @@ const Messages: React.FC = () => {
                     .find((conv) => conv.userId === activeBrokerId)
                     ?.messages.map((message, index) => {
                       const messageKey = `${activeBrokerId}-${message.id}-${index}`; 
-                      const isFromCurrentUser = message.sender_id === senderId;
+                      const isFromCurrentUser = message.sender_id === String(senderId);
                       const senderName = isFromCurrentUser ? "Você" : (message.sender?.name || "Desconhecido");
                   
                       return (

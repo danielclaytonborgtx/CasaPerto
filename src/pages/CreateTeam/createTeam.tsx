@@ -17,7 +17,14 @@ import {
   TeamImage,
 } from "./styles";
 
-import { useAuth, User } from "../../services/authContext";
+import { useAuth } from "../../services/authContext";
+
+interface BrokerUser {
+  id: number;
+  name: string;
+  username: string;
+  email: string;
+}
 import { FaPlus, FaMinus } from "react-icons/fa";
 
 interface TeamInvitation {
@@ -30,9 +37,9 @@ interface TeamInvitation {
 const CreateTeam: React.FC = () => {
   const { user, setUser } = useAuth();
   const [teamName, setTeamName] = useState("");
-  const [brokers, setBrokers] = useState<User[]>([]);
+  const [brokers, setBrokers] = useState<BrokerUser[]>([]);
   const [brokerName, setBrokerName] = useState("");
-  const [availableBrokers, setAvailableBrokers] = useState<User[]>([]);
+  const [availableBrokers, setAvailableBrokers] = useState<BrokerUser[]>([]);
   const [teamImage, setTeamImage] = useState<string | null>(null);
   const [imageInputRef, setImageInputRef] = useState<HTMLInputElement | null>(
     null
@@ -88,10 +95,7 @@ const CreateTeam: React.FC = () => {
     }
   }, [user, availableBrokers]);
 
-  const handleAddBroker = (broker: User) => {
-    if (broker.teamMembers) {
-      broker = { ...broker, teamMembers: [] }; // Remove o teamId ao definir como undefined
-    }
+  const handleAddBroker = (broker: BrokerUser) => {
 
     if (!brokers.some((b) => b.id === broker.id)) {
       setBrokers([...brokers, broker]);
@@ -178,8 +182,8 @@ const CreateTeam: React.FC = () => {
         try {
           console.log('🖼️ CreateTeam: Fazendo upload da imagem da equipe');
           const { supabaseStorage } = await import('../../services/supabaseStorage');
-          const imageBlob = dataURItoBlob(teamImage);
-          imageUrl = await supabaseStorage.uploadTeamImage(team.id, imageBlob);
+          const imageFile = dataURItoFile(teamImage);
+          imageUrl = await supabaseStorage.uploadTeamImage(team.id, imageFile);
           
           console.log('✅ CreateTeam: Imagem carregada com sucesso', imageUrl);
           
@@ -232,7 +236,7 @@ const CreateTeam: React.FC = () => {
         
         for (const broker of otherBrokers) {
           try {
-            await supabaseTeams.createTeamInvitation(team.id, broker.id);
+            await supabaseTeams.createTeamInvitation(team.id, String(broker.id));
             console.log('✅ CreateTeam: Convite enviado para', broker.name);
           } catch (inviteError) {
             console.error('❌ CreateTeam: Erro ao enviar convite para', broker.name, inviteError);
@@ -295,14 +299,15 @@ const CreateTeam: React.FC = () => {
     }
   };
 
-  const dataURItoBlob = (dataURI: string) => {
+  const dataURItoFile = (dataURI: string, filename: string = 'team-image.jpg') => {
     const byteString = atob(dataURI.split(",")[1]);
     const ab = new ArrayBuffer(byteString.length);
     const ua = new Uint8Array(ab);
     for (let i = 0; i < byteString.length; i++) {
       ua[i] = byteString.charCodeAt(i);
     }
-    return new Blob([ab], { type: "image/jpeg" });
+    const blob = new Blob([ab], { type: "image/jpeg" });
+    return new File([blob], filename, { type: "image/jpeg" });
   };
 
   const handleIconClick = () => {
@@ -312,7 +317,7 @@ const CreateTeam: React.FC = () => {
   };
 
   // Atualiza o UI para mostrar status dos convites
-  const renderBrokerStatus = (broker: User) => {
+  const renderBrokerStatus = (broker: BrokerUser) => {
     const invitation = pendingInvites.find(inv => inv.userId === broker.id);
     if (invitation) {
       return (

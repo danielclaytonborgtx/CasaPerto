@@ -50,7 +50,12 @@ const PropertyDetails: React.FC = () => {
           const { supabaseProperties } = await import('../../services/supabaseProperties');
           const data = await supabaseProperties.getPropertyById(Number(id));
           if (data) {
-            setProperty(data);
+            setProperty({
+              ...data,
+              price: typeof data.price === 'string' ? parseFloat(data.price) : data.price,
+              createdAt: data.created_at || new Date().toISOString(),
+              user: data.user ? { username: data.user.name || 'Usuário' } : undefined
+            });
           } else {
             console.error("Imóvel não encontrado");
           }

@@ -26,6 +26,12 @@ export interface Property {
   longitude: number;
   category: string;
   userId: number;
-  teamId: number;
+  teamId?: number;
   images: { url: string }[];
+  description: string;
+  description1?: string;
+  user_id?: number;
+  team_id?: number;
+  created_at?: string;
+  updated_at?: string;
 }

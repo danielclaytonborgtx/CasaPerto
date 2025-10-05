@@ -83,7 +83,7 @@ export const usePropertyData = (isRent: boolean) => {
         
         // Buscar propriedades da equipe
         console.log('🔍 usePropertyData: Buscando propriedades da equipe com teamId:', teamId);
-        const teamProperties = await supabaseProperties.getTeamProperties(teamId, category, user.id);
+        const teamProperties = await supabaseProperties.getTeamProperties(teamId, category, String(user.id));
         console.log('✅ usePropertyData: Propriedades da equipe carregadas', {
           count: teamProperties.length,
           properties: teamProperties.map(p => ({ id: p.id, title: p.title, userId: p.userId, teamId: p.teamId }))

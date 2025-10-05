@@ -37,14 +37,14 @@ const MapScreen: React.FC = () => {
       isLoaded,
       isRent,
       user: user?.id,
-      hasTeam: !!user?.teamMember?.length,
-      teamId: user?.teamMember?.[0]?.teamId,
+      hasTeam: !!user?.teamMembers?.length,
+      teamId: user?.teamMembers?.[0]?.teamId,
       properties: properties.map(p => ({ 
         id: p.id, 
         title: p.title, 
         category: p.category,
-        user_id: p.user_id,
-        team_id: p.team_id
+        user_id: p.userId,
+        team_id: p.teamId
       }))
     });
   }, [properties, isLoaded, isRent, user]);

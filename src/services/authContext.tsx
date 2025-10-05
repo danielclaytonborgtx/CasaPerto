@@ -222,7 +222,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
         
         console.log("🔄 AUTHCONTEXT: Definindo usuário no estado...");
-        setUser(userData);
+        // Converter AuthUser para User
+        const userForState: User = {
+          id: parseInt(userData.id) || 0,
+          name: userData.name,
+          email: userData.email,
+          username: userData.username,
+          password: '', // Não armazenamos senha no estado
+          createdAt: userData.created_at,
+          updatedAt: userData.updated_at,
+          teamMembers: userData.teamMembers?.map(tm => ({
+            id: tm.id,
+            userId: parseInt(tm.userId) || 0,
+            teamId: tm.teamId
+          }))
+        };
+        setUser(userForState);
         console.log("🔄 AUTHCONTEXT: Salvando usuário no localStorage...");
         localStorage.setItem('user', JSON.stringify(userData));
         console.log("✅ AUTHCONTEXT: Usuário salvo no localStorage");

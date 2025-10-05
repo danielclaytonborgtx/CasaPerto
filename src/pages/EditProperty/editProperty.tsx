@@ -61,11 +61,15 @@ const EditProperty = () => {
 
         console.log('🔍 EditProperty: Propriedade carregada', property);
         
-        setPropertyData(property);
-        setCategory(property.category);
+        setPropertyData({
+          ...property,
+          description: property.description || '',
+          description1: property.description1 || ''
+        });
+        setCategory(property.category as "venda" | "aluguel");
         setTitle(property.title);
         setPrice(property.price.toString());
-        setDescription(property.description);
+        setDescription(property.description || '');
         setDescription1(property.description1 || '');
         setLatitude(property.latitude);
         setLongitude(property.longitude);

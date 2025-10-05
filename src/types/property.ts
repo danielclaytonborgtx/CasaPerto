@@ -20,4 +20,10 @@ export interface Property {
   userId: number;
   user: User;
   teamId?: number;
+  description: string;
+  description1?: string;
+  user_id?: number;
+  team_id?: number;
+  created_at?: string;
+  updated_at?: string;
 } 
