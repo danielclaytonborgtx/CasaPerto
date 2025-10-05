@@ -267,8 +267,12 @@ export const supabaseTeams = {
         .eq('user_id', userId)
 
       if (error) {
-        console.error('❌ Erro ao remover membro:', error.message)
-        throw new Error(error.message)
+        console.error('❌ Erro ao remover membro:', error.message);
+        if (error.code === '42501') {
+          console.error('🔒 ERRO DE PERMISSÃO RLS - Execute o script fix-edit-team-rls.sql no Supabase');
+          throw new Error('Erro de permissão RLS. Execute o script fix-edit-team-rls.sql no Supabase.');
+        }
+        throw new Error(error.message);
       }
       
       console.log('✅ Membro removido da equipe com sucesso');

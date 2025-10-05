@@ -24,25 +24,34 @@ import {
 import { FaPlus, FaMinus } from "react-icons/fa";
 import { FiEdit } from "react-icons/fi";
 
-import { useAuth, User } from "../../services/authContext";
+import { useAuth } from "../../services/authContext";
+
+// Interface local para compatibilidade com UUIDs do banco
+interface LocalUser {
+  id: string;
+  name: string;
+  email: string;
+  username: string;
+  password: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 interface TeamMember {
+  id: string;
+  userId: string;
+  name: string;
+  email: string;
+  role?: string;
+}
+
+
+interface PendingInvite {
   id: number;
   userId: string;
   name: string;
   email: string;
-}
-
-interface TeamData {
-  name: string;
-  members: TeamMember[];
-  imageUrl: string | null;
-}
-
-interface PendingInvite {
-  userId: string;
-  name: string;
-  email: string;
+  status: string;
 }
 
 const EditTeam: React.FC = () => {
@@ -53,12 +62,13 @@ const EditTeam: React.FC = () => {
   const [teamName, setTeamName] = useState("");
   const [brokers, setBrokers] = useState<TeamMember[]>([]);
   const [brokerName, setBrokerName] = useState("");
-  const [availableBrokers, setAvailableBrokers] = useState<User[]>([]);
+  const [availableBrokers, setAvailableBrokers] = useState<LocalUser[]>([]);
   const [teamImage, setTeamImage] = useState<string | null>(null);
   const [imageInputRef, setImageInputRef] = useState<HTMLInputElement | null>(null);
   const [loading, setLoading] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
   const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([]);
+  const [removedMembers, setRemovedMembers] = useState<string[]>([]);
 
   const fetchTeam = useCallback(async () => {
     if (isDeleted) return;
@@ -111,7 +121,15 @@ const EditTeam: React.FC = () => {
       }
 
       console.log('✅ EditTeam: Usuários carregados', users);
-      const validBrokers = (users || []).filter((broker) => broker.id && broker.name);
+      const validBrokers: LocalUser[] = (users || []).filter((broker) => broker.id && broker.name).map((broker) => ({
+        id: broker.id,
+        name: broker.name,
+        email: broker.email,
+        username: broker.username || '',
+        password: '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }));
       setAvailableBrokers(validBrokers);
     } catch (error) {
       console.error("❌ EditTeam: Erro ao buscar corretores:", error);
@@ -125,7 +143,7 @@ const EditTeam: React.FC = () => {
     fetchBrokers();
   }, [id, isDeleted, fetchBrokers, fetchTeam]);
 
-  const handleAddBroker = (user: User) => {
+  const handleAddBroker = (user: LocalUser) => {
     console.log('🔍 EditTeam: Adicionando usuário à lista de convites pendentes', { userId: user.id, name: user.name });
     
     // Adicionar à lista de convites pendentes (sem enviar ainda)
@@ -150,35 +168,51 @@ const EditTeam: React.FC = () => {
     // Remover da lista de convites pendentes
     setPendingInvites((prev) => prev.filter((invite) => invite.userId !== userId));
     
-    // Adicionar de volta à lista de corretores disponíveis
+    // Adicionar de volta à lista de corretores disponíveis (apenas se não existir)
     const removedInvite = pendingInvites.find(invite => invite.userId === userId);
     if (removedInvite) {
-      const brokerAsUser: User = {
-        id: removedInvite.userId,
-        name: removedInvite.name,
-        email: removedInvite.email,
-        username: '',
-        password: '',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      setAvailableBrokers((prev) => [...prev, brokerAsUser]);
+      setAvailableBrokers((prev) => {
+        const alreadyExists = prev.some(b => b.id === removedInvite.userId);
+        if (alreadyExists) {
+          console.log('⚠️ EditTeam: Corretor já existe na lista de disponíveis');
+          return prev;
+        }
+        
+        const brokerAsUser: LocalUser = {
+          id: removedInvite.userId,
+          name: removedInvite.name,
+          email: removedInvite.email,
+          username: '',
+          password: '',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        
+        return [...prev, brokerAsUser];
+      });
     }
     
     console.log('✅ EditTeam: Convite pendente removido');
   };
 
-  const handleRemoveBroker = async (broker: TeamMember) => {
-    try {
-      console.log('🔍 EditTeam: Removendo membro da equipe', { userId: broker.userId, teamId: id });
+  const handleRemoveBroker = (broker: TeamMember) => {
+    console.log('🔍 EditTeam: Removendo membro da lista (visual)', { userId: broker.userId });
+    
+    // Apenas remover da lista visual - não salvar no banco ainda
+    setBrokers((prev) => prev.filter((b) => b.userId !== broker.userId));
+
+    // Adicionar à lista de membros removidos
+    setRemovedMembers((prev) => [...prev, broker.userId]);
+
+    // Adicionar de volta à lista de disponíveis (apenas se não existir)
+    setAvailableBrokers((prev) => {
+      const alreadyExists = prev.some(b => b.id === broker.userId);
+      if (alreadyExists) {
+        console.log('⚠️ EditTeam: Corretor já existe na lista de disponíveis');
+        return prev;
+      }
       
-      // Remover membro da equipe
-      await supabaseTeams.removeTeamMember(Number(id), broker.userId);
-
-      // Atualizar listas
-      setBrokers((prev) => prev.filter((b) => b.userId !== broker.userId));
-
-      const brokerAsUser: User = {
+      const brokerAsUser: LocalUser = {
         id: broker.userId,
         name: broker.name,
         email: broker.email,
@@ -187,25 +221,11 @@ const EditTeam: React.FC = () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-
-      setAvailableBrokers((prev) => [...prev, brokerAsUser]);
-
-      if (Number(broker.userId) === user?.id && setUser && user) {
-        const updatedUser = {
-          ...user,
-          teamId: undefined,
-          team: undefined,
-        };
-        setUser(updatedUser);
-        localStorage.setItem("user", JSON.stringify(updatedUser));
-      }
-    } catch (error) {
-      console.error("Erro ao remover corretor:", error);
-      if (error instanceof AxiosError) {
-        const errorMessage = error.response?.data?.error || "Erro ao remover corretor da equipe.";
-        alert(errorMessage);
-      }
-    }
+      
+      return [...prev, brokerAsUser];
+    });
+    
+    console.log('✅ EditTeam: Membro removido da lista (será salvo ao clicar em Salvar)');
   };
 
   const handleUpdateTeam = async () => {
@@ -246,12 +266,94 @@ const EditTeam: React.FC = () => {
       if (teamImage && teamImage.startsWith("data:image")) {
         console.log('🖼️ EditTeam: Fazendo upload da nova imagem');
         const imageBlob = dataURItoBlob(teamImage);
-        const imageUrl = await supabaseStorage.uploadTeamImage(Number(id), imageBlob);
+        const imageFile = new File([imageBlob], 'team-image.jpg', { type: imageBlob.type });
+        const imageUrl = await supabaseStorage.uploadTeamImage(Number(id), imageFile);
         
         // Atualizar URL da imagem
         await supabaseTeams.updateTeam(Number(id), {
           image_url: imageUrl
         });
+      }
+
+      // Remover membros da equipe (se houver)
+      // Remover membros da equipe (se houver)
+      if (removedMembers.length > 0) {
+        console.log('🗑️ EditTeam: Removendo membros da equipe', removedMembers.length);
+
+        for (const memberId of removedMembers) {
+          try {
+            // 1️⃣ Remover membro da equipe
+            await supabaseTeams.removeTeamMember(Number(id), memberId);
+            console.log('✅ EditTeam: Membro removido da equipe', memberId);
+
+            // 2️⃣ Limpar team_id das propriedades do membro
+            console.log('🧹 EditTeam: Limpando vínculo das propriedades do membro', memberId);
+            const { error: updatePropertiesError } = await supabase
+              .from('properties')
+              .update({ team_id: null })
+              .eq('user_id', memberId)
+              .eq('team_id', Number(id));
+
+            if (updatePropertiesError) {
+              console.error('❌ EditTeam: Erro ao limpar vínculo das propriedades:', updatePropertiesError);
+              if (updatePropertiesError.code === '42501') {
+                console.error('🔒 EditTeam: ERRO DE PERMISSÃO RLS - Execute o script fix-edit-team-rls.sql no Supabase');
+                alert('Erro de permissão ao atualizar propriedades. Verifique as políticas RLS do banco de dados.');
+              }
+            } else {
+              console.log('✅ EditTeam: Vínculo das propriedades limpo com sucesso');
+            }
+
+            // 3️⃣ Limpar dados do usuário no banco (teamId e afins)
+            console.log('🧩 EditTeam: Limpando dados do usuário (teamId, teamMembers...)');
+            const { error: updateUserError } = await supabase
+              .from('users')
+              .update({
+                team_id: null,
+                team: null,
+                teamMembers: [],
+              })
+              .eq('id', memberId);
+
+            if (updateUserError) {
+              console.error('❌ EditTeam: Erro ao limpar dados do usuário:', updateUserError);
+              if (updateUserError.code === '42501') {
+                console.error('🔒 EditTeam: ERRO DE PERMISSÃO RLS - Execute o script fix-edit-team-rls.sql no Supabase');
+                alert('Erro de permissão ao atualizar dados do usuário. Verifique as políticas RLS do banco de dados.');
+              }
+            } else {
+              console.log('✅ EditTeam: Dados do usuário limpos com sucesso');
+            }
+
+            // 4️⃣ Limpar localStorage do usuário removido (se estiver logado em outra aba)
+            console.log('🧹 EditTeam: Limpando localStorage do usuário removido');
+            try {
+              // Nota: Isso só funciona se o usuário estiver logado na mesma sessão
+              // Para usuários em outras abas, eles serão atualizados no próximo login
+              const storedUser = localStorage.getItem('user');
+              if (storedUser) {
+                const parsedUser = JSON.parse(storedUser);
+                if (parsedUser.id === memberId) {
+                  // Limpar dados de equipe do localStorage
+                  parsedUser.teamMembers = [];
+                  parsedUser.team_id = null;
+                  parsedUser.team = null;
+                  localStorage.setItem('user', JSON.stringify(parsedUser));
+                  console.log('✅ EditTeam: localStorage do usuário removido limpo');
+                }
+              }
+            } catch (localStorageError) {
+              console.error('❌ EditTeam: Erro ao limpar localStorage:', localStorageError);
+            }
+
+            // 4️⃣ (Opcional) Se o membro estiver logado em outra aba, 
+            // ele será desassociado automaticamente na próxima leitura do banco.
+            // Caso você tenha Supabase Realtime, isso atualizará instantaneamente.
+
+          } catch (memberError) {
+            console.error('❌ EditTeam: Erro ao remover membro', memberId, memberError);
+          }
+        }
       }
 
       // Enviar convites pendentes
@@ -269,6 +371,47 @@ const EditTeam: React.FC = () => {
       }
 
       console.log('✅ EditTeam: Equipe atualizada com sucesso');
+      
+      // Forçar atualização dos dados do usuário para refletir mudanças
+      if (user) {
+        console.log('🔄 EditTeam: Forçando atualização dos dados do usuário...');
+        // Recarregar dados do usuário para atualizar teamMembers
+        try {
+          // Buscar dados atualizados do usuário
+          const { data: updatedUser, error: userError } = await supabase
+            .from('users')
+            .select(`
+              *,
+              team_members:team_members(
+                *,
+                team:teams(*)
+              )
+            `)
+            .eq('id', user.id)
+            .single();
+          
+          if (!userError && updatedUser) {
+            // Converter team_members para o formato esperado
+            if (updatedUser.team_members) {
+              updatedUser.teamMembers = updatedUser.team_members.map((tm: any) => ({
+                id: tm.id,
+                userId: tm.user_id,
+                teamId: tm.team_id
+              }));
+              delete updatedUser.team_members;
+            }
+            
+            console.log('✅ EditTeam: Dados do usuário atualizados:', updatedUser);
+            setUser(updatedUser);
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+          }
+        } catch (error) {
+          console.error('❌ EditTeam: Erro ao atualizar dados do usuário:', error);
+          // Fallback: reload da página
+          window.location.reload();
+        }
+      }
+      
       navigate("/team");
     } catch (error) {
       console.error("❌ EditTeam: Erro ao editar equipe:", error);
@@ -420,9 +563,18 @@ const EditTeam: React.FC = () => {
               />
               <BrokerList>
                 {availableBrokers
-                  .filter((broker) => broker.name.toLowerCase().includes(brokerName.toLowerCase()))
+                  .filter((broker) => {
+                    // Filtrar por nome
+                    const matchesName = broker.name.toLowerCase().includes(brokerName.toLowerCase());
+                    // Filtrar corretores que já estão na equipe
+                    const isAlreadyInTeam = brokers.some(b => b.userId === broker.id);
+                    // Filtrar corretores que já estão nos convites pendentes
+                    const isPendingInvite = pendingInvites.some(invite => invite.userId === broker.id);
+                    
+                    return matchesName && !isAlreadyInTeam && !isPendingInvite;
+                  })
                   .map((broker) => (
-                    <BrokerItem key={broker.id}>
+                    <BrokerItem key={`available-${broker.id}`}>
                       {broker.name}
                       <AddBrokerButton onClick={() => handleAddBroker(broker)}>
                         <FaPlus />
@@ -436,7 +588,7 @@ const EditTeam: React.FC = () => {
               <h3>Corretores Adicionados</h3>
               <AddedBrokerList>
                 {brokers.map((broker) => (
-                  <BrokerItem key={broker.userId}>
+                  <BrokerItem key={`broker-${broker.userId}`}>
                     {broker.name}
                     <AddBrokerButton onClick={() => handleRemoveBroker(broker)}>
                       <FaMinus />
@@ -444,7 +596,7 @@ const EditTeam: React.FC = () => {
                   </BrokerItem>
                 ))}
                 {pendingInvites.map((invite) => (
-                  <BrokerItem key={invite.userId}>
+                  <BrokerItem key={`invite-${invite.userId}`}>
                     {invite.name} (Convite Pendente)
                     <AddBrokerButton onClick={() => handleRemovePendingInvite(invite.userId)}>
                       <FaMinus />

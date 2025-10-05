@@ -132,8 +132,41 @@ export const supabaseProperties = {
       // Filtro por usuário ou equipe
       if (filters.teamId) {
         console.log('🔍 Aplicando filtro de usuário/equipe:', `user_id.eq.${filters.userId},team_id.eq.${filters.teamId}`);
-        // Buscar propriedades do usuário OU da equipe
-        query = query.or(`user_id.eq.${filters.userId},team_id.eq.${filters.teamId}`)
+        
+        // VERIFICAÇÃO CRÍTICA: Se tem teamId, verificar se usuário ainda é membro da equipe
+        const { data: membership, error: membershipError } = await supabase
+          .from('team_members')
+          .select('id')
+          .eq('team_id', filters.teamId)
+          .eq('user_id', filters.userId)
+          .single();
+
+        if (membershipError || !membership) {
+          console.log('⚠️ Usuário não é mais membro da equipe, buscando apenas propriedades próprias');
+          query = query.eq('user_id', filters.userId);
+        } else {
+          console.log('✅ Usuário ainda é membro da equipe, buscando propriedades do usuário + da equipe');
+          // Buscar propriedades do usuário OU da equipe (apenas de membros ativos)
+          
+          // Primeiro buscar membros ativos da equipe
+          const { data: activeMembers } = await supabase
+            .from('team_members')
+            .select('user_id')
+            .eq('team_id', filters.teamId);
+          
+          const activeMemberIds = activeMembers?.map(member => member.user_id) || [];
+          console.log('✅ Membros ativos da equipe para filtro:', activeMemberIds);
+          
+          if (activeMemberIds.length > 0) {
+            // Buscar propriedades do usuário OU de membros ativos da equipe
+            const userIdCondition = `user_id.eq.${filters.userId}`;
+            const teamConditions = activeMemberIds.map(id => `user_id.eq.${id}`).join(',');
+            query = query.or(`${userIdCondition},(${teamConditions})`);
+          } else {
+            // Se não há membros ativos, buscar apenas propriedades do usuário
+            query = query.eq('user_id', filters.userId);
+          }
+        }
       } else {
         console.log('🔍 Aplicando filtro de usuário:', filters.userId);
         // Buscar apenas propriedades do usuário
@@ -171,10 +204,48 @@ export const supabaseProperties = {
   },
 
   // Buscar propriedades da equipe (nova função específica)
-  async getTeamProperties(teamId: number, category?: string): Promise<Property[]> {
+  async getTeamProperties(teamId: number, category?: string, userId?: string): Promise<Property[]> {
     try {
-      console.log('🔍 supabaseProperties.getTeamProperties: Buscando propriedades da equipe', { teamId, category });
+      console.log('🔍 supabaseProperties.getTeamProperties: Buscando propriedades da equipe', { teamId, category, userId });
       
+      // VERIFICAÇÃO CRÍTICA: Se userId for fornecido, verificar se ainda é membro da equipe
+      if (userId) {
+        console.log('🔍 Verificando se usuário ainda é membro da equipe...');
+        const { data: membership, error: membershipError } = await supabase
+          .from('team_members')
+          .select('id')
+          .eq('team_id', teamId)
+          .eq('user_id', userId)
+          .single();
+
+        if (membershipError || !membership) {
+          console.log('⚠️ Usuário não é mais membro da equipe, retornando array vazio');
+          return [];
+        }
+        console.log('✅ Usuário ainda é membro da equipe');
+      }
+      
+      // BUSCAR APENAS PROPRIEDADES DE MEMBROS ATIVOS DA EQUIPE
+      console.log('🔍 Buscando membros ativos da equipe...');
+      const { data: activeMembers, error: membersError } = await supabase
+        .from('team_members')
+        .select('user_id')
+        .eq('team_id', teamId);
+
+      if (membersError) {
+        console.error('❌ Erro ao buscar membros da equipe:', membersError);
+        throw new Error(membersError.message);
+      }
+
+      const activeMemberIds = activeMembers?.map(member => member.user_id) || [];
+      console.log('✅ Membros ativos da equipe:', activeMemberIds);
+
+      if (activeMemberIds.length === 0) {
+        console.log('⚠️ Equipe não tem membros ativos, retornando array vazio');
+        return [];
+      }
+      
+      // Buscar propriedades apenas dos membros ativos que têm team_id definido
       let query = supabase
         .from('properties')
         .select(`
@@ -182,6 +253,7 @@ export const supabaseProperties = {
           user:users(id, name, username)
         `)
         .eq('team_id', teamId)
+        .in('user_id', activeMemberIds); // FILTRO CRÍTICO: Apenas membros ativos
 
       // Filtro por categoria
       if (category) {
@@ -198,6 +270,7 @@ export const supabaseProperties = {
 
       console.log('✅ supabaseProperties.getTeamProperties: Resultado', {
         total: data?.length || 0,
+        activeMembers: activeMemberIds.length,
         properties: data?.map(p => ({
           id: p.id,
           title: p.title,
