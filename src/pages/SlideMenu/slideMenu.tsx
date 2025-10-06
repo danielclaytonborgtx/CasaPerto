@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../services/authContext';
 import { supabaseProfile } from '../../services/supabaseProfile';
 import { SlideMenuContainer, MenuItem, MenuContent, UserNameSpan, ProfileImage, DefaultIcon } from './styles';
+import { User } from 'lucide-react';
 
 const SlideMenu: React.FC<{ onClose: () => void; isVisible: boolean }> = ({ onClose, isVisible }) => {
   const { user } = useAuth();
@@ -77,7 +78,9 @@ const SlideMenu: React.FC<{ onClose: () => void; isVisible: boolean }> = ({ onCl
               {profileImage ? (
                 <ProfileImage src={profileImage} alt="Foto de perfil" />
               ) : (
-                <DefaultIcon>👤</DefaultIcon>
+                <DefaultIcon>
+                  <User size={20} />
+                </DefaultIcon>
               )}
               {user.name}
             </UserNameSpan>

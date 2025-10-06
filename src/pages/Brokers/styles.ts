@@ -20,21 +20,33 @@ export const ProfileImage = styled.img`
 `;
 
 export const MessageButton = styled.button`
-  border-radius: 20%;
   position: absolute;
-  top: 10px;
-  right: 10px;
-  background-color: #007bff;
+  top: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
   border: none;
-  font-size: 20px;
+  border-radius: 12px;
+  padding: 12px;
   cursor: pointer;
-  color: #007bff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  z-index: 2;
+  min-width: 44px;
+  min-height: 44px;
 
   &:hover {
-    color: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
   }
 
-  z-index: 1; 
+  &:active {
+    transform: translateY(0);
+  }
 `;
 
 export const BrokerList = styled.ul`
@@ -47,16 +59,19 @@ export const BrokerItem = styled.li`
   display: flex;
   align-items: center;
   background: #f8f9fa;
-  padding: 15px;
+  padding: 20px;
   margin: 10px 0;
-  border-radius: 8px;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
   transition: 0.3s;
-  gap: 15px;
-  position: relative; 
+  gap: 20px;
+  position: relative;
+  min-height: 120px;
 
   &:hover {
     background: #e9ecef;
+    transform: translateY(-2px);
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
   }
 `;
 
@@ -64,20 +79,48 @@ export const BrokerDetails = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  margin-left: 15px; 
-  gap: 5px;
+  margin-left: 15px;
+  gap: 8px;
+  flex: 1;
+  padding-right: 60px; /* Espaço para o ícone de mensagem */
+  min-width: 0; /* Permite que o texto quebre se necessário */
 `;
 
 export const ProfileLink = styled.strong`
   cursor: pointer;
-  color: blue;
+  color: #3b82f6;
   font-size: 14px; 
   margin-top: 8px; 
   display: inline-block; 
   
   &:hover {
     text-decoration: underline;
+    color: #1d4ed8;
   }
+`;
+
+export const BrokerName = styled.p`
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+  word-break: break-word;
+  line-height: 1.3;
+`;
+
+export const BrokerId = styled.p`
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+  font-weight: 500;
+`;
+
+export const BrokerEmail = styled.p`
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+  word-break: break-all;
+  line-height: 1.4;
 `;
 
 export const BrokerIcon = styled.div`

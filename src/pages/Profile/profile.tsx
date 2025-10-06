@@ -29,11 +29,8 @@ import {
 import {
   FaTrashAlt,
   FaPen,
-  FaUsers,
-  FaUserTie,
-  FaEnvelope,
-  FaCog,
 } from "react-icons/fa";
+import { Users, UserCheck, Mail, Settings, User } from "lucide-react";
 
 interface User {
   id: number;
@@ -172,7 +169,9 @@ const Profile: React.FC = () => {
         {profileImage ? (
           <ProfileImage src={profileImage} alt="Foto de perfil" />
         ) : (
-          <DefaultIcon>👤</DefaultIcon>
+          <DefaultIcon>
+            <User size={40} />
+          </DefaultIcon>
         )}
       </ProfileImageContainer>
       <UserName>{user.name}</UserName>
@@ -180,15 +179,15 @@ const Profile: React.FC = () => {
 
       <ButtonContainer>
         <StyledButton onClick={() => navigate("/brokers")}>
-          <FaUserTie size={30} />
+          <UserCheck size={30} />
           <span>Corretores</span>
         </StyledButton>
         <StyledButton onClick={() => navigate("/team")}>
-          <FaUsers size={30} />
+          <Users size={30} />
           <span>Equipes</span>
         </StyledButton>
         <StyledButton onClick={() => navigate("/messages")} style={{ position: 'relative' }}>
-          <FaEnvelope size={30} />
+          <Mail size={30} />
           {unreadMessages > 0 && (
             <span
               style={{
@@ -209,7 +208,7 @@ const Profile: React.FC = () => {
           <span>Mensagens</span>
         </StyledButton>
         <StyledButton onClick={() => navigate("/settings")}>
-          <FaCog size={30} />
+          <Settings size={30} />
           <span>Configurações</span>
         </StyledButton>
       </ButtonContainer>

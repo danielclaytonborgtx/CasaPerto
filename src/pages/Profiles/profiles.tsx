@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import LoadingMessage from "../../components/loadingMessage/LoadingMessage";
+import { User } from "lucide-react";
 import { 
   ProfileContainer, 
   UserName, 
@@ -141,7 +142,9 @@ const Profiles: React.FC = () => {
             }}
           />
         ) : (
-          <DefaultIcon>👤</DefaultIcon>
+          <DefaultIcon>
+            <User size={40} />
+          </DefaultIcon>
         )}
       </ProfileImageContainer>
 

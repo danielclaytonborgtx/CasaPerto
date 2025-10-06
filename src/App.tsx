@@ -19,6 +19,7 @@ import Team from './pages/Team/team';
 import Profiles from './pages/Profiles/profiles';
 import CreateTeam from './pages/CreateTeam/createTeam';
 import EditTeam from './pages/Edit-team/edit-team';
+import ContactBroker from './pages/ContactBroker/contactBroker';
 
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
@@ -54,6 +55,7 @@ const App: React.FC = () => {
               <Route path="/create-team" element={<CreateTeam />} />
               <Route path="/edit-team/:id" element={<EditTeam />} />
               <Route path="/profiles/:userId" element={<Profiles />} />
+              <Route path="/contact/:brokerId" element={<ContactBroker />} />
             </Route>
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>

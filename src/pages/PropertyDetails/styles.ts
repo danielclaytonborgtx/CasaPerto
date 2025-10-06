@@ -114,11 +114,6 @@ export const Price = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-  
-  &::before {
-    content: '💰';
-    font-size: 24px;
-  }
 `;
 
 export const PropertyMeta = styled.div`
@@ -153,11 +148,6 @@ export const DescriptionTitle = styled.h3`
   display: flex;
   align-items: center;
   gap: 8px;
-  
-  &::before {
-    content: '📝';
-    font-size: 18px;
-  }
 `;
 
 export const DescriptionText = styled.p`

@@ -29,8 +29,43 @@ export const ContactList = styled.div`
 export const ContactItem = styled.div`
   padding: 5px;
   cursor: pointer;
+  position: relative;
   &:hover {
     background-color: #f0f0f0;
+  }
+`;
+
+export const DeleteButton = styled.button`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #fc8181;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  padding: 0;
+  opacity: 0;
+  transition: all 0.2s ease;
+  z-index: 10;
+
+  ${ContactItem}:hover & {
+    opacity: 1;
+  }
+
+  &:hover {
+    background-color: #f56565;
+    transform: scale(1.1);
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 `;
 

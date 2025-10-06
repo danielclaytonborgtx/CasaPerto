@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
+import { User, MessageSquare } from "lucide-react"; 
 import { 
   BrokersContainer, 
   BrokerList,
@@ -10,7 +11,10 @@ import {
   ProfileImage,
   ProfileLink,
   MessageButton,
-  SearchInput
+  SearchInput,
+  BrokerName,
+  BrokerId,
+  BrokerEmail
 } from "./styles";
 import { useAuth } from "../../services/authContext"; 
 import LoadingMessage from "../../components/loadingMessage/LoadingMessage";
@@ -125,18 +129,22 @@ const Brokers: React.FC = () => {
             {profileImages[broker.id] ? (
               <ProfileImage src={profileImages[broker.id]!} />
             ) : (
-              <BrokerIcon>👤</BrokerIcon>
+              <BrokerIcon>
+                <User size={20} />
+              </BrokerIcon>
             )}
             <BrokerDetails>
-              <p>{broker.name}</p>
-              <strong>{broker.username}</strong>
-              <p>{broker.email}</p>
+              <BrokerName>{broker.name}</BrokerName>
+              <BrokerId>{broker.username}</BrokerId>
+              <BrokerEmail>{broker.email}</BrokerEmail>
               <ProfileLink onClick={() => navigate(`/profiles/${broker.id}`)}>
                 Ver perfil
               </ProfileLink>
             </BrokerDetails>
             {broker.id !== String(user?.id) && (
-        <MessageButton onClick={() => navigate(`/messages/${broker.id}`)}>💬</MessageButton>
+        <MessageButton onClick={() => navigate(`/messages/${broker.id}`)}>
+          <MessageSquare size={18} />
+        </MessageButton>
       )}
     </BrokerItem>
   ))}

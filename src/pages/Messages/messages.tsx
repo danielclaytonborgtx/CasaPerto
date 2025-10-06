@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { Trash2 } from "lucide-react";
 import { useAuth } from "../../services/authContext"; 
 import { supabaseMessages } from "../../services/supabaseMessages";
+import { supabaseVisitors } from "../../services/supabaseVisitors";
+import { supabaseDeleteMessages } from "../../services/supabaseDeleteMessages";
 import LoadingMessage from "../../components/loadingMessage/LoadingMessage";
 import {
   MessageContainer,
@@ -11,13 +14,16 @@ import {
   Button,
   ContactList,
   ContactItem,
+  DeleteButton,
   HeaderContainer,
 } from "./styles";
 
 interface Message {
   id: number;
-  sender_id: string;
-  receiver_id: string;
+  sender_id?: string;
+  receiver_id?: string;
+  visitor_sender_id?: string;
+  visitor_receiver_id?: string;
   content: string;
   created_at: string;
   read_at?: string;
@@ -31,12 +37,29 @@ interface Message {
     name: string;
     username: string;
   };
+  visitor_sender?: {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string;
+  };
+  visitor_receiver?: {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string;
+  };
 }
 
 interface Conversation {
-  userId: string;
+  userId?: string;
+  visitorId?: string;
   userName: string;
+  userPhone?: string;
+  isVisitor: boolean;
   messages: Message[];
+  unreadCount: number;
+  mainId?: string;
 }
 
 const Messages: React.FC = () => {
@@ -61,22 +84,27 @@ const Messages: React.FC = () => {
 
     const fetchConversations = async () => {
       try {
-        console.log('🔍 Messages: Buscando conversas do usuário:', senderId);
-        
-        // Usar supabaseMessages para buscar conversas
-        const conversationsData = await supabaseMessages.getUserConversations(String(senderId));
-        
-        console.log('✅ Messages: Conversas carregadas:', conversationsData);
+        // Usar supabaseVisitors para buscar conversas incluindo visitantes
+        const conversationsData = await supabaseVisitors.getUserConversationsWithVisitors(String(senderId));
 
         // Converter para o formato esperado pela interface
-        const conversations = conversationsData.map(conv => ({
-          userId: conv.user.id.toString(),
-          userName: conv.user.name,
-          messages: conv.lastMessage ? [conv.lastMessage] : [],
-          unreadCount: conv.unreadCount
-        }));
+        const conversations = conversationsData.map(conv => {
+          // Para visitantes, usar visitorId como ID principal
+          const mainId = conv.isVisitor ? conv.visitor?.id : conv.user?.id;
+          const mainName = conv.isVisitor ? (conv.visitor?.name || 'Visitante') : (conv.user?.name || 'Usuário');
+          
+          return {
+            userId: conv.isVisitor ? undefined : conv.user?.id,
+            visitorId: conv.isVisitor ? conv.visitor?.id : undefined,
+            userName: mainName,
+            userPhone: conv.visitor?.phone,
+            isVisitor: conv.isVisitor,
+            messages: conv.lastMessage ? [conv.lastMessage] : [],
+            unreadCount: conv.unreadCount,
+            mainId: mainId
+          };
+        });
 
-        console.log('✅ Messages: Conversas formatadas:', conversations);
         setConversations(conversations);
       } catch (error) {
         console.error("❌ Messages: Erro ao carregar conversas", error);
@@ -100,12 +128,15 @@ const Messages: React.FC = () => {
       if (!isMounted) return;
       
       try {
-        // Buscar conversas atualizadas
-        const conversationsData = await supabaseMessages.getUserConversations(String(senderId));
+        // Buscar conversas atualizadas (incluindo visitantes)
+        const conversationsData = await supabaseVisitors.getUserConversationsWithVisitors(String(senderId));
         
         const conversations = conversationsData.map(conv => ({
-          userId: conv.user.id.toString(),
-          userName: conv.user.name,
+          userId: conv.user?.id?.toString() || undefined,
+          visitorId: conv.visitor?.id,
+          userName: conv.user?.name || conv.visitor?.name || 'Usuário',
+          userPhone: conv.visitor?.phone,
+          isVisitor: conv.isVisitor || false,
           messages: conv.lastMessage ? [conv.lastMessage] : [],
           unreadCount: conv.unreadCount
         }));
@@ -117,13 +148,12 @@ const Messages: React.FC = () => {
         );
 
         if (hasChanges) {
-          console.log('✅ Messages: Novas mensagens detectadas!');
           setConversations(conversations);
           lastCheckTime = new Date().toISOString();
         }
 
         // Se há uma conversa ativa, também verificar mensagens dela
-        if (activeBrokerId) {
+        if (activeBrokerId && activeBrokerId !== 'unknown') {
           const messages = await supabaseMessages.getMessagesBetweenUsers(String(senderId), String(activeBrokerId));
           
           setConversations((prevConversations) => {
@@ -169,28 +199,52 @@ const Messages: React.FC = () => {
       if (!isMounted) return;
       
       try {
-        console.log('🔍 Messages: Carregando dados iniciais da conversa...');
+        // Primeiro tentar buscar como mensagens de visitante
+        let messages: Message[] = [];
+        let userInfo: string | null = null;
+        let isVisitorConversation = false;
         
-        // Buscar mensagens e nome do usuário em paralelo
-        const [messages, userInfo] = await Promise.all([
-          supabaseMessages.getMessagesBetweenUsers(String(senderId), String(activeBrokerId)),
-          fetchUserName(activeBrokerId)
-        ]);
+        try {
+          const visitorMessages = await supabaseVisitors.getMessagesBetweenVisitorAndUser(
+            activeBrokerId, 
+            String(senderId)
+          );
+          
+          if (visitorMessages && visitorMessages.length > 0) {
+            messages = visitorMessages;
+            isVisitorConversation = true;
+            // Buscar nome do visitante
+            if (visitorMessages[0].visitor_sender) {
+              userInfo = visitorMessages[0].visitor_sender.name;
+            }
+          }
+        } catch {
+          // Se falhar, não é visitante, continua para tentar como usuário
+        }
         
-        console.log('✅ Messages: Dados iniciais carregados:', { 
-          messagesCount: messages.length, 
-          userName: userInfo 
-        });
+        // Se não encontrou mensagens de visitante, buscar como usuário
+        if (!isVisitorConversation) {
+          const [userMessages, userName] = await Promise.all([
+            supabaseMessages.getMessagesBetweenUsers(String(senderId), String(activeBrokerId)),
+            fetchUserName(activeBrokerId)
+          ]);
+          messages = userMessages;
+          userInfo = userName;
+        }
 
         setConversations((prevConversations) => {
           const existingIndex = prevConversations.findIndex(
-            (conv) => conv.userId === activeBrokerId
+            (conv) => conv.userId === activeBrokerId || conv.visitorId === activeBrokerId
           );
 
           const updatedConversation: Conversation = {
-            userId: activeBrokerId,
+            userId: isVisitorConversation ? undefined : activeBrokerId,
+            visitorId: isVisitorConversation ? activeBrokerId : undefined,
             userName: userInfo || "Desconhecido",
+            userPhone: isVisitorConversation ? messages[0]?.visitor_sender?.phone : undefined,
+            isVisitor: isVisitorConversation,
             messages: messages,
+            unreadCount: 0
           };
 
           if (existingIndex !== -1) {
@@ -246,11 +300,16 @@ const Messages: React.FC = () => {
     if (!newMessage.trim() || !activeBrokerId || !senderId) return;
 
     try {
-      console.log('🔍 Messages: Enviando mensagem:', { 
-        senderId, 
-        receiverId: activeBrokerId, 
-        content: newMessage 
-      });
+      // Verificar se é uma conversa com visitante
+      const currentConversation = conversations.find(conv => 
+        conv.mainId === activeBrokerId || conv.userId === activeBrokerId || conv.visitorId === activeBrokerId
+      );
+
+      if (currentConversation?.isVisitor) {
+        // Não é possível enviar mensagem para visitante (visitante não tem conta)
+        alert('Não é possível enviar mensagem para visitantes. Eles devem entrar em contato através do formulário.');
+        return;
+      }
 
       // Usar supabaseMessages para enviar mensagem
       await supabaseMessages.sendMessage({
@@ -258,8 +317,6 @@ const Messages: React.FC = () => {
         receiver_id: activeBrokerId,
         content: newMessage,
       });
-
-      console.log('✅ Messages: Mensagem enviada com sucesso');
 
       // Buscar mensagens atualizadas
       const messages = await supabaseMessages.getMessagesBetweenUsers(
@@ -272,7 +329,9 @@ const Messages: React.FC = () => {
 
         const updatedConversation: Conversation = {
           userId: activeBrokerId,
-          userName: conversations.find((conv) => conv.userId === activeBrokerId)?.userName || "Desconhecido",
+          userName: conversations.find((conv) => conv.userId === activeBrokerId || conv.visitorId === activeBrokerId)?.userName || "Desconhecido",
+          isVisitor: false,
+          unreadCount: 0,
           messages: messages,
         };
 
@@ -297,6 +356,50 @@ const Messages: React.FC = () => {
     navigate(`/messages/${id}`);
   };
 
+  const handleDeleteConversation = async (conversationId: string, event: React.MouseEvent) => {
+    event.stopPropagation(); // Impedir que o clique abra a conversa
+    
+    const confirmDelete = window.confirm("Tem certeza que deseja excluir esta conversa? Todas as mensagens serão apagadas permanentemente.");
+    if (!confirmDelete) return;
+
+    try {
+      // Encontrar a conversa para saber se é visitante ou usuário
+      const conversation = conversations.find(conv => 
+        conv.userId === conversationId || conv.visitorId === conversationId
+      );
+
+      if (!conversation) {
+        alert("Conversa não encontrada.");
+        return;
+      }
+
+      // Deletar mensagens do banco de dados
+      await supabaseDeleteMessages.deleteConversation(
+        String(senderId),
+        conversationId,
+        conversation.isVisitor
+      );
+
+      // Remover a conversa do estado local
+      setConversations(prevConversations => 
+        prevConversations.filter(conv => 
+          (conv.userId !== conversationId && conv.visitorId !== conversationId)
+        )
+      );
+
+      // Se a conversa excluída estava ativa, limpar a seleção
+      if (activeBrokerId === conversationId) {
+        setActiveBrokerId("");
+        navigate("/messages");
+      }
+
+      alert("Conversa excluída com sucesso!");
+    } catch (error) {
+      console.error("Erro ao excluir conversa:", error);
+      alert("Erro ao excluir conversa. Tente novamente.");
+    }
+  };
+
   if (loading) {
     return <LoadingMessage />;
   }
@@ -312,14 +415,34 @@ const Messages: React.FC = () => {
         <ContactList>
           {conversations.map((conversation, index) => (
             <ContactItem
-              key={`${conversation.userId}-${index}`} 
-              onClick={() => handleSelectBroker(conversation.userId)}
+              key={`${conversation.mainId || conversation.userId || conversation.visitorId}-${index}`} 
+              onClick={() => handleSelectBroker(conversation.mainId || conversation.userId || conversation.visitorId || '')}
               style={{
                 cursor: "pointer",
-                fontWeight: activeBrokerId === conversation.userId ? "bold" : "normal",
+                fontWeight: activeBrokerId === (conversation.mainId || conversation.userId || conversation.visitorId) ? "bold" : "normal",
+                backgroundColor: conversation.isVisitor ? "#f0f9ff" : "transparent",
+                borderLeft: conversation.isVisitor ? "4px solid #3b82f6" : "none",
               }}
             >
-              <strong>{conversation.userName || "Desconhecido"}</strong>
+              <DeleteButton
+                onClick={(e) => handleDeleteConversation(conversation.mainId || conversation.userId || conversation.visitorId || '', e)}
+                title="Excluir conversa"
+              >
+                <Trash2 size={14} />
+              </DeleteButton>
+              <div>
+                <strong>{conversation.userName || "Desconhecido"}</strong>
+                {conversation.isVisitor && conversation.userPhone && (
+                  <div style={{ fontSize: "12px", color: "#64748b", marginTop: "2px" }}>
+                    📞 {conversation.userPhone}
+                  </div>
+                )}
+                {conversation.isVisitor && (
+                  <div style={{ fontSize: "10px", color: "#3b82f6", marginTop: "2px" }}>
+                    👤 Visitante
+                  </div>
+                )}
+              </div>
             </ContactItem>
           ))}
         </ContactList>
@@ -329,14 +452,14 @@ const Messages: React.FC = () => {
             <>
               <h3>
                 Conversando com{" "}
-                {conversations.find((conv) => conv.userId === activeBrokerId)?.userName || "Desconhecido"}
+                {conversations.find((conv) => conv.userId === activeBrokerId || conv.visitorId === activeBrokerId)?.userName || "Desconhecido"}
               </h3>
               <MessageList>
                 {conversations
-                  .find((conv) => conv.userId === activeBrokerId)
+                  .find((conv) => conv.userId === activeBrokerId || conv.visitorId === activeBrokerId)
                   ?.messages?.length ? (
                   conversations
-                    .find((conv) => conv.userId === activeBrokerId)
+                    .find((conv) => conv.userId === activeBrokerId || conv.visitorId === activeBrokerId)
                     ?.messages.map((message, index) => {
                       const messageKey = `${activeBrokerId}-${message.id}-${index}`; 
                       const isFromCurrentUser = message.sender_id === String(senderId);

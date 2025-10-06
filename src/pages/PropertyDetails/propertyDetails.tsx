@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router-dom"; 
+import { useLocation, useParams, useNavigate } from "react-router-dom"; 
 import Slider from "react-slick";
 import { parseISO, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import Modal from "react-modal";
 import LoadingMessage from "../../components/loadingMessage/LoadingMessage";
 import { Property } from "../../types/property";
+import { Building2, DollarSign, FileText, Mail } from "lucide-react";
 import {
   Container,
   ContentWrapper,
@@ -32,6 +33,7 @@ Modal.setAppElement("#root");
 
 const PropertyDetails: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
@@ -172,25 +174,31 @@ const PropertyDetails: React.FC = () => {
         
         <PropertyHeader>
           <Title>{title}</Title>
-          <Price>{formatPrice(price)}</Price>
+          <Price>
+            <DollarSign size={24} />
+            {formatPrice(price)}
+          </Price>
           
          
         </PropertyHeader>
 
         <Description>
-          <DescriptionTitle>Descrição do Imóvel</DescriptionTitle>
+          <DescriptionTitle>
+            <FileText size={18} />
+            Descrição do Imóvel
+          </DescriptionTitle>
           <DescriptionText>{description}</DescriptionText>
         </Description>
 
         <FooterSection>
           <FooterText>
-            <span>🏢</span>
+            <Building2 size={16} />
             <span>
               Responsável <strong>{username}</strong> em {formatDate(created_at || '')}
             </span>
           </FooterText>
-          <ContactButton>
-            <span>💬</span>
+          <ContactButton onClick={() => navigate(`/contact/${property.user_id}`)}>
+            <Mail size={16} />
             <span>Entrar em Contato</span>
           </ContactButton>
         </FooterSection>
