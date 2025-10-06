@@ -11,10 +11,18 @@ import {
   SliderContainer,
   ImageWrapper,
   Image,
+  PropertyHeader,
   Title,
   Price,
+  PropertyMeta,
+  MetaItem,
   Description,
+  DescriptionTitle,
+  DescriptionText,
+  FooterSection,
   FooterText,
+  ContactButton,
+  ImageCounter,
 } from "./styles";
 
 interface PropertyImage {
@@ -103,9 +111,22 @@ const PropertyDetails: React.FC = () => {
 
   const formatDate = (date: string) => {
     try {
+      // Verificar se a data é válida
+      if (!date || date === 'null' || date === 'undefined') {
+        return "Data não disponível";
+      }
+      
+      // Tentar parsear a data
       const parsedDate = parseISO(date);
+      
+      // Verificar se a data parseada é válida
+      if (isNaN(parsedDate.getTime())) {
+        return "Data inválida";
+      }
+      
       return format(parsedDate, "dd MMMM yyyy", { locale: ptBR });
-    } catch {
+    } catch (error) {
+      console.error("Erro ao formatar data:", error, "Data recebida:", date);
       return "Data inválida";
     }
   };
@@ -154,18 +175,55 @@ const PropertyDetails: React.FC = () => {
                     e.currentTarget.src = "/fallback-image.jpg";
                   }}
                 />
+                <ImageCounter>
+                  {index + 1} / {images.length}
+                </ImageCounter>
               </ImageWrapper>
             ))}
           </Slider>
         </SliderContainer>
-        <Title>{title}</Title>
-        <Price>{formatPrice(price)}</Price>
-        <Description>{description}</Description>
+        
+        <PropertyHeader>
+          <Title>{title}</Title>
+          <Price>{formatPrice(price)}</Price>
+          
+          <PropertyMeta>
+            <MetaItem>
+              <span>🏠</span>
+              <span>{property.category === 'venda' ? 'Venda' : 'Aluguel'}</span>
+            </MetaItem>
+            <MetaItem>
+              <span>📍</span>
+              <span>Localização: {property.latitude.toFixed(4)}, {property.longitude.toFixed(4)}</span>
+            </MetaItem>
+            <MetaItem>
+              <span>👤</span>
+              <span>Responsável: {username}</span>
+            </MetaItem>
+            <MetaItem>
+              <span>📅</span>
+              <span>Publicado em {formatDate(createdAt)}</span>
+            </MetaItem>
+          </PropertyMeta>
+        </PropertyHeader>
 
-        <FooterText>
-          Responsável Creci{" "}
-          <strong>{username}</strong> em {formatDate(createdAt)}
-        </FooterText>
+        <Description>
+          <DescriptionTitle>Descrição do Imóvel</DescriptionTitle>
+          <DescriptionText>{description}</DescriptionText>
+        </Description>
+
+        <FooterSection>
+          <FooterText>
+            <span>🏢</span>
+            <span>
+              Responsável Creci <strong>{username}</strong> em {formatDate(createdAt)}
+            </span>
+          </FooterText>
+          <ContactButton>
+            <span>💬</span>
+            <span>Entrar em Contato</span>
+          </ContactButton>
+        </FooterSection>
       </ContentWrapper>
 
       <Modal

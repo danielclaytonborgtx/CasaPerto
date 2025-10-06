@@ -60,7 +60,7 @@ const SignIn: React.FC = () => {
         <Input 
           type="text" 
           name="username" 
-          placeholder="Numero do Creci"
+          placeholder="Email"
           value={formData.username} 
           onChange={handleInputChange} 
         />
