@@ -5,6 +5,7 @@ import { parseISO, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import Modal from "react-modal";
 import LoadingMessage from "../../components/loadingMessage/LoadingMessage";
+import { Property } from "../../types/property";
 import {
   Container,
   ContentWrapper,
@@ -14,8 +15,6 @@ import {
   PropertyHeader,
   Title,
   Price,
-  PropertyMeta,
-  MetaItem,
   Description,
   DescriptionTitle,
   DescriptionText,
@@ -29,24 +28,12 @@ interface PropertyImage {
   url: string;
 }
 
-interface PropertyDetailsProps {
-  id: number;
-  title: string;
-  price: number;
-  description: string;
-  images: PropertyImage[] | string[];
-  user?: { username: string };
-  createdAt: string;
-  latitude: number;
-  longitude: number;
-}
-
 Modal.setAppElement("#root");
 
 const PropertyDetails: React.FC = () => {
   const location = useLocation();
   const { id } = useParams<{ id: string }>();
-  const [property, setProperty] = useState<PropertyDetailsProps | null>(null);
+  const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -60,9 +47,8 @@ const PropertyDetails: React.FC = () => {
           if (data) {
             setProperty({
               ...data,
-              price: typeof data.price === 'string' ? parseFloat(data.price) : data.price,
-              createdAt: data.created_at || new Date().toISOString(),
-              user: data.user ? { username: data.user.name || 'Usuário' } : undefined
+              price: data.price, // Manter como string conforme o tipo Property
+              user: data.user || { id: 0, name: 'Usuário', teamMember: [] }
             });
           } else {
             console.error("Imóvel não encontrado");
@@ -73,7 +59,7 @@ const PropertyDetails: React.FC = () => {
           setLoading(false);
         }
       } else {
-        setProperty(location.state as PropertyDetailsProps);
+        setProperty(location.state as Property);
         setLoading(false);
       }
     };
@@ -89,7 +75,7 @@ const PropertyDetails: React.FC = () => {
     return <p>Erro: Nenhuma propriedade foi encontrada.</p>;
   }
 
-  const { title, price, description, images = [], user, createdAt } = property;
+  const { title, price, description, images = [], user, created_at } = property;
 
   const settings = {
     dots: true,
@@ -102,11 +88,12 @@ const PropertyDetails: React.FC = () => {
     initialSlide: currentImageIndex,
   };
 
-  const formatPrice = (price: number) => {
+  const formatPrice = (price: string | number) => {
+    const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
-    }).format(price);
+    }).format(numericPrice);
   };
 
   const formatDate = (date: string) => {
@@ -131,7 +118,7 @@ const PropertyDetails: React.FC = () => {
     }
   };
 
-  const username = user?.username || "Usuário desconhecido";
+  const username = user?.name || "Usuário desconhecido";
 
   const resolveImageUrl = (img: PropertyImage | string) => {
     if (typeof img === "string") {
@@ -187,24 +174,7 @@ const PropertyDetails: React.FC = () => {
           <Title>{title}</Title>
           <Price>{formatPrice(price)}</Price>
           
-          <PropertyMeta>
-            <MetaItem>
-              <span>🏠</span>
-              <span>{property.category === 'venda' ? 'Venda' : 'Aluguel'}</span>
-            </MetaItem>
-            <MetaItem>
-              <span>📍</span>
-              <span>Localização: {property.latitude.toFixed(4)}, {property.longitude.toFixed(4)}</span>
-            </MetaItem>
-            <MetaItem>
-              <span>👤</span>
-              <span>Responsável: {username}</span>
-            </MetaItem>
-            <MetaItem>
-              <span>📅</span>
-              <span>Publicado em {formatDate(createdAt)}</span>
-            </MetaItem>
-          </PropertyMeta>
+         
         </PropertyHeader>
 
         <Description>
@@ -216,7 +186,7 @@ const PropertyDetails: React.FC = () => {
           <FooterText>
             <span>🏢</span>
             <span>
-              Responsável Creci <strong>{username}</strong> em {formatDate(createdAt)}
+              Responsável <strong>{username}</strong> em {formatDate(created_at || '')}
             </span>
           </FooterText>
           <ContactButton>
