@@ -144,18 +144,34 @@ export const supabaseMessages = {
   },
 
   // Marcar mensagens como lidas
-  async markMessagesAsRead(senderId: string, receiverId: string): Promise<void> {
+  async markMessagesAsRead(currentUserId: string, otherUserId: string): Promise<void> {
     try {
-      const { error } = await supabase
+      // Marcar mensagens onde o usuário atual é o receiver (mensagens que ele recebeu)
+      const { error: error1 } = await supabase
         .from('messages')
         .update({ read_at: new Date().toISOString() })
-        .eq('sender_id', senderId)
-        .eq('receiver_id', receiverId)
+        .eq('receiver_id', currentUserId)
+        .eq('sender_id', otherUserId)
         .is('read_at', null)
 
-      if (error) {
-        console.error('Erro ao marcar mensagens como lidas:', error.message)
-        throw new Error(error.message)
+      if (error1) {
+        console.error('Erro ao marcar mensagens como lidas (1):', error1.message)
+      }
+
+      // Marcar mensagens de visitantes onde o usuário atual é o receiver
+      const { error: error2 } = await supabase
+        .from('messages')
+        .update({ read_at: new Date().toISOString() })
+        .eq('receiver_id', currentUserId)
+        .eq('visitor_sender_id', otherUserId)
+        .is('read_at', null)
+
+      if (error2) {
+        console.error('Erro ao marcar mensagens de visitantes como lidas:', error2.message)
+      }
+
+      if (error1 && error2) {
+        throw new Error('Erro ao marcar mensagens como lidas')
       }
     } catch (error) {
       console.error('Erro ao marcar mensagens como lidas:', error)

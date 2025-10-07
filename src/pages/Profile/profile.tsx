@@ -159,6 +159,46 @@ const Profile: React.FC = () => {
     }
   }, [navigate, fetchProperties, fetchProfileImage, fetchUnreadMessages]);
 
+  // Polling para mensagens não lidas em tempo real
+  useEffect(() => {
+    if (!user?.id) return;
+
+    let isMounted = true;
+    let intervalId: NodeJS.Timeout | null = null;
+    let lastCheckTime = new Date().toISOString();
+
+    const checkUnreadMessages = async () => {
+      if (!isMounted) return;
+      
+      try {
+        const sinceStored = localStorage.getItem("lastSeenMessages");
+        const sinceDate = sinceStored || new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    
+        const data = await supabaseMessages.getUnreadMessagesSince(String(user.id), sinceDate);
+        const hasUnread = data.hasUnread;
+        
+        // Só atualizar se houve mudança
+        if (hasUnread !== (unreadMessages > 0)) {
+          setUnreadMessages(hasUnread ? 1 : 0);
+        }
+        
+        lastCheckTime = new Date().toISOString();
+      } catch (error) {
+        console.error("Erro ao verificar mensagens não lidas:", error);
+      }
+    };
+
+    // Verificar mensagens a cada 3 segundos
+    intervalId = setInterval(checkUnreadMessages, 3000);
+
+    return () => {
+      isMounted = false;
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [user?.id, unreadMessages]);
+
   if (loading) return <LoadingMessage />;
 
   if (!user) return <div>Usuário não encontrado</div>;
@@ -186,7 +226,16 @@ const Profile: React.FC = () => {
           <Users size={30} />
           <span>Equipes</span>
         </StyledButton>
-        <StyledButton onClick={() => navigate("/messages")} style={{ position: 'relative' }}>
+        <StyledButton 
+          onClick={() => {
+            // Atualizar lastSeenMessages quando navegar para mensagens
+            const now = new Date().toISOString();
+            localStorage.setItem("lastSeenMessages", now);
+            setUnreadMessages(0);
+            navigate("/messages");
+          }} 
+          style={{ position: 'relative' }}
+        >
           <Mail size={30} />
           {unreadMessages > 0 && (
             <span

@@ -16,6 +16,14 @@ import {
   ContactItem,
   DeleteButton,
   HeaderContainer,
+  MainContentArea,
+  MessagesArea,
+  ConversationHeader,
+  MessageInputContainer,
+  SendButton,
+  ResponsiveWrapper,
+  UnreadIndicator,
+  ContactName,
 } from "./styles";
 
 interface Message {
@@ -351,9 +359,40 @@ const Messages: React.FC = () => {
     }
   };
 
-  const handleSelectBroker = (id: string) => {
+  const handleSelectBroker = async (id: string) => {
     setActiveBrokerId(id);
     navigate(`/messages/${id}`);
+    
+    // Marcar mensagens como lidas quando selecionar a conversa
+    try {
+      if (senderId) {
+        // Encontrar a conversa para saber se é visitante ou usuário
+        const conversation = conversations.find(conv => 
+          conv.userId === id || conv.visitorId === id || conv.mainId === id
+        );
+
+        if (conversation?.isVisitor) {
+          // Se é visitante, usar a função específica para visitantes
+          console.log("📱 Marcando mensagens de visitante como lidas:", id, senderId);
+          await supabaseVisitors.markVisitorMessagesAsRead(id, String(senderId));
+        } else {
+          // Se é usuário, usar a função normal
+          console.log("📱 Marcando mensagens de usuário como lidas:", senderId, id);
+          await supabaseMessages.markMessagesAsRead(String(senderId), id);
+        }
+        
+        // Atualizar o contador de mensagens não lidas
+        setConversations(prevConversations => 
+          prevConversations.map(conv => 
+            conv.userId === id || conv.visitorId === id || conv.mainId === id
+              ? { ...conv, unreadCount: 0 }
+              : conv
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Erro ao marcar mensagens como lidas:", error);
+    }
   };
 
   const handleDeleteConversation = async (conversationId: string, event: React.MouseEvent) => {
@@ -411,49 +450,42 @@ const Messages: React.FC = () => {
         <Button onClick={() => navigate("/brokers")}>Nova Mensagem</Button>
       </HeaderContainer>
 
-      <div style={{ display: "flex" }}>
+      <ResponsiveWrapper>
+        <MainContentArea>
         <ContactList>
           {conversations.map((conversation, index) => (
             <ContactItem
               key={`${conversation.mainId || conversation.userId || conversation.visitorId}-${index}`} 
               onClick={() => handleSelectBroker(conversation.mainId || conversation.userId || conversation.visitorId || '')}
-              style={{
-                cursor: "pointer",
-                fontWeight: activeBrokerId === (conversation.mainId || conversation.userId || conversation.visitorId) ? "bold" : "normal",
-                backgroundColor: conversation.isVisitor ? "#f0f9ff" : "transparent",
-                borderLeft: conversation.isVisitor ? "4px solid #3b82f6" : "none",
-              }}
+              className={activeBrokerId === (conversation.mainId || conversation.userId || conversation.visitorId) ? 'active' : ''}
             >
               <DeleteButton
                 onClick={(e) => handleDeleteConversation(conversation.mainId || conversation.userId || conversation.visitorId || '', e)}
                 title="Excluir conversa"
               >
-                <Trash2 size={14} />
+                <Trash2 size={12} />
               </DeleteButton>
-              <div>
+              
+              {conversation.unreadCount > 0 && (
+                <UnreadIndicator>
+                  {conversation.unreadCount > 9 ? '9+' : conversation.unreadCount}
+                </UnreadIndicator>
+              )}
+              
+              <ContactName>
                 <strong>{conversation.userName || "Desconhecido"}</strong>
-                {conversation.isVisitor && conversation.userPhone && (
-                  <div style={{ fontSize: "12px", color: "#64748b", marginTop: "2px" }}>
-                    📞 {conversation.userPhone}
-                  </div>
-                )}
-                {conversation.isVisitor && (
-                  <div style={{ fontSize: "10px", color: "#3b82f6", marginTop: "2px" }}>
-                    👤 Visitante
-                  </div>
-                )}
-              </div>
+              </ContactName>
             </ContactItem>
           ))}
         </ContactList>
 
-        <div style={{ flex: 1, marginLeft: "10px" }}>
+        <MessagesArea>
           {activeBrokerId && (
             <>
-              <h3>
+              <ConversationHeader>
                 Conversando com{" "}
                 {conversations.find((conv) => conv.userId === activeBrokerId || conv.visitorId === activeBrokerId)?.userName || "Desconhecido"}
-              </h3>
+              </ConversationHeader>
               <MessageList>
                 {conversations
                   .find((conv) => conv.userId === activeBrokerId || conv.visitorId === activeBrokerId)
@@ -484,17 +516,20 @@ const Messages: React.FC = () => {
                 )}
               </MessageList>
 
-              <MessageInput
-                type="text"
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Digite sua mensagem..."
-              />
-              <Button onClick={handleSendMessage}>Enviar</Button>
+              <MessageInputContainer>
+                <MessageInput
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Digite sua mensagem..."
+                />
+                <SendButton onClick={handleSendMessage}>Enviar</SendButton>
+              </MessageInputContainer>
             </>
           )}
-        </div>
-      </div>
+        </MessagesArea>
+        </MainContentArea>
+      </ResponsiveWrapper>
     </MessageContainer>
   );
 };
