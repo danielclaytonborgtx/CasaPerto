@@ -2,25 +2,39 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../services/authContext';
 import { useNavigate } from 'react-router-dom';
 import { GoogleMap, Marker } from '@react-google-maps/api';
+import { FileImage, MapPin, FileText, Info } from 'lucide-react';
 import LoadingMessage from '../../components/loadingMessage/LoadingMessage';
 import { supabaseProperties } from '../../services/supabaseProperties';
 import { supabaseStorage } from '../../services/supabaseStorage';
 import { supabase } from '../../lib/supabase';
 import {
   AddPropertyContainer,
+  PageHeader,
+  ProgressIndicator,
+  ProgressStep,
+  Section,
+  SectionTitle,
+  FormGroup,
+  Label,
   FormInput,
-  Button,
+  TextArea,
+  Select,
+  HelpText,
   ImageUploadButton,
+  ImageCounter,
   ImagePreviewContainer,
   ImagePreview,
   MapWrapper,
+  MapInstruction,
+  Button,
+  ButtonContainer,
+  ErrorMessage,
+  SuccessMessage,
 } from './styles';
 
 const AddProperty = () => {
   const { user, setUser } = useAuth(); 
   const navigate = useNavigate();
-
-  const [username, setUsername] = useState<string>('');
 
   const [category, setCategory] = useState<'aluguel' | 'venda'>('venda');
   const [name, setName] = useState('');
@@ -37,12 +51,6 @@ const AddProperty = () => {
   const [successMessage, setSuccessMessage] = useState('');
   
   const [isLoaded, setIsLoaded] = useState(false); 
-
-  useEffect(() => {
-    if (user) {
-      setUsername(user.username);
-    }
-  }, [user]);
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -189,75 +197,164 @@ const AddProperty = () => {
     setSelectedMarker(null);
   };
 
+  // Calcular progresso do formulário
+  const calculateProgress = () => {
+    const steps = [
+      category && name && price,
+      description,
+      images.length > 0,
+      selectedMarker !== null
+    ];
+    return steps;
+  };
+
+  const progress = calculateProgress();
+
   return (
     <AddPropertyContainer>
-      <h1>Adicionar Imóvel</h1>
-      {errorMessage && <p style={{ color: 'red', fontWeight: 'bold', margin: '10px 0' }}>{errorMessage}</p>}
-      {successMessage && <p style={{ color: 'green', fontWeight: 'bold', margin: '10px 0' }}>{successMessage}</p>}
+      <PageHeader>
+        <h1>Adicionar Imóvel</h1>
+      </PageHeader>
 
-      <FormInput
-        as="select"
-        value={category}
-        onChange={(e) => setCategory(e.target.value as 'venda' | 'aluguel')}
-      >
-        <option value="venda">Venda</option>
-        <option value="aluguel">Aluguel</option>
-      </FormInput>
+      {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
+      {successMessage && <SuccessMessage>{successMessage}</SuccessMessage>}
 
-      <FormInput
-        type="text"
-        placeholder="Título"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
-      <FormInput
-        type="text"
-        placeholder="Valor"
-        value={price}
-        onChange={handlePriceChange}
-      />
-      <FormInput
-        as="textarea"
-        placeholder="Descrição"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        rows={10} 
-      />
-      <FormInput
-        as="textarea"
-        placeholder="Detalhes ocultos, somente você verá no seu perfil. ex: contato do proprietario, valor de avalição..."
-        value={description1}
-        onChange={(e) => setDescription1(e.target.value)}
-        rows={4} 
-      />
-      <p>É possivel carregar até 10 imagens, com o limite de 10 MB totais.</p>
-      <ImageUploadButton>
-        <label htmlFor="image-upload">Adicionar imagens</label>
-        <input
-          id="image-upload"
-          type="file"
-          accept="image/*"
-          multiple
-          style={{ display: 'none' }}
-          onChange={handleImageChange}
-        />
-      </ImageUploadButton>
+      {/* Indicador de Progresso */}
+      <ProgressIndicator>
+        <ProgressStep completed={!!progress[0]} active={!progress[0]} />
+        <ProgressStep completed={!!progress[1]} active={!!progress[0] && !progress[1]} />
+        <ProgressStep completed={!!progress[2]} active={!!progress[1] && !progress[2]} />
+        <ProgressStep completed={!!progress[3]} active={!!progress[2] && !progress[3]} />
+      </ProgressIndicator>
 
-      <ImagePreviewContainer>
-        {images.map((image, index) => (
-          <ImagePreview key={index}>
-            <img src={URL.createObjectURL(image)} alt={`preview-${index}`} />
-            <button onClick={() => removeImage(index)}>X</button>
-          </ImagePreview>
-        ))}
-      </ImagePreviewContainer>
-      
-      <p>Agora abaixo, vamos marcar o local do imóvel, se voce está no imóvel agora, ele já atualiza a localização que voce está, se não, arraste a tela, e com um clique marque o local do imóvel no mapa.</p>
-      <MapWrapper>
-        
+      {/* Seção: Informações Básicas */}
+      <Section>
+        <SectionTitle>
+          <Info size={20} />
+          Informações Básicas
+        </SectionTitle>
+
+        <FormGroup>
+          <Label required>Tipo de Negócio</Label>
+          <Select
+            value={category}
+            onChange={(e) => setCategory(e.target.value as 'venda' | 'aluguel')}
+          >
+            <option value="venda">Venda</option>
+            <option value="aluguel">Aluguel</option>
+          </Select>
+        </FormGroup>
+
+        <FormGroup>
+          <Label required>Título do Imóvel</Label>
+          <FormInput
+            type="text"
+            placeholder="Ex: Apartamento 3 quartos no Centro"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <HelpText>Seja claro e objetivo para atrair mais interessados</HelpText>
+        </FormGroup>
+
+        <FormGroup>
+          <Label required>Valor</Label>
+          <FormInput
+            type="text"
+            placeholder="Ex: 350000"
+            value={price}
+            onChange={handlePriceChange}
+          />
+          <HelpText>Apenas números, sem pontos ou vírgulas</HelpText>
+        </FormGroup>
+      </Section>
+
+      {/* Seção: Descrições */}
+      <Section>
+        <SectionTitle>
+          <FileText size={20} />
+          Descrições
+        </SectionTitle>
+
+        <FormGroup>
+          <Label required>Descrição Pública</Label>
+          <TextArea
+            placeholder="Descreva as características do imóvel, localização, diferenciais..."
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={8}
+          />
+          <HelpText>Esta descrição será visível para todos</HelpText>
+        </FormGroup>
+
+        <FormGroup>
+          <Label>Anotações Privadas</Label>
+          <TextArea
+            placeholder="Ex: Contato do proprietário, valor de avaliação, observações internas..."
+            value={description1}
+            onChange={(e) => setDescription1(e.target.value)}
+            rows={4}
+          />
+          <HelpText>Apenas você terá acesso a estas informações</HelpText>
+        </FormGroup>
+      </Section>
+
+      {/* Seção: Imagens */}
+      <Section>
+        <SectionTitle>
+          <FileImage size={20} />
+          Fotos do Imóvel
+        </SectionTitle>
+
+        <ImageCounter>
+          {images.length} de 10 imagens • Limite total: 10 MB
+        </ImageCounter>
+
+        <ImageUploadButton>
+          <label htmlFor="image-upload">
+            <FileImage size={18} />
+            {images.length === 0 ? 'Adicionar fotos' : 'Adicionar mais fotos'}
+          </label>
+          <input
+            id="image-upload"
+            type="file"
+            accept="image/*"
+            multiple
+            style={{ display: 'none' }}
+            onChange={handleImageChange}
+          />
+        </ImageUploadButton>
+
+        {images.length > 0 && (
+          <ImagePreviewContainer>
+            {images.map((image, index) => (
+              <ImagePreview key={index}>
+                <img src={URL.createObjectURL(image)} alt={`preview-${index}`} />
+                <button onClick={() => removeImage(index)}>×</button>
+              </ImagePreview>
+            ))}
+          </ImagePreviewContainer>
+        )}
+      </Section>
+
+      {/* Seção: Localização */}
+      <Section>
+        <SectionTitle>
+          <MapPin size={20} />
+          Localização no Mapa
+        </SectionTitle>
+
+        <MapInstruction>
+          <p>
+            {selectedMarker 
+              ? '✓ Localização marcada! Você pode ajustar clicando em outro ponto do mapa.' 
+              : 'Clique no mapa para marcar a localização exata do imóvel. Arraste para navegar.'}
+          </p>
+        </MapInstruction>
+
+        <MapWrapper>
           {isLoaded ? (
             <GoogleMap
-              mapContainerStyle={{ width: '100%', height: '500px' }}
+              mapContainerStyle={{ width: '100%', height: '100%' }}
               center={mapPosition}
               zoom={15}
               onClick={handleMapClick}
@@ -287,12 +384,15 @@ const AddProperty = () => {
           ) : (
             <LoadingMessage />
           )}
-       
-      </MapWrapper>
+        </MapWrapper>
+      </Section>
 
-      <Button onClick={handleAddProperty} disabled={loading}>
-        {loading ? 'Adicionando...' : 'Adicionar Imóvel'}
-      </Button>
+      {/* Botão de Adicionar */}
+      <ButtonContainer>
+        <Button onClick={handleAddProperty} disabled={loading}>
+          {loading ? 'Adicionando imóvel...' : 'Adicionar Imóvel'}
+        </Button>
+      </ButtonContainer>
     </AddPropertyContainer>
   );
 };

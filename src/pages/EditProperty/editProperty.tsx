@@ -1,16 +1,32 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { GoogleMap, Marker } from '@react-google-maps/api';
+import { FileImage, MapPin, FileText, Info } from 'lucide-react';
 import LoadingMessage from '../../components/loadingMessage/LoadingMessage';
 import {
   EditPropertyContainer,
+  PageHeader,
+  ProgressIndicator,
+  ProgressStep,
+  Section,
+  SectionTitle,
+  FormGroup,
+  Label,
   FormInput,
-  Button,
+  TextArea,
+  Select,
+  HelpText,
   ImageUploadButton,
+  ImageCounter,
   ImagePreviewContainer,
   ImagePreview,
+  ImageBadge,
   MapWrapper,
+  MapInstruction,
+  Button,
+  ButtonContainer,
+  ErrorMessage,
+  SuccessMessage,
 } from './styles';
 
 interface PropertyData {
@@ -194,135 +210,221 @@ const EditProperty = () => {
     return <LoadingMessage />;
   }
 
+  // Calcular progresso do formulário
+  const calculateProgress = () => {
+    const steps = [
+      category && title && price,
+      description,
+      existingImages.length > 0 || newImages.length > 0,
+      selectedMarker !== null || (latitude && longitude)
+    ];
+    return steps;
+  };
+
+  const progress = calculateProgress();
+  const totalImages = existingImages.length + newImages.length;
+
   return (
     <EditPropertyContainer>
-      <h1>Editar Imóvel</h1>
-      
-      {errorMessage && (
-        <p style={{ color: 'red', fontWeight: 'bold', margin: '10px 0' }}>
-          {errorMessage}
-        </p>
-      )}
-      
-      {successMessage && (
-        <p style={{ color: 'green', fontWeight: 'bold', margin: '10px 0' }}>
-          {successMessage}
-        </p>
-      )}
+      <PageHeader>
+        <h1>Editar Imóvel</h1>
+      </PageHeader>
+
+      {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
+      {successMessage && <SuccessMessage>{successMessage}</SuccessMessage>}
 
       {loading ? (
         <LoadingMessage />
       ) : (
         <>
-          <FormInput
-            as="select"
-            value={category}
-            onChange={(e) => setCategory(e.target.value as 'venda' | 'aluguel')}
-          >
-            <option value="venda">Venda</option>
-            <option value="aluguel">Aluguel</option>
-          </FormInput>
+          {/* Indicador de Progresso */}
+          <ProgressIndicator>
+            <ProgressStep completed={!!progress[0]} active={!progress[0]} />
+            <ProgressStep completed={!!progress[1]} active={!!progress[0] && !progress[1]} />
+            <ProgressStep completed={!!progress[2]} active={!!progress[1] && !progress[2]} />
+            <ProgressStep completed={!!progress[3]} active={!!progress[2] && !progress[3]} />
+          </ProgressIndicator>
 
-          <FormInput
-            type="text"
-            placeholder="Título"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
+          {/* Seção: Informações Básicas */}
+          <Section>
+            <SectionTitle>
+              <Info size={20} />
+              Informações Básicas
+            </SectionTitle>
 
-          <FormInput
-            type="number"
-            placeholder="Valor"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            min="0"
-            step="0.01"
-          />
+            <FormGroup>
+              <Label required>Tipo de Negócio</Label>
+              <Select
+                value={category}
+                onChange={(e) => setCategory(e.target.value as 'venda' | 'aluguel')}
+              >
+                <option value="venda">Venda</option>
+                <option value="aluguel">Aluguel</option>
+              </Select>
+            </FormGroup>
 
-          <FormInput
-            as="textarea"
-            placeholder="Descrição"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={10}
-          />
+            <FormGroup>
+              <Label required>Título do Imóvel</Label>
+              <FormInput
+                type="text"
+                placeholder="Ex: Apartamento 3 quartos no Centro"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+              <HelpText>Seja claro e objetivo para atrair mais interessados</HelpText>
+            </FormGroup>
 
-          <FormInput
-            as="textarea"
-            placeholder="Detalhes adicionais (opcional)"
-            value={description1}
-            onChange={(e) => setDescription1(e.target.value)}
-            rows={4}
-          />
+            <FormGroup>
+              <Label required>Valor</Label>
+              <FormInput
+                type="number"
+                placeholder="Ex: 350000"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                min="0"
+                step="0.01"
+              />
+              <HelpText>Valor do imóvel</HelpText>
+            </FormGroup>
+          </Section>
 
-          <ImageUploadButton>
-            <label htmlFor="image-upload">Adicionar novas imagens</label>
-            <input
-              id="image-upload"
-              type="file"
-              accept="image/*"
-              multiple
-              style={{ display: 'none' }}
-              onChange={handleImageChange}
-            />
-          </ImageUploadButton>
+          {/* Seção: Descrições */}
+          <Section>
+            <SectionTitle>
+              <FileText size={20} />
+              Descrições
+            </SectionTitle>
 
-          <ImagePreviewContainer>
-            {existingImages.map((imageUrl, index) => (
-              <ImagePreview key={`existing-${index}`}>
-                <img 
-                  src={imageUrl} 
-                  alt={`Imagem ${index + 1}`} 
-                />
-                <button onClick={() => removeExistingImage(index)}>X</button>
-              </ImagePreview>
-            ))}
+            <FormGroup>
+              <Label required>Descrição Pública</Label>
+              <TextArea
+                placeholder="Descreva as características do imóvel, localização, diferenciais..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={8}
+              />
+              <HelpText>Esta descrição será visível para todos</HelpText>
+            </FormGroup>
 
-            {newImages.map((image, index) => (
-              <ImagePreview key={`new-${index}`}>
-                <img 
-                  src={URL.createObjectURL(image)} 
-                  alt={`Nova imagem ${index + 1}`} 
-                />
-                <button onClick={() => removeNewImage(index)}>X</button>
-              </ImagePreview>
-            ))}
-          </ImagePreviewContainer>
+            <FormGroup>
+              <Label>Anotações Privadas</Label>
+              <TextArea
+                placeholder="Ex: Contato do proprietário, valor de avaliação, observações internas..."
+                value={description1}
+                onChange={(e) => setDescription1(e.target.value)}
+                rows={4}
+              />
+              <HelpText>Apenas você terá acesso a estas informações</HelpText>
+            </FormGroup>
+          </Section>
 
-          <MapWrapper>
-            <GoogleMap
-              mapContainerStyle={{ width: '100%', height: '400px' }}
-              center={mapPosition}
-              zoom={15}
-              onClick={handleMapClick}
-              options={{
-                disableDefaultUI: true,
-                zoomControl: false,
-                streetViewControl: false,
-                mapTypeControl: false,
-                fullscreenControl: false,
-                gestureHandling: "greedy",
-                styles: [
-                  {
-                    featureType: "poi",
-                    elementType: "all",
-                    stylers: [
-                      {
-                        visibility: "off",
-                      },
-                    ],
-                  },
-                ],
-              }}
-            >
-              {selectedMarker && <Marker position={selectedMarker} />}
-              <Marker position={mapPosition} icon="http://maps.google.com/mapfiles/ms/icons/blue-dot.png" />
-            </GoogleMap>
-          </MapWrapper>
+          {/* Seção: Imagens */}
+          <Section>
+            <SectionTitle>
+              <FileImage size={20} />
+              Fotos do Imóvel
+            </SectionTitle>
 
-          <Button onClick={handleUpdateProperty} disabled={loading}>
-            {loading ? "Salvando..." : "Salvar Alterações"}
-          </Button>
+            <ImageCounter>
+              {totalImages} de 10 imagens • 
+              {existingImages.length > 0 && ` ${existingImages.length} existente(s)`}
+              {newImages.length > 0 && ` • ${newImages.length} nova(s)`}
+            </ImageCounter>
+
+            <ImageUploadButton>
+              <label htmlFor="image-upload">
+                <FileImage size={18} />
+                Adicionar novas fotos
+              </label>
+              <input
+                id="image-upload"
+                type="file"
+                accept="image/*"
+                multiple
+                style={{ display: 'none' }}
+                onChange={handleImageChange}
+              />
+            </ImageUploadButton>
+
+            {(existingImages.length > 0 || newImages.length > 0) && (
+              <ImagePreviewContainer>
+                {existingImages.map((imageUrl, index) => (
+                  <ImagePreview key={`existing-${index}`}>
+                    <img 
+                      src={imageUrl} 
+                      alt={`Imagem ${index + 1}`} 
+                    />
+                    <button onClick={() => removeExistingImage(index)}>×</button>
+                  </ImagePreview>
+                ))}
+
+                {newImages.map((image, index) => (
+                  <ImagePreview key={`new-${index}`}>
+                    <img 
+                      src={URL.createObjectURL(image)} 
+                      alt={`Nova imagem ${index + 1}`} 
+                    />
+                    <ImageBadge isNew>Nova</ImageBadge>
+                    <button onClick={() => removeNewImage(index)}>×</button>
+                  </ImagePreview>
+                ))}
+              </ImagePreviewContainer>
+            )}
+          </Section>
+
+          {/* Seção: Localização */}
+          <Section>
+            <SectionTitle>
+              <MapPin size={20} />
+              Localização no Mapa
+            </SectionTitle>
+
+            <MapInstruction>
+              <p>
+                {selectedMarker 
+                  ? '✓ Localização marcada! Você pode ajustar clicando em outro ponto do mapa.' 
+                  : 'Clique no mapa para ajustar a localização do imóvel. Arraste para navegar.'}
+              </p>
+            </MapInstruction>
+
+            <MapWrapper>
+              <GoogleMap
+                mapContainerStyle={{ width: '100%', height: '100%' }}
+                center={mapPosition}
+                zoom={15}
+                onClick={handleMapClick}
+                options={{
+                  disableDefaultUI: true,
+                  zoomControl: false,
+                  streetViewControl: false,
+                  mapTypeControl: false,
+                  fullscreenControl: false,
+                  gestureHandling: "greedy",
+                  styles: [
+                    {
+                      featureType: "poi",
+                      elementType: "all",
+                      stylers: [
+                        {
+                          visibility: "off",
+                        },
+                      ],
+                    },
+                  ],
+                }}
+              >
+                {selectedMarker && <Marker position={selectedMarker} />}
+                <Marker position={mapPosition} icon="http://maps.google.com/mapfiles/ms/icons/blue-dot.png" />
+              </GoogleMap>
+            </MapWrapper>
+          </Section>
+
+          {/* Botão de Salvar */}
+          <ButtonContainer>
+            <Button onClick={handleUpdateProperty} disabled={loading}>
+              {loading ? 'Salvando alterações...' : 'Salvar Alterações'}
+            </Button>
+          </ButtonContainer>
         </>
       )}
     </EditPropertyContainer>
