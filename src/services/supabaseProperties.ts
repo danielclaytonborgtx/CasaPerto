@@ -66,7 +66,7 @@ export const supabaseProperties = {
   },
 
   // Buscar propriedades por usuário
-  async getPropertiesByUser(userId: number): Promise<Property[]> {
+  async getPropertiesByUser(userId: number | string): Promise<Property[]> {
     try {
       const { data, error } = await supabase
         .from('properties')
@@ -74,7 +74,7 @@ export const supabaseProperties = {
           *,
           user:users(id, name, username)
         `)
-        .eq('user_id', userId)
+        .eq('user_id', String(userId))
         .order('created_at', { ascending: false })
 
       if (error) {

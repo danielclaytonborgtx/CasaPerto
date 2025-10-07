@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import LoadingMessage from "../../components/loadingMessage/LoadingMessage";
 import { User } from "lucide-react";
+import { supabaseProfile } from "../../services/supabaseProfile";
+import { supabaseProperties } from "../../services/supabaseProperties";
+import { Property } from "../../types/property";
 import { 
   ProfileContainer, 
   UserName, 
@@ -20,30 +23,20 @@ import {
   DefaultIcon
 } from "./styles";
 
-interface User {
-  id: number;
+interface UserProfile {
+  id: string;
   name: string;
   username: string;
   email: string;
-}
-
-interface Property {
-  id: number;
-  title: string;
-  description: string;
-  description1: string;
-  images: string[];  
-  price: string;  
-  createdAt: string;
+  profile_picture?: string;
 }
 
 const Profiles: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [properties, setProperties] = useState<Property[]>([]); 
   const [error, setError] = useState<string | null>(null); 
-  const [profileImage, setProfileImage] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -55,73 +48,37 @@ const Profiles: React.FC = () => {
 
     const fetchUserAndProperties = async () => {
       try {
-        let userData: User;
-
-        if (isNaN(Number(userId))) {
-          const response = await fetch(`https://servercasaperto.onrender.com/users/${userId}`);
-          if (!response.ok) {
-            throw new Error("Usuário não encontrado");
-          }
-          userData = await response.json();
-        } else {
-          
-          const response = await fetch(`https://servercasaperto.onrender.com/users/${userId}`);
-          if (!response.ok) {
-            throw new Error("Usuário não encontrado");
-          }
-          userData = await response.json();
+        // Buscar dados do usuário do Supabase
+        const userData = await supabaseProfile.getProfile(userId);
+        
+        if (!userData) {
+          throw new Error("Usuário não encontrado");
         }
 
         setUser(userData);
-        fetchProperties(userData.id); 
-        fetchProfileImage(userData.id);
-      } catch {
+        
+        // Buscar propriedades do usuário
+        await fetchProperties(userId);
+      } catch (err) {
+        console.error("Erro ao buscar usuário:", err);
         setError("Erro ao buscar usuário.");
+        setLoading(false);
       }
     };
 
     fetchUserAndProperties();
   }, [userId]);
 
-  const fetchProperties = async (userId: number) => {
+  const fetchProperties = async (userId: string) => {
     try {
-      const response = await fetch(`https://servercasaperto.onrender.com/property/user?userId=${userId}`);
-      if (response.ok) {
-        const data = await response.json();
-        setProperties(data.sort((a: Property, b: Property) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
-      } else {
-        setError("Erro ao carregar imóveis.");
-      }
-    } catch {
-      setError("Erro ao conectar com o servidor.");
+      // Buscar propriedades do usuário do Supabase
+      const data = await supabaseProperties.getPropertiesByUser(userId);
+      setProperties(data);
+    } catch (err) {
+      console.error("Erro ao buscar propriedades:", err);
+      setError("Erro ao carregar imóveis.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchProfileImage = async (userId: number) => {
-    try {
-      const response = await fetch(`https://servercasaperto.onrender.com/users/${userId}/profile-picture`);
-      
-      if (response.ok) {
-        const data = await response.json();    
-        
-        const imagePath = data.picture || data.user?.picture || data.avatar || data.url;
-        
-        if (imagePath) {
-          const fullUrl = imagePath.startsWith('http') ? 
-            imagePath : 
-            `https://servercasaperto.onrender.com${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
-          
-          setProfileImage(fullUrl);
-        } else {
-          console.warn(`No image path found for user ${userId}`);
-          setProfileImage(null);
-        }
-      }
-    } catch (error) {
-      console.error("Error loading profile image:", error);
-      setProfileImage(null);
     }
   };
 
@@ -132,9 +89,9 @@ const Profiles: React.FC = () => {
   return (
     <ProfileContainer>
       <ProfileImageContainer>
-        {profileImage ? (
+        {user.profile_picture ? (
           <ProfileImage 
-            src={profileImage} 
+            src={user.profile_picture} 
             alt="Foto de perfil"
             onError={(e) => {
               e.currentTarget.onerror = null;
@@ -158,26 +115,35 @@ const Profiles: React.FC = () => {
         <div>Este usuário ainda não tem imóveis postados.</div>
       ) : (
         <UserList>
-          {properties.map((property) => (
-            <PropertyItem key={property.id}>
-              <PropertyItemLayout>
-                <PropertyImageContainer>
-                  <PropertyImage 
-                    src={property.images[0] || '/path/to/default-image.jpg'} 
-                    alt={property.title} 
-                    onClick={() => navigate(`/property/${property.id}`)}
-                  />
-                </PropertyImageContainer>
-                <TitlePriceContainer>
-                  <strong>{property.title}</strong>
-                  <p>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(property.price))}</p>
-                </TitlePriceContainer>
-              </PropertyItemLayout>
-              <PropertyDetails>
-                <p>{property.description}</p>
-              </PropertyDetails>
-            </PropertyItem>
-          ))}
+          {properties.map((property) => {
+            // Pegar a primeira imagem do array de imagens
+            const firstImage = Array.isArray(property.images) 
+              ? (typeof property.images[0] === 'string' 
+                  ? property.images[0] 
+                  : property.images[0]?.url)
+              : '/path/to/default-image.jpg';
+            
+            return (
+              <PropertyItem key={property.id}>
+                <PropertyItemLayout>
+                  <PropertyImageContainer>
+                    <PropertyImage 
+                      src={firstImage || '/path/to/default-image.jpg'} 
+                      alt={property.title} 
+                      onClick={() => navigate(`/property/${property.id}`)}
+                    />
+                  </PropertyImageContainer>
+                  <TitlePriceContainer>
+                    <strong>{property.title}</strong>
+                    <p>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(property.price))}</p>
+                  </TitlePriceContainer>
+                </PropertyItemLayout>
+                <PropertyDetails>
+                  <p>{property.description}</p>
+                </PropertyDetails>
+              </PropertyItem>
+            );
+          })}
         </UserList>
       )}
     </ProfileContainer>
