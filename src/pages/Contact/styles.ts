@@ -186,8 +186,8 @@ export const Description = styled.p`
 `;
 
 export const InfoText = styled.p`
-  font-size: 0.9em;
+  font-size: 0.7em;
   text-align: center;
   color: #777;
-  margin-top: 20px;
+  margin-top: 1px;
 `;
