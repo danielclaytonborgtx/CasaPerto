@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 
 import Home from './pages/Home/home';
 import MapScreen from './pages/MapScreen/mapScreen';
-import ListScreen from './pages/ListScreen/listScreen';
 import Layout from './layout/layout'; 
 import SignIn from './pages/SignIn/signIn';
 import SignUp from './pages/SignUp/signUp';
@@ -38,12 +37,9 @@ const App: React.FC = () => {
               <Route index element={<Home />} />
               <Route path="signIn" element={<SignIn />} />
               <Route path="signUp" element={<SignUp />} />
-
               <Route path="map" element={<MapScreen />} />
               <Route path="addProperty" element={<AddProperty />} />
               <Route path="editProperty/:id" element={<EditProperty />} />
-
-              <Route path="list" element={<ListScreen />} />
               <Route path="contact" element={<Contact />} />
               <Route path="property/:id" element={<PropertyDetails />} />
               <Route path="profile" element={<Profile />} />

@@ -3,7 +3,7 @@ import styled from 'styled-components';
 export const Container = styled.div`
   min-height: 100vh;
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  padding: 20px;
+  padding: 20px 12px;
   box-sizing: border-box;
   width: 100%;
 `;
@@ -92,7 +92,7 @@ export const Image = styled.img`
 `;
 
 export const PropertyHeader = styled.div`
-  padding: 40px 40px 20px;
+  padding: 40px 24px 20px;
   background: white;
   position: relative;
 `;
@@ -136,7 +136,7 @@ export const MetaItem = styled.div`
 `;
 
 export const Description = styled.div`
-  padding: 0 40px 40px;
+  padding: 0 24px 40px;
   background: white;
 `;
 
@@ -160,7 +160,7 @@ export const DescriptionText = styled.p`
 `;
 
 export const FooterSection = styled.div`
-  padding: 24px 40px;
+  padding: 24px 24px;
   background: #f8fafc;
   border-top: 1px solid #e2e8f0;
   display: flex;

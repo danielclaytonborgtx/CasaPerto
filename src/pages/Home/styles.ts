@@ -5,14 +5,14 @@ export const Container = styled.div`
   flex-direction: column;
   align-items: center;
   padding: 0;
-  margin-top: 60px;
-  margin-bottom: 50px;
+  margin-top: 50px;
+  margin-bottom: 30px;
   width: 100%;
   box-sizing: border-box;
 `;
 
 export const SearchInput = styled.input`
-  width: 90%;
+  width: 95%;
   max-width: 400px;
   padding: 10px;
   margin-bottom: 20px;
@@ -25,7 +25,7 @@ export const Item = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 90%;
+  width: 95%;
   max-width: 1200px;
   margin-bottom: 20px;
   border: 1px solid #ddd;
@@ -60,7 +60,7 @@ export const Price = styled.p`
 `;
 
 export const Button = styled.button`
-  background-color: #00BFFF;
+  background: linear-gradient(135deg, #00BFFF 0%, #007bff 100%);
   color: black;
   border: none;
   padding: 10px;

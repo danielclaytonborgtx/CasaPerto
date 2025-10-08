@@ -6,7 +6,7 @@ import { ptBR } from "date-fns/locale";
 import Modal from "react-modal";
 import LoadingMessage from "../../components/loadingMessage/LoadingMessage";
 import { Property } from "../../types/property";
-import { Building2, DollarSign, FileText, Mail } from "lucide-react";
+import { Building2, FileText, Mail } from "lucide-react";
 import {
   Container,
   ContentWrapper,
@@ -175,7 +175,6 @@ const PropertyDetails: React.FC = () => {
         <PropertyHeader>
           <Title>{title}</Title>
           <Price>
-            <DollarSign size={24} />
             {formatPrice(price)}
           </Price>
           

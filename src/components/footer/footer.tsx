@@ -18,7 +18,7 @@ const Footer: React.FC = () => {
           <ButtonText>Mapa</ButtonText>
         </ButtonContent>
       </Button>
-      <Button onClick={() => navigateTo('/list')}>
+      <Button onClick={() => navigateTo('/')}>
         <ButtonContent>
           <FaListAlt size={24} color="black" /> 
           
