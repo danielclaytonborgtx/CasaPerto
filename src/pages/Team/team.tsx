@@ -4,13 +4,28 @@ import { useNavigate } from 'react-router-dom';
 import LoadingMessage from '../../components/loadingMessage/LoadingMessage';
 import { supabaseTeams } from '../../services/supabaseTeams';
 import { 
-  TeamContainer, 
-  CreateTeamButton, 
-  TeamImage, 
-  TeamCard, 
-  TeamMembers, 
-  TeamName, 
-  UserTag, 
+  TeamContainer,
+  PageTitle,
+  CreateTeamButton,
+  InvitationsSection,
+  InvitationsTitle,
+  InfoBox,
+  InvitationCard,
+  InvitationContent,
+  InvitationInfo,
+  InvitationButtons,
+  TeamsSection,
+  TeamCard,
+  TeamCardContent,
+  TeamLeftSection,
+  TeamImage,
+  TeamInfo,
+  TeamName,
+  UserTag,
+  TeamActions,
+  TeamRightSection,
+  MembersTitle,
+  TeamMembers,
   EditIcon,
   AcceptButton,
   RejectButton,
@@ -333,7 +348,7 @@ const Team = () => {
 
   return (
     <TeamContainer>
-      <h2>Equipes</h2>
+      <PageTitle>Equipes</PageTitle>
 
       {!loading && !userHasTeam && !hasPendingInvitations && (
         <CreateTeamButton onClick={handleCreateTeam}>Criar Equipe</CreateTeamButton>
@@ -341,141 +356,70 @@ const Team = () => {
 
       {/* Mensagem informativa quando há convites pendentes */}
       {!loading && !userHasTeam && hasPendingInvitations && (
-        <div style={{
-          backgroundColor: '#e3f2fd',
-          border: '1px solid #2196f3',
-          borderRadius: '8px',
-          padding: '15px',
-          marginBottom: '20px',
-          color: '#1976d2'
-        }}>
+        <InfoBox>
           <strong>📧 Você tem convites pendentes!</strong>
-          <p style={{ margin: '5px 0 0 0', fontSize: '14px' }}>
-            Responda aos convites antes de criar uma nova equipe.
-          </p>
-        </div>
+          <p>Responda aos convites antes de criar uma nova equipe.</p>
+        </InfoBox>
       )}
 
       {/* Convites Pendentes */}
       {!loading && invitations.length > 0 && (
-        <div style={{ marginBottom: '20px' }}>
-          <h3 style={{ color: '#007bff', marginBottom: '10px' }}>📧 Convites Pendentes</h3>
+        <InvitationsSection>
+          <InvitationsTitle>📧 Convites Pendentes</InvitationsTitle>
           {invitations.map((invitation) => (
-            <div key={invitation.id} style={{
-              border: '1px solid #ddd',
-              borderRadius: '8px',
-              padding: '15px',
-              marginBottom: '10px',
-              backgroundColor: '#f9f9f9'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
+            <InvitationCard key={invitation.id}>
+              <InvitationContent>
+                <InvitationInfo>
                   <strong>{invitation.team?.name}</strong>
-                  <p style={{ margin: '5px 0', color: '#666' }}>
-                    Convite para participar da equipe
-                  </p>
-                </div>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <button
-                    onClick={() => handleAcceptInvitation(invitation.id)}
-                    style={{
-                      padding: '8px 16px',
-                      backgroundColor: '#28a745',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
-                  >
+                  <p>Convite para participar da equipe</p>
+                </InvitationInfo>
+                <InvitationButtons>
+                  <AcceptButton onClick={() => handleAcceptInvitation(invitation.id)}>
                     ✅ Aceitar
-                  </button>
-                  <button
-                    onClick={() => handleRejectInvitation(invitation.id)}
-                    style={{
-                      padding: '8px 16px',
-                      backgroundColor: '#dc3545',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
-                  >
+                  </AcceptButton>
+                  <RejectButton onClick={() => handleRejectInvitation(invitation.id)}>
                     ❌ Rejeitar
-                  </button>
-                </div>
-              </div>
-            </div>
+                  </RejectButton>
+                </InvitationButtons>
+              </InvitationContent>
+            </InvitationCard>
           ))}
-        </div>
+        </InvitationsSection>
       )}
 
-      <div>
+      <TeamsSection>
         {loading ? (
           <LoadingMessage />
         ) : Array.isArray(sortedTeams) && sortedTeams.length > 0 ? (
           sortedTeams.map((team) => {
-            // console.log('🔍 Team: Dados da equipe:', {
-            //   id: team.id,
-            //   name: team.name,
-            //   image_url: team.image_url,
-            //   created_by: team.created_by,
-            //   members: team.members,
-            //   user_id: user?.id
-            // });
-            
             const isUserInTeam = Array.isArray(team.members) && 
               team.members.some((member: any) => member.user_id === user?.id);
             
             const isTeamOwner = team.created_by === user?.id;
-            
-            // console.log('🔍 Team: Verificações:', {
-            //   isUserInTeam,
-            //   isTeamOwner,
-            //   user_id: user?.id,
-            //   created_by: team.created_by
-            // });
             
             const pendingInvitation = invitations.find(
               inv => inv.teamId === team.id && inv.status === 'PENDING'
             );
 
             return (
-              <TeamCard key={team.id} style={{
-                backgroundColor: '#f8f9fa',
-                border: '1px solid #e9ecef',
-                borderRadius: '8px',
-                padding: '20px'
-              }}>
-                <div style={{ 
-                  display: 'flex', 
-                  alignItems: 'flex-start', 
-                  gap: '20px',
-                  width: '100%'
-                }}>
-                  {/* Lado Esquerdo: Logo, Nome, "Sua equipe!" e Botões */}
-                  <div style={{ 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    alignItems: 'center',
-                    minWidth: '120px',
-                    gap: '10px'
-                  }}>
+              <TeamCard key={team.id}>
+                <TeamCardContent>
+                  <TeamLeftSection>
                     {team.image_url && (
                       <TeamImage 
                         src={team.image_url}
-                        alt={`Imagem da equipe ${team.name}`} 
-                        style={{ width: '60px', height: '60px' }}
+                        alt={`Imagem da equipe ${team.name}`}
                       />
                     )}
                     
-                    <div style={{ textAlign: 'center' }}>
-                      <TeamName style={{ fontSize: '16px', marginBottom: '5px' }}>{team.name}</TeamName>
+                    <TeamInfo>
+                      <TeamName>{team.name}</TeamName>
                       {isUserInTeam && <UserTag>Sua equipe!</UserTag>}
-                    </div>
+                    </TeamInfo>
                     
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'center' }}>
+                    <TeamActions>
                       {pendingInvitation && (
-                        <div style={{ display: 'flex', gap: '5px' }}>
+                        <div style={{ display: 'flex', gap: '8px' }}>
                           <AcceptButton onClick={() => handleAcceptInvitation(pendingInvitation.id)}>
                             Aceitar
                           </AcceptButton>
@@ -495,44 +439,18 @@ const Team = () => {
                           <FaEdit />
                         </EditIcon>
                       )}
-                    </div>
-                  </div>
+                    </TeamActions>
+                  </TeamLeftSection>
 
-                  {/* Lado Direito: Lista de Participantes */}
-                  <div style={{ 
-                    flex: 1,
-                    display: 'flex',
-                    flexDirection: 'column'
-                  }}>
-                    <h4 style={{ 
-                      margin: '0 0 10px 0', 
-                      fontSize: '14px', 
-                      color: '#666',
-                      fontWeight: 'bold'
-                    }}>
-                      Participantes:
-                    </h4>
+                  <TeamRightSection>
+                    <MembersTitle>Participantes:</MembersTitle>
                     <TeamMembers>
                       {Array.isArray(team.members) && team.members.length > 0 ? (
-                        <ul style={{ 
-                          listStyle: 'none', 
-                          padding: 0, 
-                          margin: 0,
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '5px'
-                        }}>
+                        <ul>
                           {team.members
                             .sort((a: any, b: any) => a.user?.name?.localeCompare(b.user?.name) || 0) 
                             .map((member: any, index: number) => (
-                              <li key={member.id || member.user_id || index} style={{
-                                padding: '5px 10px',
-                                backgroundColor: '#ffffff',
-                                borderRadius: '4px',
-                                fontSize: '14px',
-                                border: '1px solid #dee2e6',
-                                boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-                              }}>
+                              <li key={member.id || member.user_id || index}>
                                 {member.user?.name || member.name}
                                 {pendingInvitation && member.user_id === user?.id && 
                                   " (Convite Pendente)"}
@@ -540,20 +458,18 @@ const Team = () => {
                             ))}
                         </ul>
                       ) : (
-                        <p style={{ color: '#666', fontSize: '14px', margin: 0 }}>
-                          Sem membros na equipe.
-                        </p>
+                        <p>Sem membros na equipe.</p>
                       )}
                     </TeamMembers>
-                  </div>
-                </div>
+                  </TeamRightSection>
+                </TeamCardContent>
               </TeamCard>
             );
           })
         ) : (
           <p>Nenhuma equipe encontrada.</p>
         )}
-      </div>
+      </TeamsSection>
     </TeamContainer>
   );
 };
