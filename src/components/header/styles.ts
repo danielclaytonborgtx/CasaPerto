@@ -24,6 +24,7 @@ export const Container = styled.div`
   z-index: 10;
   height: 40px;
   box-shadow: 0 4px 12px rgba(0, 123, 255, 0.25);
+  overflow: visible;
 `;
 
 export const MenuButton = styled.button`
@@ -33,8 +34,8 @@ export const MenuButton = styled.button`
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 45px; 
-  width: 45px; 
+  height: 40px; 
+  width: 40px; 
   margin-right: 15px;
   margin-top: 8px;
   border-radius: 50%;
@@ -43,7 +44,7 @@ export const MenuButton = styled.button`
   &:hover {
     background: rgba(255, 255, 255, 0.25);
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); 
+    box-shadow: 0 0px 6px rgba(0, 0, 0, 0.2); 
   }
 
   &:focus {
@@ -59,8 +60,8 @@ export const AddButton = styled.button`
   background: rgba(255, 255, 255, 0.15);
   border: none;
   cursor: pointer;
-  height: 45px;
-  width: 45px;  
+  height: 40px;
+  width: 40px;  
   margin-left: 15px;
   margin-top: 8px;
   border-radius: 50%; 
@@ -69,7 +70,7 @@ export const AddButton = styled.button`
   &:hover {
     background: rgba(255, 255, 255, 0.25);
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0px 6px rgba(0, 0, 0, 0.2);
   }
 
   &:focus {

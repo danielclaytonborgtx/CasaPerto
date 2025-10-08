@@ -221,10 +221,10 @@ const AddProperty = () => {
 
       {/* Indicador de Progresso */}
       <ProgressIndicator>
-        <ProgressStep completed={!!progress[0]} active={!progress[0]} />
-        <ProgressStep completed={!!progress[1]} active={!!progress[0] && !progress[1]} />
-        <ProgressStep completed={!!progress[2]} active={!!progress[1] && !progress[2]} />
-        <ProgressStep completed={!!progress[3]} active={!!progress[2] && !progress[3]} />
+        <ProgressStep $completed={!!progress[0]} $active={!progress[0]} />
+        <ProgressStep $completed={!!progress[1]} $active={!!progress[0] && !progress[1]} />
+        <ProgressStep $completed={!!progress[2]} $active={!!progress[1] && !progress[2]} />
+        <ProgressStep $completed={!!progress[3]} $active={!!progress[2] && !progress[3]} />
       </ProgressIndicator>
 
       {/* Seção: Informações Básicas */}

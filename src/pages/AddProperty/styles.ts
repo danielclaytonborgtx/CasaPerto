@@ -38,12 +38,12 @@ export const ProgressIndicator = styled.div`
   margin-bottom: 24px;
 `;
 
-export const ProgressStep = styled.div<{ active: boolean; completed: boolean }>`
+export const ProgressStep = styled.div<{ $active: boolean; $completed: boolean }>`
   flex: 1;
   height: 4px;
   background-color: ${props => 
-    props.completed ? '#00BFFF' : 
-    props.active ? '#87CEEB' : 
+    props.$completed ? '#00BFFF' : 
+    props.$active ? '#87CEEB' : 
     '#e0e0e0'};
   border-radius: 2px;
   transition: background-color 0.3s ease;
