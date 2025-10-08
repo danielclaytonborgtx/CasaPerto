@@ -75,8 +75,10 @@ export const UnreadIndicator = styled.div`
 `;
 
 export const ContactName = styled.div`
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   margin-left: 28px;
   font-weight: 500;
+  letter-spacing: 0.2px;
 `;
 
 export const DeleteButton = styled.button`
@@ -214,6 +216,7 @@ export const MessageInputContainer = styled.div`
 `;
 
 export const MessageInput = styled.input`
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   flex: 1;
   padding: 12px;
   border-radius: 8px;

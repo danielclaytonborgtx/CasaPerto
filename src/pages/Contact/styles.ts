@@ -69,6 +69,7 @@ export const ContactForm = styled.form`
 `;
 
 export const InputField = styled.input`
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   padding: 14px 16px;
   font-size: 16px;
   border: 2px solid #e2e8f0;
@@ -102,6 +103,7 @@ export const TextArea = styled.textarea`
 `;
 
 export const SubmitButton = styled.button`
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   padding: 16px 24px;
   font-size: 16px;
   font-weight: 700;
@@ -112,6 +114,7 @@ export const SubmitButton = styled.button`
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 3px 10px rgba(0, 123, 255, 0.3);
+  letter-spacing: 0.3px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   position: relative;
@@ -151,14 +154,17 @@ export const SubmitButton = styled.button`
 `;
 
 export const Title = styled.h1`
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 1.8em;
   font-weight: 700;
   margin-bottom: 12px;
   text-align: center;
   color: #333;
+  letter-spacing: 0.5px;
 `;
 
 export const Description = styled.p`
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 1em;
   text-align: center;
   margin-bottom: 24px;

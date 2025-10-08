@@ -116,6 +116,7 @@ export const ProfileImage = styled.img`
 `;
 
 export const UserName = styled.h1`
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 1.8em;
   font-weight: 700;
   background: linear-gradient(135deg, #007bff 0%, #00BFFF 100%);
@@ -124,6 +125,7 @@ export const UserName = styled.h1`
   background-clip: text;
   margin: 8px 0;
   text-align: center;
+  letter-spacing: 0.5px;
 
   @media (max-width: 768px) {
     font-size: 1.4em;
@@ -161,6 +163,7 @@ export const LogoutIcon = styled.div`
 `;
 
 export const SectionTitle = styled.h2`
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 1.5em;
   font-weight: 700;
   margin-top: 50px;
@@ -169,6 +172,7 @@ export const SectionTitle = styled.h2`
   width: 100%;
   text-align: center;
   position: relative;
+  letter-spacing: 0.3px;
   
   &::after {
     content: '';
@@ -321,6 +325,7 @@ export const TitlePriceContainer = styled.div`
 `;
 
 export const PropertyDetails = styled.div`
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   white-space: pre-line; 
   flex-grow: 1;
   display: flex;
@@ -331,6 +336,7 @@ export const PropertyDetails = styled.div`
   word-break: break-word;
   padding: 16px 20px;
   margin-top: 8px;
+  line-height: 1.5;
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   border-radius: 12px;
   border-left: 3px solid #00BFFF;

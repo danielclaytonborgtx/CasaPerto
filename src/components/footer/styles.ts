@@ -54,9 +54,11 @@ export const ButtonContent = styled.div`
 `;
 
 export const ButtonText = styled.span`
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: black;
   margin-left: 8px;
   font-size: 16px;
   font-weight: 600;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  letter-spacing: 0.3px;
 `;

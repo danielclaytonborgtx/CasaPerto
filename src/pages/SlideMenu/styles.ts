@@ -65,6 +65,7 @@ export const MenuItem = styled.div`
   }
 
   a {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     text-decoration: none;
     color: black;
     font-size: 16px;
@@ -75,6 +76,7 @@ export const MenuItem = styled.div`
     width: 100%;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
+    letter-spacing: 0.2px;
     
     &:hover {
       color: black;
@@ -96,6 +98,7 @@ export const MenuItem = styled.div`
 `;
 
 export const UserNameSpan = styled.span`
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   cursor: pointer;
   font-size: 18px;
   font-weight: 700;
@@ -106,6 +109,7 @@ export const UserNameSpan = styled.span`
   color: black;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
+  letter-spacing: 0.3px;
 
   &:hover {
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);

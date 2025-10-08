@@ -1,5 +1,15 @@
 import styled from 'styled-components';
 
+// Importar fontes do Google Fonts
+const fontImports = `
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap');
+`;
+
+// Aplicar as importações de fonte
+const style = document.createElement('style');
+style.textContent = fontImports;
+document.head.appendChild(style);
+
 export const Container = styled.div`
   display: flex;
   justify-content: space-between;
@@ -88,9 +98,10 @@ export const SwitchContainer = styled.div`
 `;
 
 export const SwitchLabel = styled.span<{ $position: 'left' | 'right' }>`
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 20px;
   color: #1a1a1a;
-  font-weight: bold;
+  font-weight: 600;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -101,6 +112,7 @@ export const SwitchLabel = styled.span<{ $position: 'left' | 'right' }>`
   top: 2px;
   text-align: center;
   text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.5px;
 `;
 
 export const ModernSwitch = styled.div`
@@ -134,6 +146,7 @@ export const SwitchTrack = styled.div<{ $isActive: boolean }>`
 `;
 
 export const SwitchText = styled.span<{ $isActive: boolean }>`
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 16px;
   font-weight: 700;
   color: #1a1a1a;
@@ -143,6 +156,7 @@ export const SwitchText = styled.span<{ $isActive: boolean }>`
   position: absolute;
   opacity: ${({ $isActive }) => $isActive ? 1 : 0};
   transform: ${({ $isActive }) => $isActive ? 'scale(1)' : 'scale(0.8)'};
+  letter-spacing: 0.3px;
 `;
 
 export const SwitchThumb = styled.div<{ $isActive: boolean }>`
