@@ -342,35 +342,40 @@ export const TeamsSection = styled.div`
 `;
 
 export const EditIcon = styled.button`
+  font-family: 'Inter', sans-serif;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  gap: 8px;
   background: rgba(0, 123, 255, 0.1);
-  border: none;
+  color: #007bff;
+  border: 1px solid #007bff;
+  padding: 8px 16px;
   border-radius: 8px;
   cursor: pointer;
-  color: #007bff;
+  font-weight: 600;
+  font-size: 0.85em;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
 
   svg {
-    font-size: 18px;
+    font-size: 16px;
   }
 
   &:hover {
-    background: rgba(0, 123, 255, 0.2);
+    background: #007bff;
+    color: white;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 
   @media (max-width: 768px) {
-    width: 36px;
-    height: 36px;
-
-    svg {
-      font-size: 16px;
-    }
+    width: 100%;
+    padding: 10px;
   }
 `;
 

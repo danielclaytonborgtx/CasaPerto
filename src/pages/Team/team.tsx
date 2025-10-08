@@ -436,6 +436,7 @@ const Team = () => {
                       )}
                       {isTeamOwner && (
                         <EditIcon onClick={() => navigate(`/edit-team/${team.id}`)}>
+                          <span>Editar</span>
                           <FaEdit />
                         </EditIcon>
                       )}
