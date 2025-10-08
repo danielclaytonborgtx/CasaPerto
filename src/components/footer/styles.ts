@@ -5,8 +5,8 @@ export const Container = styled.div`
   justify-content: space-around;
   align-items: center;
   padding: 5px 20px;
-  background-color: #87CEEB;
-  border-top: 1px solid #000000;
+  background: linear-gradient(135deg, #00BFFF 0%, #007bff 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
   position: fixed;
   bottom: 0;
   left: 0;
@@ -14,6 +14,7 @@ export const Container = styled.div`
   height: 40px;
   width: 100%;
   box-sizing: border-box;
+  box-shadow: 0 -4px 12px rgba(0, 123, 255, 0.25);
   
   @media (max-width: 768px) {
     padding: 5px 10px; 
@@ -30,14 +31,20 @@ export const Button = styled.button`
   align-items: center;
   justify-content: center;
   padding: 10px 50px;
-  border-radius: 10px;
-  background-color: transparent;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
   border: none;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
-    background-color: #00BFFF;
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 `;
 
@@ -47,7 +54,9 @@ export const ButtonContent = styled.div`
 `;
 
 export const ButtonText = styled.span`
-  color: #000000;
+  color: black;
   margin-left: 8px;
   font-size: 16px;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 `;

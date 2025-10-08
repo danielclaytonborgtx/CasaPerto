@@ -88,9 +88,10 @@ export const ButtonContainer = styled.div`
   margin-bottom: 20px;
 
   @media (max-width: 768px) {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
     max-width: 100%;
+    padding: 0 10px;
   }
 `;
 
@@ -101,7 +102,7 @@ export const StyledButton = styled.button`
   justify-content: center;
   padding: 18px 12px;
   background: linear-gradient(135deg, #00BFFF 0%, #007bff 100%);
-  color: white;
+  color: black;
   border: none;
   border-radius: 16px;
   cursor: pointer;
@@ -138,28 +139,28 @@ export const StyledButton = styled.button`
   svg {
     font-size: 28px;
     margin-bottom: 8px;
-    color: white;
+    color: black;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
   }
 
   span {
     font-size: 13px;
     font-weight: 600;
-    color: white;
+    color: black;
     white-space: nowrap;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
 
   @media (max-width: 768px) {
-    padding: 14px 8px;
+    padding: 10px 4px;
 
     svg {
-      font-size: 24px;
-      margin-bottom: 6px;
+      font-size: 18px;
+      margin-bottom: 4px;
     }
 
     span {
-      font-size: 11px;
+      font-size: 9px;
     }
   }
 `;

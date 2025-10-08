@@ -1,9 +1,8 @@
 import React, { useState } from "react";
-import { Container, MenuButton, AddButton, Icon, SwitchContainer, SwitchLabel } from "./styles";
+import { Container, MenuButton, AddButton, Icon, SwitchContainer, ModernSwitch, SwitchTrack, SwitchThumb, SwitchText } from "./styles";
 import SlideMenu from "../../pages/SlideMenu/slideMenu";
 import { useNavigate } from "react-router-dom";
 import { FaBars, FaPlus } from "react-icons/fa";
-import Switch from "react-switch";
 import { usePropertyContext } from "../../contexts/PropertyContext";
 
 const Header: React.FC = () => {
@@ -24,8 +23,8 @@ const Header: React.FC = () => {
     }
   };
 
-  const handleSwitchChange = (checked: boolean) => {
-    setIsRent(checked);
+  const handleSwitchChange = () => {
+    setIsRent(!isRent);
   };
 
   return (
@@ -37,19 +36,13 @@ const Header: React.FC = () => {
       </MenuButton>
 
       <SwitchContainer>
-        <Switch
-          checked={isRent}
-          onChange={handleSwitchChange}
-          offColor="#E0FFFF"
-          onColor="#E0FFFF"
-          height={30}
-          width={160}
-          uncheckedIcon={<SwitchLabel $position="left">Aluguel</SwitchLabel>}
-          checkedIcon={<SwitchLabel $position="right">Venda</SwitchLabel>}
-          handleDiameter={25}
-          onHandleColor="#00BFFF"
-          offHandleColor="#00BFFF"
-        />
+        <ModernSwitch onClick={handleSwitchChange}>
+          <SwitchTrack $isActive={isRent}>
+            <SwitchText $isActive={!isRent}>Aluguel</SwitchText>
+            <SwitchThumb $isActive={isRent} />
+            <SwitchText $isActive={isRent}>Venda</SwitchText>
+          </SwitchTrack>
+        </ModernSwitch>
       </SwitchContainer>
 
       <AddButton onClick={handleAddPropertyClick}>

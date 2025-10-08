@@ -108,8 +108,36 @@ const Contato: React.FC = () => {
         />
         <SubmitButton type="submit">Enviar</SubmitButton>
       </ContactForm>
-      {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
-      {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
+      {successMessage && (
+        <div style={{ 
+          color: "#10b981", 
+          backgroundColor: "#d1fae5", 
+          padding: "16px 24px", 
+          borderRadius: "12px", 
+          border: "1px solid #a7f3d0",
+          marginTop: "20px",
+          textAlign: "center",
+          fontWeight: "600",
+          boxShadow: "0 2px 8px rgba(16, 185, 129, 0.15)"
+        }}>
+          {successMessage}
+        </div>
+      )}
+      {errorMessage && (
+        <div style={{ 
+          color: "#ef4444", 
+          backgroundColor: "#fee2e2", 
+          padding: "16px 24px", 
+          borderRadius: "12px", 
+          border: "1px solid #fecaca",
+          marginTop: "20px",
+          textAlign: "center",
+          fontWeight: "600",
+          boxShadow: "0 2px 8px rgba(239, 68, 68, 0.15)"
+        }}>
+          {errorMessage}
+        </div>
+      )}
       <InfoText>Ou envie um email diretamente para: danielclayton.imoveis@outlook.com</InfoText>
     </Container>
   );
