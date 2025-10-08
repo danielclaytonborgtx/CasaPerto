@@ -1,8 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../services/authContext';
-import { OptionsContainer, OptionItem, UserNameSpan, ProfileImage, ProfileIcon, ErrorMessage, EditButton } from './styles';
-import { FiEdit } from 'react-icons/fi'; // Ícone de edição
+import { 
+  OptionsContainer, 
+  OptionItem, 
+  ProfileSection, 
+  ProfileImageContainer,
+  UserNameSpan, 
+  UserName,
+  UserInfoContainer,
+  UserInfoItem,
+  ProfileImage, 
+  ProfileIcon, 
+  ErrorMessage, 
+  EditButton,
+  LogoutSection 
+} from './styles';
+import { FiEdit } from 'react-icons/fi';
 import { supabaseProfile } from '../../services/supabaseProfile';
 import { supabaseStorage } from '../../services/supabaseStorage';
 
@@ -90,45 +104,57 @@ const Settings: React.FC = () => {
 
   return (
     <OptionsContainer>
-      <UserNameSpan>  
-        {profileImage ? (
-          <div style={{ position: "relative", display: "inline-block" }}>
-            <ProfileImage src={profileImage} alt="Foto de perfil" />
-            {/* Botão pequeno para trocar a imagem */}
-            <EditButton onClick={handleIconClick} disabled={loading}>
-              {loading ? '⏳' : <FiEdit size={16} />}
-            </EditButton>
-            <input 
-              type="file" 
-              ref={setImageInputRef} 
-              onChange={handleImageUpload} 
-              style={{ display: "none" }}
-              disabled={loading}
-            />
-          </div>
-        ) : (
-          <ProfileIcon>
-            <button type="button" onClick={handleIconClick} disabled={loading}>
-              <span>{loading ? '⏳' : '+'}</span>
-            </button>
-            <input 
-              type="file" 
-              ref={setImageInputRef} 
-              onChange={handleImageUpload} 
-              style={{ display: "none" }}
-              disabled={loading}
-            />
-          </ProfileIcon>
-        )}
+      <ProfileSection>
+        <ProfileImageContainer>
+          {profileImage ? (
+            <div style={{ position: "relative", display: "inline-block" }}>
+              <ProfileImage src={profileImage} alt="Foto de perfil" />
+              <EditButton onClick={handleIconClick} disabled={loading}>
+                {loading ? '⏳' : <FiEdit size={16} />}
+              </EditButton>
+              <input 
+                type="file" 
+                ref={setImageInputRef} 
+                onChange={handleImageUpload} 
+                style={{ display: "none" }}
+                disabled={loading}
+              />
+            </div>
+          ) : (
+            <ProfileIcon>
+              <button type="button" onClick={handleIconClick} disabled={loading}>
+                <span>{loading ? '⏳' : '+'}</span>
+              </button>
+              <input 
+                type="file" 
+                ref={setImageInputRef} 
+                onChange={handleImageUpload} 
+                style={{ display: "none" }}
+                disabled={loading}
+              />
+            </ProfileIcon>
+          )}
+        </ProfileImageContainer>
 
-        <div>Nome - {user?.name}</div>
-        <div>Creci - {user?.username}</div>
-        <div>Email - {user?.email}</div>               
-      </UserNameSpan>
+        <UserNameSpan>
+          <UserName>{user?.name || 'Usuário'}</UserName>
+          
+          <UserInfoContainer>
+            <UserInfoItem>
+              <strong>CRECI:</strong> {user?.username || 'N/A'}
+            </UserInfoItem>
+            <UserInfoItem>
+              <strong>Email:</strong> {user?.email || 'N/A'}
+            </UserInfoItem>
+          </UserInfoContainer>
+        </UserNameSpan>
+      </ProfileSection>
 
-      <OptionItem onClick={handleLogout}>
-        Sair
-      </OptionItem>
+      <LogoutSection>
+        <OptionItem onClick={handleLogout}>
+          Sair da Conta
+        </OptionItem>
+      </LogoutSection>
     </OptionsContainer>
   );
 };
