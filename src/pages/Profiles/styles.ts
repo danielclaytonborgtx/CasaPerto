@@ -39,7 +39,7 @@ export const ProfileSection = styled.div`
   }
 
   @media (max-width: 480px) {
-    grid-template-columns: 120px 1fr !important;
+    grid-template-columns: 130px 1fr !important;
     padding: 16px;
     gap: 12px !important;
   }
