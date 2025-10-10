@@ -3,11 +3,6 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-// Logs para debug
-console.log('🔧 Configuração do Supabase:')
-console.log('📍 URL:', supabaseUrl ? '✅ Configurada' : '❌ Não configurada')
-console.log('🔑 Anon Key:', supabaseAnonKey ? '✅ Configurada' : '❌ Não configurada')
-
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error('❌ Variáveis de ambiente do Supabase não configuradas!')
   console.error('📝 Verifique se o arquivo .env existe e contém:')

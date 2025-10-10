@@ -4,6 +4,7 @@ export interface ProfileUpdate {
   name?: string;
   username?: string;
   profile_picture?: string;
+  bio?: string;
 }
 
 export const supabaseProfile = {
@@ -51,11 +52,37 @@ export const supabaseProfile = {
     }
   },
 
+  // Atualizar bio do usuário (TEMPORARIAMENTE DESABILITADO - aguardando coluna no banco)
+  async updateBio(userId: string, bio: string): Promise<void> {
+    try {
+      console.log('📝 supabaseProfile: Bio salva temporariamente no localStorage (aguardando coluna bio no banco)');
+      
+      // TEMPORÁRIO: Salvar no localStorage até a coluna bio ser adicionada ao banco
+      localStorage.setItem(`user_bio_${userId}`, bio);
+      
+      // TODO: Descomentar quando a coluna bio for adicionada ao banco
+      /*
+      const { error } = await supabase
+        .from('users')
+        .update({ bio: bio })
+        .eq('id', userId);
+
+      if (error) {
+        console.error('❌ Erro ao atualizar bio:', error.message);
+        throw new Error(error.message);
+      }
+      */
+
+      console.log('✅ supabaseProfile: Bio salva no localStorage (temporário)');
+    } catch (error) {
+      console.error('❌ Erro ao atualizar bio:', error);
+      throw error;
+    }
+  },
+
   // Buscar perfil do usuário
   async getProfile(userId: string) {
-    try {
-      console.log('👤 supabaseProfile: Buscando perfil', userId);
-      
+    try { 
       const { data, error } = await supabase
         .from('users')
         .select('id, name, username, email, profile_picture')
@@ -67,7 +94,6 @@ export const supabaseProfile = {
         throw new Error(error.message);
       }
 
-      console.log('✅ supabaseProfile: Perfil encontrado', data);
       return data;
     } catch (error) {
       console.error('❌ Erro ao buscar perfil:', error);

@@ -6,7 +6,19 @@ import { supabaseMessages } from "../../services/supabaseMessages";
 import { supabaseProfile } from "../../services/supabaseProfile";
 import {
   ProfileContainer,
+  ProfileSection,
+  ProfileLeftSection,
+  ProfileRightSection,
+  ProfileImageContainer,
+  ProfileInfo,
+  BioSection,
+  BioHeader,
+  BioTitle,
+  BioEditButton,
+  BioText,
+  BioInput,
   UserName,
+  UserEmail,
   UserList,
   PropertyItem,
   PropertyImage,
@@ -18,7 +30,6 @@ import {
   PropertyItemLayout,
   SectionTitle,
   ProfileImage,
-  ProfileImageContainer,
   ButtonContainer,
   DefaultIcon,
   StyledButton,
@@ -30,7 +41,7 @@ import {
   FaTrashAlt,
   FaPen,
 } from "react-icons/fa";
-import { Users, UserCheck, Mail, Settings, User } from "lucide-react";
+import { Users, UserCheck, Mail, Settings, User, Edit } from "lucide-react";
 
 interface User {
   id: number;
@@ -56,6 +67,9 @@ const Profile: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [unreadMessages, setUnreadMessages] = useState<number>(0);
+  const [bio, setBio] = useState<string>("");
+  const [isEditingBio, setIsEditingBio] = useState(false);
+  const [tempBio, setTempBio] = useState<string>("");
   const navigate = useNavigate();
 
 
@@ -140,6 +154,47 @@ const Profile: React.FC = () => {
     }).format(price);
   };
 
+  const handleEditBio = () => {
+    setTempBio(bio);
+    setIsEditingBio(true);
+  };
+
+  const handleSaveBio = async () => {
+    try {
+      if (!user?.id) {
+        console.error("Usuário não encontrado");
+        return;
+      }
+
+      // Salvar bio no banco de dados
+      await supabaseProfile.updateBio(String(user.id), tempBio);
+      
+      // Atualizar estado local
+      setBio(tempBio);
+      setIsEditingBio(false);
+      
+      // Atualizar localStorage do usuário
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        parsedUser.bio = tempBio;
+        localStorage.setItem("user", JSON.stringify(parsedUser));
+      }
+      
+      console.log("✅ Bio salva com sucesso no banco de dados");
+    } catch (error) {
+      console.error("❌ Erro ao salvar bio:", error);
+      // Ainda assim atualiza o estado local em caso de erro de rede
+      setBio(tempBio);
+      setIsEditingBio(false);
+    }
+  };
+
+  const handleCancelBio = () => {
+    setTempBio(bio);
+    setIsEditingBio(false);
+  };
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (!storedUser) {
@@ -151,6 +206,22 @@ const Profile: React.FC = () => {
     setUser(parsedUser);
 
     if (parsedUser?.id) {
+      // Carregar bio do localStorage (temporário até coluna bio ser adicionada ao banco)
+      const loadBio = () => {
+        try {
+          // TEMPORÁRIO: Carregar do localStorage
+          const userBio = localStorage.getItem(`user_bio_${parsedUser.id}`);
+          if (userBio) {
+            setBio(userBio);
+          } else if (parsedUser?.bio) {
+            setBio(parsedUser.bio);
+          }
+        } catch (error) {
+          console.error("Erro ao carregar bio:", error);
+        }
+      };
+      
+      loadBio();
       fetchProperties(parsedUser.id);
       fetchProfileImage(parsedUser.id);
       fetchUnreadMessages(parsedUser.id); 
@@ -165,7 +236,6 @@ const Profile: React.FC = () => {
 
     let isMounted = true;
     let intervalId: NodeJS.Timeout | null = null;
-    let lastCheckTime = new Date().toISOString();
 
     const checkUnreadMessages = async () => {
       if (!isMounted) return;
@@ -181,8 +251,6 @@ const Profile: React.FC = () => {
         if (hasUnread !== (unreadMessages > 0)) {
           setUnreadMessages(hasUnread ? 1 : 0);
         }
-        
-        lastCheckTime = new Date().toISOString();
       } catch (error) {
         console.error("Erro ao verificar mensagens não lidas:", error);
       }
@@ -205,17 +273,81 @@ const Profile: React.FC = () => {
 
   return (
     <ProfileContainer>
-      <ProfileImageContainer>
-        {profileImage ? (
-          <ProfileImage src={profileImage} alt="Foto de perfil" />
-        ) : (
-          <DefaultIcon>
-            <User size={40} />
-          </DefaultIcon>
-        )}
-      </ProfileImageContainer>
-      <UserName>{user.name}</UserName>
-      <UserName>Creci-{user.username}</UserName>
+      <ProfileSection style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '24px', alignItems: 'start' }}>
+        <ProfileLeftSection>
+          <ProfileImageContainer>
+            {profileImage ? (
+              <ProfileImage src={profileImage} alt="Foto de perfil" />
+            ) : (
+              <DefaultIcon>
+                <User size={32} />
+              </DefaultIcon>
+            )}
+          </ProfileImageContainer>
+          
+          <ProfileInfo>
+            <UserName>{user.name}</UserName>
+            <UserName>Creci-{user.username}</UserName>
+            <UserEmail>{user.email}</UserEmail>
+          </ProfileInfo>
+        </ProfileLeftSection>
+
+        <ProfileRightSection>
+          <BioSection>
+            <BioHeader>
+              <BioTitle>Bio</BioTitle>
+              <BioEditButton onClick={handleEditBio}>
+                <Edit size={16} />
+              </BioEditButton>
+            </BioHeader>
+            
+            {isEditingBio ? (
+              <div>
+                <BioInput
+                  value={tempBio}
+                  onChange={(e) => setTempBio(e.target.value)}
+                  placeholder="Escreva sua bio aqui..."
+                  maxLength={200}
+                />
+                <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                  <button 
+                    onClick={handleSaveBio}
+                    style={{
+                      background: '#10b981',
+                      color: 'white',
+                      border: 'none',
+                      padding: '6px 12px',
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Salvar
+                  </button>
+                  <button 
+                    onClick={handleCancelBio}
+                    style={{
+                      background: '#6b7280',
+                      color: 'white',
+                      border: 'none',
+                      padding: '6px 12px',
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <BioText className={!bio ? 'empty' : ''}>
+                {bio || "Clique no ícone de edição para adicionar sua bio..."}
+              </BioText>
+            )}
+          </BioSection>
+        </ProfileRightSection>
+      </ProfileSection>
 
       <ButtonContainer>
         <StyledButton onClick={() => navigate("/brokers")}>

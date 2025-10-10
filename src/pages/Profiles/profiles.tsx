@@ -6,9 +6,15 @@ import { supabaseProfile } from "../../services/supabaseProfile";
 import { supabaseProperties } from "../../services/supabaseProperties";
 import { Property } from "../../types/property";
 import { 
-  ProfileContainer, 
+  ProfileContainer,
+  ProfileSection,
+  ProfileLeftSection,
+  ProfileRightSection,
+  ProfileImageContainer,
+  ProfileInfo,
   UserName, 
-  UserInfo, 
+  UserInfo,
+  UserEmail,
   UserList, 
   ErrorMessage, 
   PropertyItem, 
@@ -19,8 +25,10 @@ import {
   PropertyItemLayout,
   SectionTitle,
   ProfileImage,
-  ProfileImageContainer,
-  DefaultIcon
+  DefaultIcon,
+  BioViewSection,
+  BioViewTitle,
+  BioViewText
 } from "./styles";
 
 interface UserProfile {
@@ -29,6 +37,7 @@ interface UserProfile {
   username: string;
   email: string;
   profile_picture?: string;
+  bio?: string;
 }
 
 const Profiles: React.FC = () => {
@@ -36,7 +45,8 @@ const Profiles: React.FC = () => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [properties, setProperties] = useState<Property[]>([]); 
-  const [error, setError] = useState<string | null>(null); 
+  const [error, setError] = useState<string | null>(null);
+  const [bio, setBio] = useState<string>("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -56,6 +66,12 @@ const Profiles: React.FC = () => {
         }
 
         setUser(userData);
+        
+        // Carregar bio do localStorage (temporário até coluna bio ser adicionada ao banco)
+        const userBio = localStorage.getItem(`user_bio_${userId}`);
+        if (userBio) {
+          setBio(userBio);
+        }
         
         // Buscar propriedades do usuário
         await fetchProperties(userId);
@@ -88,26 +104,41 @@ const Profiles: React.FC = () => {
 
   return (
     <ProfileContainer>
-      <ProfileImageContainer>
-        {user.profile_picture ? (
-          <ProfileImage 
-            src={user.profile_picture} 
-            alt="Foto de perfil"
-            onError={(e) => {
-              e.currentTarget.onerror = null;
-              e.currentTarget.style.display = 'none';
-            }}
-          />
-        ) : (
-          <DefaultIcon>
-            <User size={40} />
-          </DefaultIcon>
-        )}
-      </ProfileImageContainer>
+      <ProfileSection style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '24px', alignItems: 'start' }}>
+        <ProfileLeftSection>
+          <ProfileImageContainer>
+            {user.profile_picture ? (
+              <ProfileImage 
+                src={user.profile_picture} 
+                alt="Foto de perfil"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            ) : (
+              <DefaultIcon>
+                <User size={32} />
+              </DefaultIcon>
+            )}
+          </ProfileImageContainer>
+          
+          <ProfileInfo>
+            <UserName>{user.name}</UserName>
+            <UserInfo>Creci-{user.username}</UserInfo>
+            <UserEmail>{user.email}</UserEmail>
+          </ProfileInfo>
+        </ProfileLeftSection>
 
-      <UserName>{user.name}</UserName>
-      <UserInfo>Creci-{user.username}</UserInfo>
-      <UserInfo>{user.email}</UserInfo>
+        <ProfileRightSection>
+          <BioViewSection>
+            <BioViewTitle>Bio</BioViewTitle>
+            <BioViewText className={!bio ? 'empty' : ''}>
+              {bio || "Este usuário ainda não adicionou uma bio."}
+            </BioViewText>
+          </BioViewSection>
+        </ProfileRightSection>
+      </ProfileSection>
 
       <SectionTitle>Imóveis em minha carteira</SectionTitle>
 

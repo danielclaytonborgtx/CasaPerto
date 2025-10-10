@@ -42,13 +42,10 @@ const SlideMenu: React.FC<{ onClose: () => void; isVisible: boolean }> = ({ onCl
   }, [user]);
 
   const fetchProfileImage = async (userId: string) => {
-    try {
-      console.log('🔄 SlideMenu: Buscando imagem do perfil para usuário:', userId);
-      
+    try {     
       const profile = await supabaseProfile.getProfile(userId);
       
       if (profile?.profile_picture) {
-        console.log('✅ SlideMenu: Imagem encontrada:', profile.profile_picture);
         setProfileImage(profile.profile_picture);
       } else {
         console.log('ℹ️ SlideMenu: Usuário não tem imagem de perfil');

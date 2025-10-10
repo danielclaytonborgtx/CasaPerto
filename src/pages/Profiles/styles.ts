@@ -14,6 +14,71 @@ export const ProfileContainer = styled.div`
   box-sizing: border-box;
 `;
 
+export const ProfileSection = styled.div`
+  display: grid !important;
+  grid-template-columns: auto 1fr !important;
+  gap: 16px !important;
+  align-items: start !important;
+  width: 100%;
+  background: #fff;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #00BFFF 0%, #007bff 100%);
+    border-radius: 20px 20px 0 0;
+  }
+
+  @media (max-width: 480px) {
+    padding: 16px;
+    gap: 12px !important;
+  }
+`;
+
+export const ProfileLeftSection = styled.div`
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  min-width: 150px !important;
+  flex-shrink: 0 !important;
+  gap: 24px !important;
+  width: auto !important;
+  padding-top: 30px !important;
+
+  @media (max-width: 480px) {
+    min-width: 120px !important;
+    gap: 38px !important;
+    padding-top: 16px !important;
+  }
+`;
+
+export const ProfileRightSection = styled.div`
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  width: auto !important;
+  min-width: 0 !important;
+`;
+
+export const ProfileInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+`;
+
 export const ProfileIcon = styled.div`
   display: flex;
   justify-content: center;
@@ -56,14 +121,13 @@ export const ProfileImageContainer = styled.div`
   flex-direction: column;
   justify-content: center;  
   align-items: center;      
-  margin-bottom: 20px;
   position: relative;
   
   &::before {
     content: '';
     position: absolute;
-    width: 130px;
-    height: 130px;
+    width: 120px;
+    height: 120px;
     border-radius: 50%;
     background: linear-gradient(135deg, #00BFFF 0%, #007bff 100%);
     opacity: 0.1;
@@ -80,16 +144,16 @@ export const DefaultIcon = styled.span`
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 50px;
-  box-shadow: 0 8px 24px rgba(0, 123, 255, 0.2);
+  font-size: 40px;
+  box-shadow: 0 4px 16px rgba(0, 123, 255, 0.2);
   position: relative;
   z-index: 1;
-  border: 4px solid #fff;
+  border: 3px solid #fff;
 
-  @media (max-width: 768px) {
-    width: 100px;
-    height: 100px;
-    font-size: 40px;
+  @media (max-width: 480px) {
+    width: 80px;
+    height: 80px;
+    font-size: 32px;
   }
 `;
 
@@ -98,49 +162,62 @@ export const ProfileImage = styled.img`
   width: 120px;
   height: 120px;
   object-fit: cover;
-  border: 4px solid #fff;
-  box-shadow: 0 8px 24px rgba(0, 123, 255, 0.2);
+  border: 3px solid #fff;
+  box-shadow: 0 4px 16px rgba(0, 123, 255, 0.2);
   position: relative;
   z-index: 1;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 
   &:hover {
     transform: scale(1.05);
-    box-shadow: 0 12px 32px rgba(0, 123, 255, 0.3);
+    box-shadow: 0 8px 24px rgba(0, 123, 255, 0.3);
   }
 
-  @media (max-width: 768px) {
-    width: 100px;
-    height: 100px;
+  @media (max-width: 480px) {
+    width: 80px;
+    height: 80px;
   }
 `;
 
-export const UserName = styled.h1`
+export const UserName = styled.h2`
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-size: 1.8em;
+  font-size: 1.2em;
   font-weight: 700;
   background: linear-gradient(135deg, #007bff 0%, #00BFFF 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin: 8px 0;
+  margin: 0;
   text-align: center;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 
-  @media (max-width: 768px) {
-    font-size: 1.4em;
+  @media (max-width: 480px) {
+    font-size: 1em;
   }
 `;
 
 export const UserInfo = styled.p`
-  font-size: 1.05em;
+  font-size: 1.2em;
   color: #666;
   text-align: center;
-  margin: 5px 0;
+  margin: 0;
   font-weight: 500;
 
-  @media (max-width: 768px) {
-    font-size: 0.95em;
+  @media (max-width: 480px) {
+    font-size: 1em;
+  }
+`;
+
+export const UserEmail = styled.p`
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.85em;
+  color: #666;
+  margin: 0;
+  text-align: center;
+  font-weight: 500;
+
+  @media (max-width: 480px) {
+    font-size: 0.75em;
   }
 `;
 
@@ -437,5 +514,55 @@ export const EditIcon = styled.div`
   @media (max-width: 768px) {
     top: 5px;
     right: 35px;
+  }
+`;
+
+export const BioViewSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+`;
+
+export const BioViewTitle = styled.h3`
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 1.25em;
+  font-weight: 600;
+  background: linear-gradient(135deg, #007bff 0%, #00BFFF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 16px 0;
+  letter-spacing: 0.3px;
+  text-align: center;
+`;
+
+export const BioViewText = styled.div`
+  font-family: 'Poppins', sans-serif;
+  font-size: 1em;
+  line-height: 1.7;
+  color: #4a5568;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 12px;
+  padding: 20px;
+  border-left: 4px solid #00BFFF;
+  min-height: 100px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  text-align: left;
+
+  &.empty {
+    color: #999;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-style: italic;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.95em;
+    padding: 16px;
+    min-height: 80px;
   }
 `;

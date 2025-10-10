@@ -14,19 +14,66 @@ export const ProfileContainer = styled.div`
   box-sizing: border-box;
 `;
 
-export const ProfileImageContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;  
-  align-items: center;      
+export const ProfileSection = styled.div`
+  display: grid !important;
+  grid-template-columns: auto 1fr !important;
+  gap: 16px !important;
+  align-items: start !important;
+  width: 100%;
+  background: #fff;
+  border-radius: 20px;
+  padding: 20px;
   margin-bottom: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   position: relative;
   
   &::before {
     content: '';
     position: absolute;
-    width: 130px;
-    height: 130px;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #00BFFF 0%, #007bff 100%);
+    border-radius: 20px 20px 0 0;
+  }
+
+  @media (max-width: 480px) {
+    padding: 16px;
+    gap: 12px !important;
+  }
+`;
+
+export const ProfileLeftSection = styled.div`
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  min-width: 150px !important;
+  flex-shrink: 0 !important;
+  gap: 24px !important;
+  width: auto !important;
+  padding-top: 30px !important;
+
+  @media (max-width: 480px) {
+    min-width: 120px !important;
+    gap: 38px !important;
+    padding-top: 16px !important;
+  }
+`;
+
+export const ProfileImageContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;  
+  align-items: center;      
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    width: 120px;
+    height: 120px;
     border-radius: 50%;
     background: linear-gradient(135deg, #00BFFF 0%, #007bff 100%);
     opacity: 0.1;
@@ -34,42 +81,168 @@ export const ProfileImageContainer = styled.div`
   }
 `;
 
+export const ProfileInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+`;
+
+export const ProfileRightSection = styled.div`
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  width: auto !important;
+  min-width: 0 !important;
+`;
+
+export const BioSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;
+
+export const BioHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+`;
+
+export const BioTitle = styled.h3`
+  font-family: 'Inter', sans-serif;
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0;
+`;
+
+export const BioEditButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(0, 123, 255, 0.1);
+  border: 1px solid #007bff;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #007bff;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  svg {
+    font-size: 16px;
+  }
+
+  &:hover {
+    background: #007bff;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+export const BioText = styled.div`
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.95em;
+  line-height: 1.6;
+  color: #4a5568;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 12px;
+  padding: 16px;
+  border-left: 3px solid #00BFFF;
+  min-height: 120px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  text-align: left;
+  font-style: italic;
+
+  &.empty {
+    color: #999;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+`;
+
+export const BioInput = styled.textarea`
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.95em;
+  line-height: 1.6;
+  color: #4a5568;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  border-left: 3px solid #00BFFF;
+  min-height: 120px;
+  resize: vertical;
+  width: 100%;
+  box-sizing: border-box;
+
+  &:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  }
+`;
+
 export const ProfileImage = styled.img`
   border-radius: 50%;
-  width: 120px;
-  height: 120px;
+  width: 100px;
+  height: 100px;
   object-fit: cover;
-  border: 4px solid #fff;
-  box-shadow: 0 8px 24px rgba(0, 123, 255, 0.2);
+  border: 3px solid #fff;
+  box-shadow: 0 4px 16px rgba(0, 123, 255, 0.2);
   position: relative;
   z-index: 1;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 
   &:hover {
     transform: scale(1.05);
-    box-shadow: 0 12px 32px rgba(0, 123, 255, 0.3);
+    box-shadow: 0 8px 24px rgba(0, 123, 255, 0.3);
   }
 
-  @media (max-width: 768px) {
-    width: 100px;
-    height: 100px;
+  @media (max-width: 480px) {
+    width: 80px;
+    height: 80px;
   }
 `;
 
-export const UserName = styled.h1`
+export const UserName = styled.h2`
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-size: 1.8em;
+  font-size: 1.2em;
   font-weight: 700;
   background: linear-gradient(135deg, #007bff 0%, #00BFFF 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin: 8px 0;
+  margin: 0;
   text-align: center;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 
-  @media (max-width: 768px) {
-    font-size: 1.4em;
+  @media (max-width: 480px) {
+    font-size: 1em;
+  }
+`;
+
+export const UserEmail = styled.p`
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.85em;
+  color: #666;
+  margin: 0;
+  text-align: center;
+  font-weight: 500;
+
+  @media (max-width: 480px) {
+    font-size: 0.75em;
   }
 `;
 
@@ -466,16 +639,16 @@ export const DefaultIcon = styled.span`
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 50px;
-  box-shadow: 0 8px 24px rgba(0, 123, 255, 0.2);
+  font-size: 40px;
+  box-shadow: 0 4px 16px rgba(0, 123, 255, 0.2);
   position: relative;
   z-index: 1;
-  border: 4px solid #fff;
+  border: 3px solid #fff;
 
-  @media (max-width: 768px) {
-    width: 100px;
-    height: 100px;
-    font-size: 40px;
+  @media (max-width: 480px) {
+    width: 80px;
+    height: 80px;
+    font-size: 32px;
   }
 `;
 

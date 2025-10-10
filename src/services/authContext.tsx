@@ -70,7 +70,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         const parsedUser = JSON.parse(storedUser) as User;
         if (parsedUser.id && parsedUser.email) {
-          console.log("🔄 AUTHCONTEXT: Usuário carregado do localStorage:", parsedUser);
           setUser(parsedUser);
 
           // Verificar se o usuário tem dados de equipe atualizados
@@ -87,7 +86,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             try {
               const parsedTeam = JSON.parse(storedTeam) as Team;
               if (parsedTeam.id && parsedTeam.name) {
-                console.log("✅ AUTHCONTEXT: Equipe carregada do localStorage:", parsedTeam);
                 setTeam(parsedTeam);
               }
             } catch (error) {
