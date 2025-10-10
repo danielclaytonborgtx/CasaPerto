@@ -35,6 +35,7 @@ import {
   StyledButton,
   PriceAndMapContainer,
   MapLink,
+  UserInfo,
 } from "./styles";
 
 import {
@@ -274,7 +275,7 @@ const Profile: React.FC = () => {
           
           <ProfileInfo>
             <UserName>{user.name}</UserName>
-            <UserName>Creci-{user.username}</UserName>
+            <UserInfo>Creci-{user.username}</UserInfo>
             <UserEmail>{user.email}</UserEmail>
           </ProfileInfo>
         </ProfileLeftSection>

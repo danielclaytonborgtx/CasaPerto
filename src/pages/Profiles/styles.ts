@@ -16,7 +16,7 @@ export const ProfileContainer = styled.div`
 
 export const ProfileSection = styled.div`
   display: grid !important;
-  grid-template-columns: auto 1fr !important;
+  grid-template-columns: 200px 1fr !important;
   gap: 16px !important;
   align-items: start !important;
   width: 100%;
@@ -39,6 +39,7 @@ export const ProfileSection = styled.div`
   }
 
   @media (max-width: 480px) {
+    grid-template-columns: 110px 1fr !important;
     padding: 16px;
     gap: 12px !important;
   }
@@ -136,8 +137,8 @@ export const ProfileImageContainer = styled.div`
 `;
 
 export const DefaultIcon = styled.span`
-  width: 120px;
-  height: 120px;
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
   background: linear-gradient(135deg, #00BFFF 0%, #007bff 100%);
   display: flex;
@@ -159,8 +160,8 @@ export const DefaultIcon = styled.span`
 
 export const ProfileImage = styled.img`
   border-radius: 50%;
-  width: 120px;
-  height: 120px;
+  width: 150px;
+  height: 150px;
   object-fit: cover;
   border: 3px solid #fff;
   box-shadow: 0 4px 16px rgba(0, 123, 255, 0.2);
@@ -174,8 +175,8 @@ export const ProfileImage = styled.img`
   }
 
   @media (max-width: 480px) {
-    width: 80px;
-    height: 80px;
+    width: 100px;
+    height: 100px;
   }
 `;
 
@@ -539,14 +540,14 @@ export const BioViewTitle = styled.h3`
 
 export const BioViewText = styled.div`
   font-family: 'Poppins', sans-serif;
-  font-size: 1em;
-  line-height: 1.7;
+  font-size: 0.75em;
+  line-height: 1.6;
   color: #4a5568;
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   border-radius: 12px;
-  padding: 20px;
-  border-left: 4px solid #00BFFF;
-  min-height: 100px;
+  padding: 16px;
+  border-left: 3px solid #00BFFF;
+  min-height: 120px;
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
@@ -561,7 +562,7 @@ export const BioViewText = styled.div`
   }
 
   @media (max-width: 480px) {
-    font-size: 0.95em;
+    font-size: 0.75em;
     padding: 16px;
     min-height: 80px;
   }

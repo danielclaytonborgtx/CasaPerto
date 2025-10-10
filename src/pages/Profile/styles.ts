@@ -16,7 +16,7 @@ export const ProfileContainer = styled.div`
 
 export const ProfileSection = styled.div`
   display: grid !important;
-  grid-template-columns: auto 1fr !important;
+  grid-template-columns: 200px 1fr !important;
   gap: 16px !important;
   align-items: start !important;
   width: 100%;
@@ -39,6 +39,7 @@ export const ProfileSection = styled.div`
   }
 
   @media (max-width: 480px) {
+    grid-template-columns: 110px 1fr !important;
     padding: 16px;
     gap: 12px !important;
   }
@@ -150,7 +151,7 @@ export const BioEditButton = styled.button`
 
 export const BioText = styled.div`
   font-family: 'Poppins', sans-serif;
-  font-size: 0.95em;
+  font-size: 0.75em;
   line-height: 1.6;
   color: #4a5568;
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
@@ -174,7 +175,7 @@ export const BioText = styled.div`
 
 export const BioInput = styled.textarea`
   font-family: 'Poppins', sans-serif;
-  font-size: 0.95em;
+  font-size: 0.75em;
   line-height: 1.6;
   color: #4a5568;
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
@@ -211,8 +212,8 @@ export const ProfileImage = styled.img`
   }
 
   @media (max-width: 480px) {
-    width: 80px;
-    height: 80px;
+    width: 100px;
+    height: 100px;
   }
 `;
 
@@ -247,10 +248,15 @@ export const UserEmail = styled.p`
 `;
 
 export const UserInfo = styled.p`
-  font-size: 1em;
+  font-size: 1.2em;
   color: #666;
-  margin-bottom: 10px;
+  text-align: center;
+  margin: 0;
   font-weight: 500;
+
+  @media (max-width: 480px) {
+    font-size: 1em;
+  }
 `;
 
 export const ButtonContainer = styled.div`
