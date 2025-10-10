@@ -173,20 +173,10 @@ const Profile: React.FC = () => {
       setBio(tempBio);
       setIsEditingBio(false);
       
-      // Atualizar localStorage do usuário
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        const parsedUser = JSON.parse(storedUser);
-        parsedUser.bio = tempBio;
-        localStorage.setItem("user", JSON.stringify(parsedUser));
-      }
-      
       console.log("✅ Bio salva com sucesso no banco de dados");
     } catch (error) {
       console.error("❌ Erro ao salvar bio:", error);
-      // Ainda assim atualiza o estado local em caso de erro de rede
-      setBio(tempBio);
-      setIsEditingBio(false);
+      alert("Erro ao salvar bio. Tente novamente.");
     }
   };
 
@@ -206,15 +196,12 @@ const Profile: React.FC = () => {
     setUser(parsedUser);
 
     if (parsedUser?.id) {
-      // Carregar bio do localStorage (temporário até coluna bio ser adicionada ao banco)
-      const loadBio = () => {
+      // Carregar bio do banco de dados
+      const loadBio = async () => {
         try {
-          // TEMPORÁRIO: Carregar do localStorage
-          const userBio = localStorage.getItem(`user_bio_${parsedUser.id}`);
-          if (userBio) {
-            setBio(userBio);
-          } else if (parsedUser?.bio) {
-            setBio(parsedUser.bio);
+          const profileData = await supabaseProfile.getProfile(String(parsedUser.id));
+          if (profileData?.bio) {
+            setBio(profileData.bio);
           }
         } catch (error) {
           console.error("Erro ao carregar bio:", error);

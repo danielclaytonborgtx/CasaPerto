@@ -67,10 +67,9 @@ const Profiles: React.FC = () => {
 
         setUser(userData);
         
-        // Carregar bio do localStorage (temporário até coluna bio ser adicionada ao banco)
-        const userBio = localStorage.getItem(`user_bio_${userId}`);
-        if (userBio) {
-          setBio(userBio);
+        // Carregar bio do banco de dados
+        if (userData?.bio) {
+          setBio(userData.bio);
         }
         
         // Buscar propriedades do usuário
