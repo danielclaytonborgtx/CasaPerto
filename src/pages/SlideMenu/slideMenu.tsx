@@ -88,9 +88,9 @@ const SlideMenu: React.FC<{ onClose: () => void; isVisible: boolean }> = ({ onCl
           </MenuItem>
         )}
 
-        {/* <MenuItem onClick={handleLinkClick}>
-          <Link to="/">Home</Link>
-        </MenuItem> */}
+        <MenuItem onClick={handleLinkClick}>
+          <Link to="/brokers">Corretores</Link>
+        </MenuItem>
         <MenuItem onClick={handleLinkClick}>
           <Link to="/map">Mapa</Link>
         </MenuItem>

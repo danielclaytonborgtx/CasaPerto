@@ -142,7 +142,15 @@ const Brokers: React.FC = () => {
               </ProfileLink>
             </BrokerDetails>
             {broker.id !== String(user?.id) && (
-        <MessageButton onClick={() => navigate(`/messages/${broker.id}`)}>
+        <MessageButton onClick={() => {
+          // Se usuário está logado → mensagens internas
+          // Se não está logado (visitante) → formulário de contato
+          if (user) {
+            navigate(`/messages/${broker.id}`);
+          } else {
+            navigate(`/contact/${broker.id}`);
+          }
+        }}>
           <MessageSquare size={18} />
         </MessageButton>
       )}
