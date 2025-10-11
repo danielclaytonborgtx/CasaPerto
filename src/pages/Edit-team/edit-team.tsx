@@ -572,27 +572,29 @@ const EditTeam: React.FC = () => {
                 value={brokerName}
                 onChange={(e) => setBrokerName(e.target.value)}
               />
-              <BrokerList>
-                {availableBrokers
-                  .filter((broker) => {
-                    // Filtrar por nome
-                    const matchesName = broker.name.toLowerCase().includes(brokerName.toLowerCase());
-                    // Filtrar corretores que já estão na equipe
-                    const isAlreadyInTeam = brokers.some(b => b.userId === broker.id);
-                    // Filtrar corretores que já estão nos convites pendentes
-                    const isPendingInvite = pendingInvites.some(invite => invite.userId === broker.id);
-                    
-                    return matchesName && !isAlreadyInTeam && !isPendingInvite;
-                  })
-                  .map((broker) => (
-                    <BrokerItem key={`available-${broker.id}`}>
-                      {broker.name}
-                      <AddBrokerButton onClick={() => handleAddBroker(broker)}>
-                        <FaPlus />
-                      </AddBrokerButton>
-                    </BrokerItem>
-                  ))}
-              </BrokerList>
+              {brokerName.trim() !== "" && (
+                <BrokerList>
+                  {availableBrokers
+                    .filter((broker) => {
+                      // Filtrar por nome
+                      const matchesName = broker.name.toLowerCase().includes(brokerName.toLowerCase());
+                      // Filtrar corretores que já estão na equipe
+                      const isAlreadyInTeam = brokers.some(b => b.userId === broker.id);
+                      // Filtrar corretores que já estão nos convites pendentes
+                      const isPendingInvite = pendingInvites.some(invite => invite.userId === broker.id);
+                      
+                      return matchesName && !isAlreadyInTeam && !isPendingInvite;
+                    })
+                    .map((broker) => (
+                      <BrokerItem key={`available-${broker.id}`}>
+                        {broker.name}
+                        <AddBrokerButton onClick={() => handleAddBroker(broker)}>
+                          <FaPlus />
+                        </AddBrokerButton>
+                      </BrokerItem>
+                    ))}
+                </BrokerList>
+              )}
             </LeftColumn>
 
             <RightColumn>

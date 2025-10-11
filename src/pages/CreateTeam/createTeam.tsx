@@ -356,20 +356,22 @@ const CreateTeam: React.FC = () => {
             value={brokerName}
             onChange={(e) => setBrokerName(e.target.value)}
           />
-          <BrokerList>
-            {availableBrokers
-              .filter((broker) =>
-                broker.name.toLowerCase().includes(brokerName.toLowerCase())
-              )
-              .map((broker) => (
-                <BrokerItem key={broker.id}>
-                  {broker.name}
-                  <AddBrokerButton onClick={() => handleAddBroker(broker)}>
-                    <FaPlus />
-                  </AddBrokerButton>
-                </BrokerItem>
-              ))}
-          </BrokerList>
+          {brokerName.trim() !== "" && (
+            <BrokerList>
+              {availableBrokers
+                .filter((broker) =>
+                  broker.name.toLowerCase().includes(brokerName.toLowerCase())
+                )
+                .map((broker) => (
+                  <BrokerItem key={broker.id}>
+                    {broker.name}
+                    <AddBrokerButton onClick={() => handleAddBroker(broker)}>
+                      <FaPlus />
+                    </AddBrokerButton>
+                  </BrokerItem>
+                ))}
+            </BrokerList>
+          )}
         </LeftColumn>
 
         <RightColumn>
