@@ -543,6 +543,7 @@ export const PropertyDetails = styled.div`
     font-size: 1.1em;
     font-weight: 600;
     color: #2d3748;
+    margin-top: 20px;
     margin-bottom: 6px;
 
     @media (max-width: 768px) {

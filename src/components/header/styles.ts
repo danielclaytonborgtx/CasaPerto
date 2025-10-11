@@ -28,7 +28,7 @@ export const Container = styled.div`
 `;
 
 export const MenuButton = styled.button`
-  background: rgba(255, 255, 255, 0.15);
+  background: transparent;
   border: none;
   cursor: pointer;
   display: flex;
@@ -41,15 +41,8 @@ export const MenuButton = styled.button`
   border-radius: 50%;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-  &:hover {
-    background: rgba(255, 255, 255, 0.25);
-    transform: scale(1.05);
-    box-shadow: 0 0px 6px rgba(0, 0, 0, 0.2); 
-  }
-
   &:focus {
     outline: none;
-    background: rgba(255, 255, 255, 0.3);
   }
 `;
 
@@ -57,25 +50,17 @@ export const AddButton = styled.button`
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgba(255, 255, 255, 0.15);
+  background: transparent;
   border: none;
   cursor: pointer;
   height: 40px;
   width: 40px;  
   margin-left: 15px;
   margin-top: 8px;
-  border-radius: 50%; 
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.25);
-    transform: scale(1.05);
-    box-shadow: 0 0px 6px rgba(0, 0, 0, 0.2);
-  }
+  border-radius: 50%;
 
   &:focus {
     outline: none;
-    background: rgba(255, 255, 255, 0.3);
   }
 `;
 

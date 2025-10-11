@@ -27,11 +27,10 @@ interface BrokerUser {
 }
 import { FaPlus, FaMinus } from "react-icons/fa";
 
-interface TeamInvitation {
-  id: number;
-  userId: number;
-  teamId: number;
-  status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+interface TeamMemberData {
+  id: string;
+  user_id: string;
+  team_id: number;
 }
 
 const CreateTeam: React.FC = () => {
@@ -46,8 +45,6 @@ const CreateTeam: React.FC = () => {
   );
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
-  const [pendingInvites, setPendingInvites] = useState<TeamInvitation[]>([]);
 
   const fetchBrokers = useCallback(async () => {
     try {
@@ -266,7 +263,7 @@ const CreateTeam: React.FC = () => {
         } else if (updatedUser) {
           // Converter team_members para o formato esperado
           if (updatedUser.team_members) {
-            updatedUser.teamMembers = updatedUser.team_members.map((tm: any) => ({
+            updatedUser.teamMembers = updatedUser.team_members.map((tm: TeamMemberData) => ({
               id: tm.id,
               userId: tm.user_id,
               teamId: tm.team_id
@@ -314,22 +311,6 @@ const CreateTeam: React.FC = () => {
     if (imageInputRef) {
       imageInputRef.click();
     }
-  };
-
-  // Atualiza o UI para mostrar status dos convites
-  const renderBrokerStatus = (broker: BrokerUser) => {
-    const invitation = pendingInvites.find(inv => inv.userId === broker.id);
-    if (invitation) {
-      return (
-        <span style={{ 
-          fontSize: '12px', 
-          color: invitation.status === 'PENDING' ? '#f0ad4e' : '#5cb85c' 
-        }}>
-          {invitation.status === 'PENDING' ? ' (Convite Pendente)' : ' (Convite Aceito)'}
-        </span>
-      );
-    }
-    return null;
   };
 
   return (
@@ -397,7 +378,6 @@ const CreateTeam: React.FC = () => {
             {brokers.map((broker) => (
               <BrokerItem key={broker.id}>
                 {broker.name}
-                {renderBrokerStatus(broker)}
                 <AddBrokerButton onClick={() => handleRemoveBroker(broker.id)}>
                   <FaMinus />
                 </AddBrokerButton>
